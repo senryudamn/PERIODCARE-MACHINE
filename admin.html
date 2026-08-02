@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | PERIODCARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }</style>
+</head>
+<body class="text-gray-800 antialiased h-screen flex">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-pink-500">PeriodCare Admin</h1>
+                <p class="text-gray-500 text-sm">Masuk untuk mengelola sistem</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="login-email" placeholder="Email Admin" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300" required>
+                <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300" required>
+                <button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 rounded-xl hover:bg-pink-600 transition-colors">Masuk</button>
+                <p id="login-error" class="text-red-500 text-sm text-center hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD (Hidden until logged in) -->
+    <div id="dashboard-screen" class="hidden w-full flex flex-col md:flex-row h-full">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-gray-900 text-white p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-pink-400 mb-8">Admin Panel</h2>
+            <nav class="space-y-4 flex-1">
+                <button onclick="switchTab('settings')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 font-medium">⚙️ Pengaturan Web</button>
+                <button onclick="switchTab('messages')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">📧 Pesan Kolaborasi</button>
+                <button onclick="switchTab('volunteers')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">🤝 Data Relawan</button>
+                <button onclick="switchTab('donations')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">💖 Data Donasi</button>
+            </nav>
+            <button id="logout-btn" class="mt-auto px-4 py-2 bg-red-500 rounded-lg font-bold hover:bg-red-600">Logout</button>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            
+            <!-- TAB: Settings -->
+            <div id="tab-settings" class="tab-content">
+                <h3 class="text-2xl font-bold mb-6">Pengaturan Tampilan Publik</h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Update Maps -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h4 class="font-bold mb-4">📍 Link Google Maps (Live Tracker)</h4>
+                        <form id="maps-form" class="space-y-4">
+                            <label class="text-xs text-gray-500">Masukkan Link Embed Maps (src) / URL Biasa</label>
+                            <input type="text" id="maps-input" class="w-full px-4 py-2 rounded-xl border border-gray-200" placeholder="https://www.google.com/maps/embed?..." required>
+                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold">Perbarui Maps</button>
+                        </form>
+                    </div>
+
+                    <!-- Update QRIS (Cloudinary) -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h4 class="font-bold mb-4">💳 Upload Foto QRIS Baru</h4>
+                        <form id="qris-form" class="space-y-4">
+                            <label class="text-xs text-gray-500">Foto akan diunggah ke Cloudinary & diperbarui di Web.</label>
+                            <input type="file" id="qris-input" accept="image/*" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
+                            <!-- Cloudinary Config Inputs -->
+                            <input type="text" id="cloud-name" placeholder="Cloud Name (Cloudinary)" class="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm" required>
+                            <input type="text" id="upload-preset" placeholder="Upload Preset (Unsigned)" class="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm" required>
+                            
+                            <button type="submit" id="qris-btn" class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">Upload & Perbarui QRIS</button>
+                            <p id="qris-status" class="text-xs font-bold text-center"></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Messages -->
+            <div id="tab-messages" class="tab-content hidden">
+                <h3 class="text-2xl font-bold mb-6">Pesan Masuk & Tawaran Kolaborasi</h3>
+                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 border-b">
+                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama/Instansi</th><th class="p-4 text-sm">Email</th><th class="p-4 text-sm">Pesan</th></tr>
+                        </thead>
+                        <tbody id="table-messages" class="divide-y divide-gray-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: Volunteers -->
+            <div id="tab-volunteers" class="tab-content hidden">
+                <h3 class="text-2xl font-bold mb-6">Pendaftar Relawan</h3>
+                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 border-b">
+                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama Lengkap</th><th class="p-4 text-sm">Email</th><th class="p-4 text-sm">Peran Diminati</th></tr>
+                        </thead>
+                        <tbody id="table-volunteers" class="divide-y divide-gray-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: Donations -->
+            <div id="tab-donations" class="tab-content hidden">
+                <h3 class="text-2xl font-bold mb-6">Konfirmasi Donasi Masuk</h3>
+                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 border-b">
+                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama Donatur</th><th class="p-4 text-sm text-right">Nominal Konfirmasi (Rp)</th></tr>
+                        </thead>
+                        <tbody id="table-donations" class="divide-y divide-gray-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- UI Tab Switcher Logic -->
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+        }
+    </script>
+    <script type="module" src="assets/js/admin.js"></script>
+</body>
+</html>
