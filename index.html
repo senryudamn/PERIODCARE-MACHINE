@@ -51,8 +51,6 @@
             .heading-1 { @apply text-4xl md:text-5xl lg:text-6xl font-bold text-dark leading-tight; }
             .heading-2 { @apply text-3xl md:text-4xl font-bold text-dark leading-snug; }
             .body-text { @apply text-base md:text-lg text-gray-600 leading-relaxed; }
-            
-            /* Custom Form Input */
             .form-input { @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-pink-100 transition-all; }
         }
     </style>
@@ -119,21 +117,17 @@
 
                 <!-- Kanan: Visual Mesin Dispenser (Telah Diperbaiki) -->
                 <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100">
-                    
-                    <!-- Container Mesin: Ditambahkan shrink-0 dan overflow-hidden agar bentuknya solid tidak terpotong -->
+                    <!-- Container Mesin -->
                     <div class="relative w-72 h-[460px] bg-gradient-to-b from-orange-400 to-accent rounded-[2.5rem] shadow-2xl border-8 border-orange-200 flex flex-col items-center pt-8 z-10 overflow-hidden shrink-0 group">
                         
-                        <!-- Dekorasi Watermark Teks (Aman di dalam kotak) -->
                         <div class="absolute -right-12 top-1/2 -translate-y-1/2 rotate-90 text-white/15 font-black text-4xl tracking-[0.2em] pointer-events-none whitespace-nowrap select-none">
                             SMART DISPENSER
                         </div>
 
-                        <!-- Sensor / Camera Dummy -->
                         <div class="w-16 h-5 bg-gray-900 rounded-full mb-6 flex justify-center items-center shadow-inner border border-gray-700 relative z-10">
                             <div class="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_#3b82f6]"></div>
                         </div>
                         
-                        <!-- Smart Screen (IoT Interface) -->
                         <div class="w-56 bg-gray-900 rounded-2xl flex flex-col p-5 shadow-inner border-b-[6px] border-gray-800 relative z-10">
                             <div class="text-primary font-black text-lg mb-3 text-center tracking-wider uppercase">PeriodCare</div>
                             
@@ -156,10 +150,8 @@
                             </div>
                         </div>
 
-                        <!-- Dispenser Slot (Menempel di dasar mesin) -->
                         <div class="absolute bottom-0 w-40 h-20 bg-gray-800 rounded-t-2xl border-t-4 border-x-4 border-gray-700 shadow-inner flex flex-col justify-start items-center overflow-hidden z-10">
                             <div class="w-full h-2 bg-primary/50 shadow-[0_0_15px_#FF4D85] mb-2"></div>
-                            <!-- Animasi Pembalut Keluar saat mesin di-hover -->
                             <div class="w-20 h-10 bg-pink-50 rounded-lg border-2 border-pink-200 -translate-y-12 group-hover:translate-y-0 transition-transform duration-700 shadow-md flex items-center justify-center">
                                 <span class="text-[10px] text-primary font-bold">PAD</span>
                             </div>
@@ -191,7 +183,7 @@
 
                 <div class="flex flex-col lg:flex-row gap-8 mb-24 scroll-animate opacity-0 translate-y-10">
                     <div class="w-full lg:w-1/2 bg-white rounded-2xl p-2 shadow-sm border border-gray-100 relative overflow-hidden min-h-[400px]">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.0981774399347!2d110.38459411130635!3d-7.779414277057037!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5a8286a11e49%3A0x6b7713d7894a4c6a!2sUniversitas%20Negeri%20Yogyakarta!5e0!3m2!1sid!2sid!4v1709400000000!5m2!1sid!2sid" class="absolute inset-0 w-full h-full rounded-xl" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        <iframe id="maps-iframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.0981774399347!2d110.38459411130635!3d-7.779414277057037!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5a8286a11e49%3A0x6b7713d7894a4c6a!2sUniversitas%20Negeri%20Yogyakarta!5e0!3m2!1sid!2sid!4v1709400000000!5m2!1sid!2sid" class="absolute inset-0 w-full h-full rounded-xl" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
 
                     <div class="w-full lg:w-1/2 flex flex-col">
@@ -261,9 +253,8 @@
                         </div>
                         <p class="text-gray-600 mb-6 text-sm">Scan QRIS di bawah ini melalui aplikasi M-Banking atau e-Wallet Anda (OVO, Gopay, Dana, dll).</p>
                         
-                        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-inner w-48 h-48 mx-auto flex flex-col items-center justify-center mb-6 group cursor-pointer hover:border-primary transition-colors">
-                            <svg class="w-16 h-16 text-gray-300 group-hover:text-primary transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                            <span class="font-mono text-sm text-gray-500 font-bold">QRIS_DUMMY</span>
+                        <div class="bg-white p-2 rounded-2xl border border-gray-200 shadow-inner w-48 h-48 mx-auto flex flex-col items-center justify-center mb-6 overflow-hidden">
+                            <img id="qris-img" src="https://via.placeholder.com/300?text=Memuat+QRIS..." alt="QRIS Code" class="w-full h-full object-cover rounded-xl">
                         </div>
 
                         <form id="donation-form" class="space-y-4">
@@ -271,7 +262,7 @@
                             <input type="number" id="donation-amount" placeholder="Nominal Donasi (Rp)" class="form-input" required>
                             <button type="submit" class="btn btn-primary w-full shadow-soft">Konfirmasi Donasi Saya</button>
                             <div id="donasi-success" class="hidden text-green-600 text-sm font-semibold bg-green-50 p-3 rounded-lg text-center mt-2 border border-green-200">
-                                ✅ Terima kasih! Donasi Anda sedang diverifikasi.
+                                ✅ Terima kasih! Donasi Anda telah tercatat dan sedang diverifikasi.
                             </div>
                         </form>
                     </div>
@@ -303,7 +294,7 @@
                                 </select>
                                 <button type="submit" class="btn btn-accent w-full">Daftar Sekarang</button>
                                 <div id="volunteer-success" class="hidden text-orange-600 text-sm font-semibold bg-orange-50 p-3 rounded-lg text-center mt-2 border border-orange-200">
-                                    🎉 Pendaftaran berhasil! Tim kami akan menghubungi Anda.
+                                    🎉 Pendaftaran berhasil terkirim ke sistem kami!
                                 </div>
                             </form>
                         </div>
@@ -340,7 +331,7 @@
                                 <textarea id="contact-message" rows="4" placeholder="Tuliskan pesan atau tawaran kolaborasi Anda..." class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none" required></textarea>
                                 <button type="submit" class="btn btn-primary w-full">Kirim Pesan</button>
                                 <div id="contact-success" class="hidden text-pink-300 text-sm font-semibold bg-pink-900/30 p-3 rounded-lg text-center mt-2 border border-pink-900">
-                                    ✨ Pesan terkirim! Mari berkolaborasi.
+                                    ✨ Pesan berhasil dikirim ke Admin! Mari berkolaborasi.
                                 </div>
                             </form>
                         </div>
