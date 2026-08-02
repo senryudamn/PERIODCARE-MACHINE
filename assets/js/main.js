@@ -307,17 +307,18 @@ const initFormValidationAndSubmission = () => {
 /* =======================================================
    6. MODUL LOADING ANIMATION (PRELOADER)
    ======================================================= */
-window.addEventListener('load', () => {
+// Menggunakan DOMContentLoaded agar preloader hilang lebih cepat
+// tanpa harus menunggu Google Maps selesai di-load 100%.
+document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('loader');
     if (loader) {
-        // Tahan sebentar selama 0.8 detik agar animasi terlihat elegan
+        // Tampil singkat selama 0.5 detik, lalu menghilang
         setTimeout(() => {
-            loader.classList.add('opacity-0'); // Efek fade out
+            loader.classList.add('opacity-0'); 
             
-            // Hapus elemen dari DOM setelah transisi selesai
             setTimeout(() => {
                 loader.style.display = 'none';
-            }, 700);
-        }, 800); 
+            }, 500); // Durasi efek fade-out
+        }, 500); 
     }
 });
