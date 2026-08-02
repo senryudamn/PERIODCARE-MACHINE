@@ -59,6 +59,16 @@
 </head>
 <body class="bg-light font-sans text-dark antialiased">
 
+    <!-- Loading Screen (Animasi Preloader) -->
+    <div id="loader" class="fixed inset-0 z-[9999] bg-light flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="relative w-20 h-20 flex justify-center items-center mb-4">
+            <div class="absolute inset-0 border-4 border-pink-100 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
+            <span class="text-2xl">💖</span>
+        </div>
+        <h2 class="text-primary font-black tracking-[0.2em] uppercase animate-pulse">PeriodCare.</h2>
+    </div>
+
     <!-- Sticky Navbar -->
     <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300" id="navbar">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
