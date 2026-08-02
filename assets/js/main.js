@@ -257,3 +257,21 @@ const initFormValidation = () => {
     handleFormSubmit('volunteer-form', 'volunteer-success');
     handleFormSubmit('contact-form', 'contact-success');
 };
+
+/* =======================================================
+   5. MODUL LOADING ANIMATION (PRELOADER)
+   ======================================================= */
+window.addEventListener('load', () => {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        // Tahan sebentar selama 0.8 detik agar animasi terlihat elegan
+        setTimeout(() => {
+            loader.classList.add('opacity-0'); // Efek fade out
+            
+            // Hapus elemen dari DOM setelah transisi selesai
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 700);
+        }, 800); 
+    }
+});
