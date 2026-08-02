@@ -7,16 +7,19 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// 2. KONFIGURASI FIREBASE
-// PENTING: Nanti ganti nilai di bawah ini dengan config dari Project Firebase Anda
+// 2. KONFIGURASI FIREBASE ASLI (Sudah disesuaikan)
 const firebaseConfig = {
-    apiKey: "API_KEY_ANDA",
-    authDomain: "periodcare-xxx.firebaseapp.com",
-    databaseURL: "https://periodcare-xxx-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "periodcare-xxx",
-    storageBucket: "periodcare-xxx.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
+    apiKey: "AIzaSyB2hA3tXY8A87pBwZGzDdxxUCNpzU9Q-GA",
+    authDomain: "periodcare-d3afa.firebaseapp.com",
+    
+    // PENTING: URL Database ditambahkan manual. Jika Anda memilih server Singapore, 
+    // ubah .firebaseio.com menjadi .asia-southeast1.firebasedatabase.app
+    databaseURL: "https://periodcare-d3afa-default-rtdb.firebaseio.com",
+    
+    projectId: "periodcare-d3afa",
+    storageBucket: "periodcare-d3afa.firebasestorage.app",
+    messagingSenderId: "501107071095",
+    appId: "1:501107071095:web:ab9f04e4eb867a7ab48e72"
 };
 
 // 3. INISIALISASI FIREBASE
@@ -29,7 +32,7 @@ let machinesData = [];
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initScrollAnimation();
-    initFirebaseLiveTracker(); // Modul Tracker kini menggunakan Firebase
+    initFirebaseLiveTracker();
     initDonationDashboard();
     initFormValidation();
 });
@@ -47,7 +50,6 @@ const initNavigation = () => {
         mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
     }
     
-    // Tutup menu mobile jika link diklik
     mobileLinks.forEach(link => {
         link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
     });
@@ -76,16 +78,15 @@ const initScrollAnimation = () => {
 };
 
 /* =======================================================
-   2. MODUL LIVE TRACKER & GOOGLE MAPS LINK (FIREBASE)
+   2. MODUL LIVE TRACKER (FIREBASE)
    ======================================================= */
 const initFirebaseLiveTracker = () => {
     const container = document.getElementById('machine-list-container');
     const searchInput = document.getElementById('search-machine');
     const filterSelect = document.getElementById('filter-status');
 
-    if(!container) return; // Guard clause jika elemen tidak ada
+    if(!container) return; 
 
-    // Fungsi Render UI Card Mesin
     const renderMachines = (data) => {
         container.innerHTML = ''; 
         if(data.length === 0) {
@@ -124,7 +125,6 @@ const initFirebaseLiveTracker = () => {
         });
     };
 
-    // Fungsi Filter Data
     const applyFilters = () => {
         const query = searchInput.value.toLowerCase();
         const status = filterSelect.value;
@@ -141,13 +141,11 @@ const initFirebaseLiveTracker = () => {
     // --- MENGAMBIL DATA DARI FIREBASE REALTIME DATABASE ---
     const machinesRef = ref(db, 'machines');
     
-    // onValue akan membaca data pertama kali, DAN setiap kali sensor IoT mengupdate data
     onValue(machinesRef, (snapshot) => {
         const data = snapshot.val();
-        machinesData = []; // Kosongkan array lama
+        machinesData = []; 
 
         if (data) {
-            // Ubah format JSON Object Firebase menjadi Array JavaScript
             for (let key in data) {
                 machinesData.push({
                     id: key,
@@ -159,14 +157,12 @@ const initFirebaseLiveTracker = () => {
             }
         }
         
-        // Render ulang UI setelah data terbaru ditarik
         applyFilters(); 
     }, (error) => {
         console.error("Error fetching data from Firebase:", error);
         container.innerHTML = '<p class="text-red-500 text-center py-4">Gagal terhubung ke database. Cek koneksi Anda.</p>';
     });
 
-    // Event Listener untuk Search dan Filter
     searchInput.addEventListener('input', applyFilters);
     filterSelect.addEventListener('change', applyFilters);
 };
@@ -187,7 +183,7 @@ const financialData = {
 
 const initDonationDashboard = () => {
     const totalEl = document.getElementById('total-donation-text');
-    if(!totalEl) return; // Guard clause
+    if(!totalEl) return; 
 
     const formatIDR = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
 
@@ -227,14 +223,13 @@ const initDonationDashboard = () => {
    4. MODUL VALIDASI FORM
    ======================================================= */
 const initFormValidation = () => {
-    // Fungsi umum untuk menangani submit form (Mencegah reload dan memunculkan pesan sukses)
     const handleFormSubmit = (formId, successMsgId) => {
         const form = document.getElementById(formId);
         const successMsg = document.getElementById(successMsgId);
 
         if (form && successMsg) {
             form.addEventListener('submit', (e) => {
-                e.preventDefault(); // Mencegah reload halaman
+                e.preventDefault(); 
                 
                 const btn = form.querySelector('button[type="submit"]');
                 const originalText = btn.textContent;
@@ -243,25 +238,21 @@ const initFormValidation = () => {
                 btn.classList.add('opacity-70', 'cursor-not-allowed');
 
                 setTimeout(() => {
-                    // Reset tombol
                     btn.textContent = originalText;
                     btn.disabled = false;
                     btn.classList.remove('opacity-70', 'cursor-not-allowed');
                     
-                    // Tampilkan pesan sukses
                     successMsg.classList.remove('hidden');
-                    form.reset(); // Kosongkan input form
+                    form.reset(); 
 
-                    // Sembunyikan pesan sukses setelah 5 detik
                     setTimeout(() => {
                         successMsg.classList.add('hidden');
                     }, 5000);
-                }, 1200); // Simulasi waktu proses 1.2 detik
+                }, 1200); 
             });
         }
     };
 
-    // Terapkan ke 3 form yang ada
     handleFormSubmit('donation-form', 'donasi-success');
     handleFormSubmit('volunteer-form', 'volunteer-success');
     handleFormSubmit('contact-form', 'contact-success');
