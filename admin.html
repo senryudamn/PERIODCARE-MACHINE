@@ -26,18 +26,19 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD (Hidden until logged in) -->
+    <!-- MAIN DASHBOARD -->
     <div id="dashboard-screen" class="hidden w-full flex flex-col md:flex-row h-full">
         <!-- Sidebar -->
         <aside class="w-full md:w-64 bg-gray-900 text-white p-6 flex flex-col">
             <h2 class="text-2xl font-bold text-pink-400 mb-8">Admin Panel</h2>
             <nav class="space-y-4 flex-1">
                 <button onclick="switchTab('settings')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 font-medium">⚙️ Pengaturan Web</button>
-                <button onclick="switchTab('messages')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">📧 Pesan Kolaborasi</button>
+                <button onclick="switchTab('donations')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">💖 Kelola Donasi</button>
+                <button onclick="switchTab('messages')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">📧 Pesan Masuk</button>
                 <button onclick="switchTab('volunteers')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">🤝 Data Relawan</button>
-                <button onclick="switchTab('donations')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">💖 Data Donasi</button>
             </nav>
-            <button id="logout-btn" class="mt-auto px-4 py-2 bg-red-500 rounded-lg font-bold hover:bg-red-600">Logout</button>
+            <a href="/" class="mt-auto px-4 py-2 text-center text-gray-400 text-sm hover:text-white mb-2">Lihat Website</a>
+            <button id="logout-btn" class="px-4 py-2 bg-red-500 rounded-lg font-bold hover:bg-red-600">Logout</button>
         </aside>
 
         <!-- Content Area -->
@@ -46,7 +47,6 @@
             <!-- TAB: Settings -->
             <div id="tab-settings" class="tab-content">
                 <h3 class="text-2xl font-bold mb-6">Pengaturan Tampilan Publik</h3>
-                
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Update Maps -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -58,20 +58,61 @@
                         </form>
                     </div>
 
-                    <!-- Update QRIS (Cloudinary) -->
+                    <!-- Update QRIS -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <h4 class="font-bold mb-4">💳 Upload Foto QRIS Baru</h4>
                         <form id="qris-form" class="space-y-4">
-                            <label class="text-xs text-gray-500">Foto akan diunggah ke Cloudinary & diperbarui di Web.</label>
                             <input type="file" id="qris-input" accept="image/*" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
-                            <!-- Cloudinary Config Inputs -->
                             <input type="text" id="cloud-name" placeholder="Cloud Name (Cloudinary)" class="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm" required>
                             <input type="text" id="upload-preset" placeholder="Upload Preset (Unsigned)" class="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm" required>
-                            
                             <button type="submit" id="qris-btn" class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">Upload & Perbarui QRIS</button>
                             <p id="qris-status" class="text-xs font-bold text-center"></p>
                         </form>
                     </div>
+                </div>
+            </div>
+
+            <!-- TAB: Donations & Expenses (DIPERBARUI) -->
+            <div id="tab-donations" class="tab-content hidden">
+                <h3 class="text-2xl font-bold mb-6">Kelola Dana & Donasi</h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <!-- Set Target Donasi -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h4 class="font-bold mb-4">🎯 Set Target Donasi</h4>
+                        <form id="target-form" class="space-y-4">
+                            <label class="text-xs text-gray-500">Angka akan muncul di progress bar halaman utama.</label>
+                            <input type="number" id="target-input" class="w-full px-4 py-2 rounded-xl border border-gray-200" placeholder="Contoh: 50000000" required>
+                            <button type="submit" class="bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">Update Target</button>
+                        </form>
+                    </div>
+
+                    <!-- Input Pengeluaran Baru -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+                        <h4 class="font-bold mb-4">💸 Catat Pengeluaran Baru</h4>
+                        <form id="expense-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="date" id="exp-date" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
+                            <select id="exp-category" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
+                                <option value="" disabled selected>Pilih Kategori</option>
+                                <option value="Pembelian Stok">Pembelian Stok</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Operasional">Operasional</option>
+                            </select>
+                            <input type="text" id="exp-desc" placeholder="Deskripsi Pengeluaran (Cth: Beli 10 Karton Softex)" class="w-full px-4 py-2 rounded-xl border border-gray-200 md:col-span-2" required>
+                            <input type="number" id="exp-amount" placeholder="Nominal Pengeluaran (Rp)" class="w-full px-4 py-2 rounded-xl border border-gray-200 md:col-span-2" required>
+                            <button type="submit" id="exp-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold md:col-span-2">Catat ke Laporan Publik</button>
+                        </form>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold mb-4">Riwayat Donasi Masuk (Dari Formulir Web)</h3>
+                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 border-b">
+                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama Donatur</th><th class="p-4 text-sm text-right">Nominal Konfirmasi (Rp)</th></tr>
+                        </thead>
+                        <tbody id="table-donations" class="divide-y divide-gray-100 text-sm"></tbody>
+                    </table>
                 </div>
             </div>
 
@@ -100,20 +141,6 @@
                     </table>
                 </div>
             </div>
-
-            <!-- TAB: Donations -->
-            <div id="tab-donations" class="tab-content hidden">
-                <h3 class="text-2xl font-bold mb-6">Konfirmasi Donasi Masuk</h3>
-                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 border-b">
-                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama Donatur</th><th class="p-4 text-sm text-right">Nominal Konfirmasi (Rp)</th></tr>
-                        </thead>
-                        <tbody id="table-donations" class="divide-y divide-gray-100 text-sm"></tbody>
-                    </table>
-                </div>
-            </div>
-
         </main>
     </div>
 
