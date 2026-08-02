@@ -1,13 +1,12 @@
 /**
  * PERIODCARE MACHINE - Admin JavaScript
- * Fitur: Auth, Cloudinary Upload, Baca Data Tabel
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+// DITAMBAHKAN: push untuk menambahkan data pengeluaran
+import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// KONFIGURASI FIREBASE FINAL (Telah Diperbarui dengan yang asli)
 const firebaseConfig = {
     apiKey: "AIzaSyB2hA3tXY8A87pBwZGzDdxxUCNpzU9Q-GA",
     authDomain: "periodcare-d3afa.firebaseapp.com",
@@ -22,14 +21,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// DOM Elements
 const loginScreen = document.getElementById('login-screen');
 const dashboardScreen = document.getElementById('dashboard-screen');
 const loginForm = document.getElementById('login-form');
 const logoutBtn = document.getElementById('logout-btn');
 
 /* =======================================
-   1. SISTEM AUTENTIKASI (LOGIN/LOGOUT)
+   1. SISTEM AUTENTIKASI
    ======================================= */
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -55,12 +53,10 @@ loginForm.addEventListener('submit', (e) => {
         });
 });
 
-logoutBtn.addEventListener('click', () => {
-    signOut(auth);
-});
+logoutBtn.addEventListener('click', () => signOut(auth));
 
 /* =======================================
-   2. PENGATURAN WEB (MAPS & QRIS)
+   2. PENGATURAN WEB (MAPS, QRIS, DANA)
    ======================================= */
 document.getElementById('maps-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -78,7 +74,7 @@ document.getElementById('qris-form').addEventListener('submit', async (e) => {
 
     if(!file) return alert("Pilih foto terlebih dahulu!");
 
-    btn.textContent = "Mengunggah ke Cloudinary...";
+    btn.textContent = "Mengunggah...";
     btn.disabled = true;
 
     try {
@@ -86,17 +82,11 @@ document.getElementById('qris-form').addEventListener('submit', async (e) => {
         formData.append('file', file);
         formData.append('upload_preset', uploadPreset);
 
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData });
         const data = await res.json();
         if(data.error) throw new Error(data.error.message);
 
-        const imageUrl = data.secure_url;
-        await set(ref(db, 'settings/qrisUrl'), imageUrl);
-
+        await set(ref(db, 'settings/qrisUrl'), data.secure_url);
         statusText.textContent = "✅ QRIS Berhasil Diperbarui!";
         statusText.className = "text-xs font-bold text-center text-green-500 mt-2";
     } catch (error) {
@@ -108,11 +98,54 @@ document.getElementById('qris-form').addEventListener('submit', async (e) => {
     }
 });
 
+// A. Set Target Donasi
+document.getElementById('target-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const target = document.getElementById('target-input').value;
+    set(ref(db, 'settings/targetDonation'), target).then(() => alert('Target Donasi berhasil diperbarui!'));
+});
+
+// Tarik target saat ini untuk dimasukkan ke dalam input form
+onValue(ref(db, 'settings/targetDonation'), (snapshot) => {
+    if(snapshot.exists()) {
+        document.getElementById('target-input').value = snapshot.val();
+    }
+});
+
+// B. Catat Pengeluaran Baru
+document.getElementById('expense-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('exp-btn');
+    const originalText = btn.textContent;
+    btn.textContent = "Menyimpan...";
+    btn.disabled = true;
+
+    const expData = {
+        date: document.getElementById('exp-date').value,
+        category: document.getElementById('exp-category').value,
+        desc: document.getElementById('exp-desc').value,
+        amount: document.getElementById('exp-amount').value,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        await push(ref(db, 'expenses'), expData);
+        alert('Pengeluaran berhasil dicatat ke laporan publik!');
+        document.getElementById('expense-form').reset();
+    } catch (error) {
+        alert('Gagal mencatat pengeluaran: ' + error.message);
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+});
+
 /* =======================================
    3. MEMBACA DATA DARI PUBLIK (TABEL)
    ======================================= */
 function loadDashboardData() {
     const formatDate = (isoString) => {
+        if(!isoString) return '-';
         const d = new Date(isoString);
         return d.toLocaleDateString('id-ID') + ' ' + d.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
     };
