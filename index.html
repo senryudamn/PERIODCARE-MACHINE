@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PERIODCARE MACHINE - Inovasi sosial penanggulangan period poverty melalui dispenser pembalut gratis berbasis IoT.">
+    <title>PERIODCARE MACHINE | Inovasi Sosial Inklusif</title>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Tailwind CSS (CDN) Setup -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] },
+                    colors: {
+                        primary: '#FF4D85',   
+                        soft: '#FFB3C6',      
+                        accent: '#FF7043',    
+                        light: '#FFF5F7',     
+                        dark: '#2D3748',      
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 25px -5px rgba(255, 77, 133, 0.15)',
+                    },
+                    borderRadius: {
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Tailwind Custom Components -->
+    <style type="text/tailwindcss">
+        @layer components {
+            .btn { @apply inline-flex items-center justify-center px-6 py-3 rounded-full font-semibold transition-all duration-300 focus:outline-none focus:ring-4; }
+            .btn-primary { @apply bg-primary text-white hover:bg-pink-600 hover:shadow-soft focus:ring-soft; }
+            .btn-accent { @apply bg-accent text-white hover:bg-orange-600 hover:shadow-lg focus:ring-orange-200; }
+            .btn-outline { @apply border-2 border-primary text-primary hover:bg-primary hover:text-white bg-transparent; }
+            .card { @apply bg-white rounded-2xl shadow-md p-6 border border-pink-50 hover:-translate-y-2 hover:shadow-soft transition-all duration-300; }
+            .heading-1 { @apply text-4xl md:text-5xl lg:text-6xl font-bold text-dark leading-tight; }
+            .heading-2 { @apply text-3xl md:text-4xl font-bold text-dark leading-snug; }
+            .body-text { @apply text-base md:text-lg text-gray-600 leading-relaxed; }
+            
+            /* Custom Form Input */
+            .form-input { @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-pink-100 transition-all; }
+        }
+    </style>
+</head>
+<body class="bg-light font-sans text-dark antialiased">
+
+    <!-- Sticky Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-2xl font-bold text-primary hover:opacity-80 transition">
+                PeriodCare<span class="text-accent">.</span>
+            </a>
+            
+            <nav class="hidden md:flex gap-8 items-center">
+                <a href="#home" class="text-dark font-medium hover:text-primary transition">Beranda</a>
+                <a href="#about" class="text-gray-500 font-medium hover:text-primary transition">Tentang Kami</a>
+                <a href="#locations" class="text-gray-500 font-medium hover:text-primary transition">Lokasi & Data</a>
+                <a href="#donate" class="text-gray-500 font-medium hover:text-primary transition">Aksi Nyata</a>
+                <a href="#donate" class="btn btn-primary px-5 py-2 text-sm">Join Relawan</a>
+            </nav>
+
+            <button id="mobile-menu-btn" class="md:hidden text-dark focus:outline-none" aria-label="Buka Menu">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 absolute w-full shadow-lg">
+            <nav class="flex flex-col px-6 py-4 space-y-4">
+                <a href="#home" class="text-dark font-medium mobile-link">Beranda</a>
+                <a href="#about" class="text-gray-500 font-medium mobile-link">Tentang Kami</a>
+                <a href="#locations" class="text-gray-500 font-medium mobile-link">Lokasi & Data</a>
+                <a href="#donate" class="text-gray-500 font-medium mobile-link">Aksi Nyata (Donasi)</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Section: Home (Diperbarui pada Bagian Mesin) -->
+        <section id="home" class="container mx-auto px-6 py-16 md:py-24">
+            <div class="flex flex-col-reverse lg:flex-row items-center justify-between gap-12">
+                
+                <!-- Kiri: Teks -->
+                <div class="w-full lg:w-1/2 text-center lg:text-left scroll-animate opacity-0 translate-y-10">
+                    <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce">Inovasi Sosial 2026</span>
+                    <h1 class="heading-1 mb-6">PERIODCARE MACHINE</h1>
+                    <p class="body-text mb-8">"Inovasi kolaboratif dalam mewujudkan pembangunan sosial inklusif melalui penyediaan dispenser pembalut gratis berbasis teknologi pintar."</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="#locations" class="btn btn-primary">Lihat Tracker</a>
+                        <a href="#donate" class="btn btn-accent">Donate Now</a>
+                    </div>
+                </div>
+
+                <!-- Kanan: Visual Mesin Dispenser (Telah Diperbaiki) -->
+                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100">
+                    
+                    <!-- Container Mesin: Ditambahkan shrink-0 dan overflow-hidden agar bentuknya solid tidak terpotong -->
+                    <div class="relative w-72 h-[460px] bg-gradient-to-b from-orange-400 to-accent rounded-[2.5rem] shadow-2xl border-8 border-orange-200 flex flex-col items-center pt-8 z-10 overflow-hidden shrink-0 group">
+                        
+                        <!-- Dekorasi Watermark Teks (Aman di dalam kotak) -->
+                        <div class="absolute -right-12 top-1/2 -translate-y-1/2 rotate-90 text-white/15 font-black text-4xl tracking-[0.2em] pointer-events-none whitespace-nowrap select-none">
+                            SMART DISPENSER
+                        </div>
+
+                        <!-- Sensor / Camera Dummy -->
+                        <div class="w-16 h-5 bg-gray-900 rounded-full mb-6 flex justify-center items-center shadow-inner border border-gray-700 relative z-10">
+                            <div class="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_#3b82f6]"></div>
+                        </div>
+                        
+                        <!-- Smart Screen (IoT Interface) -->
+                        <div class="w-56 bg-gray-900 rounded-2xl flex flex-col p-5 shadow-inner border-b-[6px] border-gray-800 relative z-10">
+                            <div class="text-primary font-black text-lg mb-3 text-center tracking-wider uppercase">PeriodCare</div>
+                            
+                            <div class="flex items-center justify-between bg-gray-800 rounded-lg p-2 mb-3 border border-gray-700">
+                                <span class="text-gray-400 text-[11px] font-semibold">STATUS</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_5px_#22c55e]"></div>
+                                    <span class="text-green-400 text-[11px] font-bold tracking-wider">ONLINE</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between mb-1.5 px-1">
+                                <span class="text-gray-400 text-[11px] font-semibold">STOK PEMBALUT</span>
+                                <span class="text-white text-[11px] font-bold">85%</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2.5 shadow-inner">
+                                <div class="bg-primary h-2.5 rounded-full w-[85%] relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-white/20 animate-[pulse_2s_ease-in-out_infinite]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dispenser Slot (Menempel di dasar mesin) -->
+                        <div class="absolute bottom-0 w-40 h-20 bg-gray-800 rounded-t-2xl border-t-4 border-x-4 border-gray-700 shadow-inner flex flex-col justify-start items-center overflow-hidden z-10">
+                            <div class="w-full h-2 bg-primary/50 shadow-[0_0_15px_#FF4D85] mb-2"></div>
+                            <!-- Animasi Pembalut Keluar saat mesin di-hover -->
+                            <div class="w-20 h-10 bg-pink-50 rounded-lg border-2 border-pink-200 -translate-y-12 group-hover:translate-y-0 transition-transform duration-700 shadow-md flex items-center justify-center">
+                                <span class="text-[10px] text-primary font-bold">PAD</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Latar Belakang -->
+        <section id="about" class="bg-white py-20 border-t border-gray-100">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10">
+                    <h2 class="heading-2 mb-4">Mengapa PERIODCARE MACHINE Hadir?</h2>
+                    <p class="body-text max-w-3xl mx-auto">Fenomena Period Poverty berdampak langsung pada hilangnya hari efektif sekolah. Mesin ini hadir untuk menguji efektivitas penyediaan pembalut gratis yang terintegrasi IoT untuk distribusi transparan dan tepat sasaran.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Tracker & Transparansi -->
+        <section id="locations" class="py-20 bg-light border-t border-gray-200">
+            <div class="container mx-auto px-6">
+                
+                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
+                    <h2 class="heading-2 mb-4">Live Tracker & Lokasi Mesin</h2>
+                    <p class="body-text max-w-2xl mx-auto">Pantau ketersediaan stok pembalut secara real-time. Temukan lokasi mesin terdekat melalui Google Maps untuk kemudahan akses.</p>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-8 mb-24 scroll-animate opacity-0 translate-y-10">
+                    <div class="w-full lg:w-1/2 bg-white rounded-2xl p-2 shadow-sm border border-gray-100 relative overflow-hidden min-h-[400px]">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.0981774399347!2d110.38459411130635!3d-7.779414277057037!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5a8286a11e49%3A0x6b7713d7894a4c6a!2sUniversitas%20Negeri%20Yogyakarta!5e0!3m2!1sid!2sid!4v1709400000000!5m2!1sid!2sid" class="absolute inset-0 w-full h-full rounded-xl" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+
+                    <div class="w-full lg:w-1/2 flex flex-col">
+                        <div class="flex gap-4 mb-6">
+                            <input type="text" id="search-machine" placeholder="Cari lokasi mesin..." class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                            <select id="filter-status" class="px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary">
+                                <option value="all">Semua Status</option>
+                                <option value="aman">Aman (>50%)</option>
+                                <option value="hampir-habis">Hampir Habis (<50%)</option>
+                                <option value="kosong">Kosong (0%)</option>
+                            </select>
+                        </div>
+                        <div id="machine-list-container" class="space-y-4 overflow-y-auto pr-2 max-h-[400px] custom-scrollbar"></div>
+                    </div>
+                </div>
+
+                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
+                    <h2 class="heading-2 mb-4">Dashboard Transparansi Donasi</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 scroll-animate opacity-0 translate-y-10">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-gradient-to-br from-primary to-soft rounded-2xl p-6 text-white shadow-soft">
+                            <h3 class="text-sm font-semibold uppercase tracking-wider mb-2 opacity-90">Total Donasi Terkumpul</h3>
+                            <div class="text-3xl font-bold mb-4" id="total-donation-text">Rp 0</div>
+                            <div class="w-full bg-white/30 rounded-full h-2 mb-2"><div id="progress-bar" class="bg-white h-2 rounded-full transition-all duration-1000 w-0"></div></div>
+                            <div class="flex justify-between text-sm opacity-90"><span id="progress-percent">0%</span><span>Target: <span id="target-donation-text">Rp 0</span></span></div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-200 shadow-sm overflow-hidden">
+                        <h3 class="text-xl font-bold text-dark mb-4">Laporan Pengeluaran</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 border-b border-gray-100">
+                                        <th class="py-3 px-4 text-sm font-semibold text-gray-600">Tanggal</th>
+                                        <th class="py-3 px-4 text-sm font-semibold text-gray-600">Kategori</th>
+                                        <th class="py-3 px-4 text-sm font-semibold text-gray-600">Deskripsi</th>
+                                        <th class="py-3 px-4 text-sm font-semibold text-gray-600 text-right">Nominal (Rp)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-table-body" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Donasi, Relawan & Kontak -->
+        <section id="donate" class="py-20 bg-white border-t border-gray-200 relative">
+            <div class="container mx-auto px-6">
+                
+                <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10">
+                    <h2 class="heading-2 mb-4">Waktunya Mengambil Peran</h2>
+                    <p class="body-text max-w-2xl mx-auto">Pilih cara Anda berkontribusi. Menjadi donatur untuk operasional mesin, atau bergabung sebagai relawan untuk edukasi dan distribusi.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-24 scroll-animate opacity-0 translate-y-10">
+                    
+                    <!-- Kiri: Donasi -->
+                    <div class="bg-light rounded-3xl p-8 border border-pink-100 shadow-sm">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-xl">💖</div>
+                            <h3 class="text-2xl font-bold text-dark">Berdonasi</h3>
+                        </div>
+                        <p class="text-gray-600 mb-6 text-sm">Scan QRIS di bawah ini melalui aplikasi M-Banking atau e-Wallet Anda (OVO, Gopay, Dana, dll).</p>
+                        
+                        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-inner w-48 h-48 mx-auto flex flex-col items-center justify-center mb-6 group cursor-pointer hover:border-primary transition-colors">
+                            <svg class="w-16 h-16 text-gray-300 group-hover:text-primary transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                            <span class="font-mono text-sm text-gray-500 font-bold">QRIS_DUMMY</span>
+                        </div>
+
+                        <form id="donation-form" class="space-y-4">
+                            <input type="text" id="donator-name" placeholder="Nama Donatur (Boleh Anonim)" class="form-input">
+                            <input type="number" id="donation-amount" placeholder="Nominal Donasi (Rp)" class="form-input" required>
+                            <button type="submit" class="btn btn-primary w-full shadow-soft">Konfirmasi Donasi Saya</button>
+                            <div id="donasi-success" class="hidden text-green-600 text-sm font-semibold bg-green-50 p-3 rounded-lg text-center mt-2 border border-green-200">
+                                ✅ Terima kasih! Donasi Anda sedang diverifikasi.
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Kanan: Relawan -->
+                    <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm relative overflow-hidden">
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-orange-50 rounded-full z-0"></div>
+                        
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-white text-xl">🤝</div>
+                                <h3 class="text-2xl font-bold text-dark">Menjadi Relawan</h3>
+                            </div>
+                            
+                            <ul class="text-sm text-gray-600 space-y-3 mb-8">
+                                <li class="flex items-center gap-2"><span>✔️</span> Terlibat langsung dalam edukasi reproduksi di sekolah.</li>
+                                <li class="flex items-center gap-2"><span>✔️</span> Sertifikat penghargaan tingkat Universitas/Daerah.</li>
+                                <li class="flex items-center gap-2"><span>✔️</span> Relasi berharga dengan komunitas dan aktivis sosial.</li>
+                            </ul>
+
+                            <form id="volunteer-form" class="space-y-4">
+                                <input type="text" id="vol-name" placeholder="Nama Lengkap" class="form-input" required>
+                                <input type="email" id="vol-email" placeholder="Email Aktif" class="form-input" required>
+                                <select id="vol-role" class="form-input text-gray-500" required>
+                                    <option value="" disabled selected>Pilih Peran Relawan</option>
+                                    <option value="distribusi">Tim Distribusi & Maintenance IoT</option>
+                                    <option value="edukasi">Tim Edukasi & Sosialisasi</option>
+                                    <option value="media">Tim Media & Kreatif</option>
+                                </select>
+                                <button type="submit" class="btn btn-accent w-full">Daftar Sekarang</button>
+                                <div id="volunteer-success" class="hidden text-orange-600 text-sm font-semibold bg-orange-50 p-3 rounded-lg text-center mt-2 border border-orange-200">
+                                    🎉 Pendaftaran berhasil! Tim kami akan menghubungi Anda.
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bagian Kontak & Kolaborasi -->
+                <div class="bg-dark rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl scroll-animate opacity-0 translate-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <h3 class="text-3xl font-bold mb-4">Punya Ide Kolaborasi?</h3>
+                            <p class="text-gray-400 mb-8">Kami membuka pintu seluas-luasnya untuk pemerintah daerah, NGO, perusahaan swasta (CSR), maupun media untuk mensukseskan gerakan ini.</p>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📧</div>
+                                    <span class="text-gray-300">periodcare@uny.ac.id</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📍</div>
+                                    <span class="text-gray-300">Fakultas Teknik, Universitas Negeri Yogyakarta</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📱</div>
+                                    <span class="text-gray-300">Instagram: @periodcare.uny</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <form id="contact-form" class="space-y-4">
+                                <input type="text" id="contact-name" placeholder="Nama / Instansi" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
+                                <input type="email" id="contact-email" placeholder="Email" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" required>
+                                <textarea id="contact-message" rows="4" placeholder="Tuliskan pesan atau tawaran kolaborasi Anda..." class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none" required></textarea>
+                                <button type="submit" class="btn btn-primary w-full">Kirim Pesan</button>
+                                <div id="contact-success" class="hidden text-pink-300 text-sm font-semibold bg-pink-900/30 p-3 rounded-lg text-center mt-2 border border-pink-900">
+                                    ✨ Pesan terkirim! Mari berkolaborasi.
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark pt-8 pb-8 border-t border-gray-800">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
+            <p>&copy; 2026 PERIODCARE MACHINE. Hak Cipta Dilindungi.</p>
+            <p class="mt-2 md:mt-0">Dibuat dengan ❤️ oleh Tim Peneliti UNY</p>
+        </div>
+    </footer>
+
+    <!-- Modular JavaScript -->
+    <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
