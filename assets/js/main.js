@@ -1,14 +1,37 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Modul: Navigasi, Animasi, Live Tracker (IoT Mock), Transparansi Data, Validasi Form
+ * Modul: Navigasi, Animasi, Live Tracker (Firebase IoT), Transparansi Data, Validasi Form
  */
+
+// 1. IMPORT MODUL FIREBASE (Menggunakan versi modular ES6 dari CDN)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// 2. KONFIGURASI FIREBASE
+// PENTING: Nanti ganti nilai di bawah ini dengan config dari Project Firebase Anda
+const firebaseConfig = {
+    apiKey: "API_KEY_ANDA",
+    authDomain: "periodcare-xxx.firebaseapp.com",
+    databaseURL: "https://periodcare-xxx-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "periodcare-xxx",
+    storageBucket: "periodcare-xxx.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+};
+
+// 3. INISIALISASI FIREBASE
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Array global untuk menampung data mesin dari database
+let machinesData = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initScrollAnimation();
-    initLiveTracker();
+    initFirebaseLiveTracker(); // Modul Tracker kini menggunakan Firebase
     initDonationDashboard();
-    initFormValidation(); // MODUL BARU LANGKAH 5
+    initFormValidation();
 });
 
 /* =======================================================
@@ -53,27 +76,20 @@ const initScrollAnimation = () => {
 };
 
 /* =======================================================
-   2. MODUL LIVE TRACKER & GOOGLE MAPS LINK
+   2. MODUL LIVE TRACKER & GOOGLE MAPS LINK (FIREBASE)
    ======================================================= */
-const machinesData = [
-    { id: 'PCM-001', name: 'Dispenser Fakultas Teknik UNY', location: 'Gedung KPLT Lantai 1', stock: 85, status: 'aman', mapsLink: 'https://maps.app.goo.gl/W5N5y1d4o6kQ6YcQ8' },
-    { id: 'PCM-002', name: 'Dispenser Perpustakaan Pusat', location: 'Toilet Wanita Lt. 2', stock: 10, status: 'hampir-habis', mapsLink: 'https://maps.app.goo.gl/Q2Wb5vV4eP1C4uXZ7' },
-    { id: 'PCM-003', name: 'Dispenser Asrama Putri Bundo Kanduang', location: 'Gedung Utama', stock: 100, status: 'aman', mapsLink: 'https://maps.app.goo.gl/EXAMPLE1' },
-    { id: 'PCM-004', name: 'Dispenser Stasiun Tugu', location: 'Ruang Tunggu VIP', stock: 0, status: 'kosong', mapsLink: 'https://maps.app.goo.gl/EXAMPLE2' },
-    { id: 'PCM-005', name: 'Dispenser Halte Trans', location: 'Halte Pusat Kota', stock: 45, status: 'hampir-habis', mapsLink: 'https://maps.app.goo.gl/EXAMPLE3' }
-];
-
-const initLiveTracker = () => {
+const initFirebaseLiveTracker = () => {
     const container = document.getElementById('machine-list-container');
     const searchInput = document.getElementById('search-machine');
     const filterSelect = document.getElementById('filter-status');
 
-    if(!container) return; // Guard clause
+    if(!container) return; // Guard clause jika elemen tidak ada
 
+    // Fungsi Render UI Card Mesin
     const renderMachines = (data) => {
         container.innerHTML = ''; 
         if(data.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-center py-4">Mesin tidak ditemukan.</p>';
+            container.innerHTML = '<p class="text-gray-500 text-center py-4">Memuat data sensor atau mesin tidak ditemukan...</p>';
             return;
         }
 
@@ -108,6 +124,7 @@ const initLiveTracker = () => {
         });
     };
 
+    // Fungsi Filter Data
     const applyFilters = () => {
         const query = searchInput.value.toLowerCase();
         const status = filterSelect.value;
@@ -121,9 +138,37 @@ const initLiveTracker = () => {
         renderMachines(filtered);
     };
 
+    // --- MENGAMBIL DATA DARI FIREBASE REALTIME DATABASE ---
+    const machinesRef = ref(db, 'machines');
+    
+    // onValue akan membaca data pertama kali, DAN setiap kali sensor IoT mengupdate data
+    onValue(machinesRef, (snapshot) => {
+        const data = snapshot.val();
+        machinesData = []; // Kosongkan array lama
+
+        if (data) {
+            // Ubah format JSON Object Firebase menjadi Array JavaScript
+            for (let key in data) {
+                machinesData.push({
+                    id: key,
+                    name: data[key].name || 'Mesin Tanpa Nama',
+                    location: data[key].location || 'Lokasi Belum Diatur',
+                    stock: data[key].stock || 0,
+                    mapsLink: data[key].mapsLink || '#'
+                });
+            }
+        }
+        
+        // Render ulang UI setelah data terbaru ditarik
+        applyFilters(); 
+    }, (error) => {
+        console.error("Error fetching data from Firebase:", error);
+        container.innerHTML = '<p class="text-red-500 text-center py-4">Gagal terhubung ke database. Cek koneksi Anda.</p>';
+    });
+
+    // Event Listener untuk Search dan Filter
     searchInput.addEventListener('input', applyFilters);
     filterSelect.addEventListener('change', applyFilters);
-    renderMachines(machinesData);
 };
 
 /* =======================================================
@@ -179,7 +224,7 @@ const initDonationDashboard = () => {
 };
 
 /* =======================================================
-   4. MODUL VALIDASI FORM (LANGKAH 5)
+   4. MODUL VALIDASI FORM
    ======================================================= */
 const initFormValidation = () => {
     // Fungsi umum untuk menangani submit form (Mencegah reload dan memunculkan pesan sukses)
@@ -190,9 +235,6 @@ const initFormValidation = () => {
         if (form && successMsg) {
             form.addEventListener('submit', (e) => {
                 e.preventDefault(); // Mencegah reload halaman
-                
-                // Di sini biasanya ada AJAX / fetch API ke Firebase atau Backend.
-                // Untuk tahap Front-End, kita simulasikan proses loading singkat.
                 
                 const btn = form.querySelector('button[type="submit"]');
                 const originalText = btn.textContent;
