@@ -3,19 +3,15 @@
  * Modul: Navigasi, Animasi, Live Tracker (Firebase IoT), Transparansi Data, Validasi Form
  */
 
-// 1. IMPORT MODUL FIREBASE (Menggunakan versi modular ES6 dari CDN)
+// 1. IMPORT MODUL FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// 2. KONFIGURASI FIREBASE ASLI (Sudah disesuaikan)
+// 2. KONFIGURASI FIREBASE ASLI
 const firebaseConfig = {
     apiKey: "AIzaSyB2hA3tXY8A87pBwZGzDdxxUCNpzU9Q-GA",
     authDomain: "periodcare-d3afa.firebaseapp.com",
-    
-    // PENTING: URL Database ditambahkan manual. Jika Anda memilih server Singapore, 
-    // ubah .firebaseio.com menjadi .asia-southeast1.firebasedatabase.app
     databaseURL: "https://periodcare-d3afa-default-rtdb.firebaseio.com",
-    
     projectId: "periodcare-d3afa",
     storageBucket: "periodcare-d3afa.firebasestorage.app",
     messagingSenderId: "501107071095",
@@ -34,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollAnimation();
     initFirebaseLiveTracker();
     initDonationDashboard();
-    initFormValidation();
+    initDynamicSettings(); // Modul Baru: Membaca Maps & QRIS dari Admin
+    initFormValidationAndSubmission(); // Modul Baru: Mengirim Form ke Firebase
 });
 
 /* =======================================================
@@ -138,7 +135,6 @@ const initFirebaseLiveTracker = () => {
         renderMachines(filtered);
     };
 
-    // --- MENGAMBIL DATA DARI FIREBASE REALTIME DATABASE ---
     const machinesRef = ref(db, 'machines');
     
     onValue(machinesRef, (snapshot) => {
@@ -220,46 +216,96 @@ const initDonationDashboard = () => {
 };
 
 /* =======================================================
-   4. MODUL VALIDASI FORM
+   4. MODUL PENGATURAN DINAMIS DARI ADMIN
    ======================================================= */
-const initFormValidation = () => {
-    const handleFormSubmit = (formId, successMsgId) => {
+const initDynamicSettings = () => {
+    onValue(ref(db, 'settings'), (snapshot) => {
+        const settings = snapshot.val();
+        if (settings) {
+            // Perbarui URL iframe Google Maps
+            if (settings.mapsLink) {
+                const mapsIframe = document.getElementById('maps-iframe');
+                if (mapsIframe) mapsIframe.src = settings.mapsLink;
+            }
+            // Perbarui Gambar QRIS
+            if (settings.qrisUrl) {
+                const qrisImg = document.getElementById('qris-img');
+                if (qrisImg) qrisImg.src = settings.qrisUrl;
+            }
+        }
+    });
+};
+
+/* =======================================================
+   5. MODUL VALIDASI FORM & SUBMIT KE FIREBASE
+   ======================================================= */
+const initFormValidationAndSubmission = () => {
+    // Fungsi umum untuk menangani submit form
+    const handleFormSubmit = (formId, successMsgId, dbNode, getDataCallback) => {
         const form = document.getElementById(formId);
         const successMsg = document.getElementById(successMsgId);
 
         if (form && successMsg) {
-            form.addEventListener('submit', (e) => {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault(); 
                 
                 const btn = form.querySelector('button[type="submit"]');
                 const originalText = btn.textContent;
-                btn.textContent = 'Memproses...';
+                btn.textContent = 'Mengirim...';
                 btn.disabled = true;
                 btn.classList.add('opacity-70', 'cursor-not-allowed');
 
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                try {
+                    // Ambil data dan tambahkan timestamp
+                    const dataToPush = getDataCallback();
+                    dataToPush.timestamp = new Date().toISOString(); 
                     
+                    // Dorong (push) data ke Realtime Database
+                    await push(ref(db, dbNode), dataToPush);
+
+                    // Reset form dan tampilkan pesan sukses
                     successMsg.classList.remove('hidden');
                     form.reset(); 
 
                     setTimeout(() => {
                         successMsg.classList.add('hidden');
                     }, 5000);
-                }, 1200); 
+                } catch (error) {
+                    console.error("Gagal mengirim data:", error);
+                    alert("Terjadi kesalahan saat menghubungi server. Silakan coba lagi.");
+                } finally {
+                    // Kembalikan tombol ke keadaan semula
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                }
             });
         }
     };
 
-    handleFormSubmit('donation-form', 'donasi-success');
-    handleFormSubmit('volunteer-form', 'volunteer-success');
-    handleFormSubmit('contact-form', 'contact-success');
+    // Terapkan ke Form Donasi
+    handleFormSubmit('donation-form', 'donasi-success', 'donations', () => ({
+        name: document.getElementById('donator-name').value || 'Anonim',
+        amount: document.getElementById('donation-amount').value
+    }));
+
+    // Terapkan ke Form Relawan
+    handleFormSubmit('volunteer-form', 'volunteer-success', 'volunteers', () => ({
+        name: document.getElementById('vol-name').value,
+        email: document.getElementById('vol-email').value,
+        role: document.getElementById('vol-role').value
+    }));
+
+    // Terapkan ke Form Pesan/Kontak
+    handleFormSubmit('contact-form', 'contact-success', 'messages', () => ({
+        name: document.getElementById('contact-name').value,
+        email: document.getElementById('contact-email').value,
+        message: document.getElementById('contact-message').value
+    }));
 };
 
 /* =======================================================
-   5. MODUL LOADING ANIMATION (PRELOADER)
+   6. MODUL LOADING ANIMATION (PRELOADER)
    ======================================================= */
 window.addEventListener('load', () => {
     const loader = document.getElementById('loader');
