@@ -1,32 +1,34 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Terhubung ke Firebase (Realtime Database & Forms)
+ * Firebase Config sekarang dipanggil dari Backend Vercel
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// KONFIGURASI FIREBASE FINAL
-const firebaseConfig = {
-    apiKey: "AIzaSyB2hA3tXY8A87pBwZGzDdxxUCNpzU9Q-GA",
-    authDomain: "periodcare-d3afa.firebaseapp.com",
-    databaseURL: "https://periodcare-d3afa-default-rtdb.firebaseio.com",
-    projectId: "periodcare-d3afa",
-    storageBucket: "periodcare-d3afa.firebasestorage.app",
-    messagingSenderId: "501107071095",
-    appId: "1:501107071095:web:ab9f04e4eb867a7ab48e72"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+let db; // Variabel db dibuat global
 let machinesData = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-    initNavigation();
-    initScrollAnimation();
-    initFirebaseLiveTracker();
-    initDonationDashboard(); // Diperbarui menjadi REAL-TIME
-    initDynamicSettings();
-    initFormValidationAndSubmission(); 
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // 1. Ambil konfigurasi dari Backend Vercel API
+        const response = await fetch('/api/config');
+        const firebaseConfig = await response.json();
+
+        // 2. Inisialisasi Firebase dengan config yang aman
+        const app = initializeApp(firebaseConfig);
+        db = getDatabase(app);
+
+        // 3. Jalankan UI dan Fitur setelah Firebase siap
+        initNavigation();
+        initScrollAnimation();
+        initFirebaseLiveTracker();
+        initDonationDashboard();
+        initDynamicSettings();
+        initFormValidationAndSubmission(); 
+
+    } catch (error) {
+        console.error("Gagal mengambil konfigurasi dari Backend:", error);
+    }
 });
 
 const initNavigation = () => {
@@ -62,8 +64,8 @@ window.addEventListener('load', () => {
     if (loader) {
         setTimeout(() => {
             loader.classList.add('opacity-0');
-            setTimeout(() => { loader.style.display = 'none'; }, 700);
-        }, 800); 
+            setTimeout(() => { loader.style.display = 'none'; }, 500);
+        }, 500); 
     }
 });
 
@@ -139,37 +141,29 @@ const initFirebaseLiveTracker = () => {
     filterSelect.addEventListener('change', applyFilters);
 };
 
-/* =======================================================
-   3. MODUL DASHBOARD TRANSPARANSI DONASI (REAL-TIME)
-   ======================================================= */
 const initDonationDashboard = () => {
     const totalEl = document.getElementById('total-donation-text');
     if(!totalEl) return; 
     
     const formatIDR = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
 
-    let targetValue = 50000000; // Target Default
+    let targetValue = 50000000; 
     let collectedValue = 0;
 
-    // Fungsi Render Progress Bar
     const updateProgressUI = () => {
         document.getElementById('target-donation-text').textContent = formatIDR(targetValue);
         totalEl.textContent = formatIDR(collectedValue);
-        
         let percentage = targetValue > 0 ? Math.round((collectedValue / targetValue) * 100) : 0;
         if(percentage > 100) percentage = 100;
-        
         document.getElementById('progress-bar').style.width = `${percentage}%`; 
         document.getElementById('progress-percent').textContent = `${percentage}% Tercapai`;
     };
 
-    // A. Baca Target Donasi dari Firebase
     onValue(ref(db, 'settings/targetDonation'), (snapshot) => {
         if(snapshot.exists()) targetValue = parseInt(snapshot.val());
         updateProgressUI();
     });
 
-    // B. Baca Semua Donasi yang Masuk untuk dihitung totalnya
     onValue(ref(db, 'donations'), (snapshot) => {
         collectedValue = 0;
         if(snapshot.exists()) {
@@ -181,7 +175,6 @@ const initDonationDashboard = () => {
         updateProgressUI();
     });
 
-    // C. Baca Laporan Pengeluaran untuk Tabel
     onValue(ref(db, 'expenses'), (snapshot) => {
         const tbody = document.getElementById('expenses-table-body');
         tbody.innerHTML = ''; 
@@ -193,8 +186,6 @@ const initDonationDashboard = () => {
 
         const expensesArray = [];
         snapshot.forEach(child => expensesArray.push(child.val()));
-
-        // Urutkan dari yang terbaru ke terlama
         expensesArray.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         expensesArray.forEach(exp => {
