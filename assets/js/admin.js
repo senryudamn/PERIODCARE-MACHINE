@@ -1,30 +1,30 @@
 /**
  * PERIODCARE MACHINE - Admin JavaScript
- * Firebase Config sekarang dipanggil dari Backend Vercel
+ * Konfigurasi API disembunyikan dan dipanggil dari Backend Vercel
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-let auth, db;
+let auth, db; // Variabel global
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // 1. Ambil konfigurasi dari Backend Vercel API
+        // 1. Panggil API Key secara aman dari Backend Vercel
         const response = await fetch('/api/config');
         const firebaseConfig = await response.json();
 
-        // 2. Inisialisasi Firebase dengan config yang aman
+        // 2. Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getDatabase(app);
 
-        // 3. Jalankan Event Listeners dan Logika Admin
+        // 3. Jalankan fungsi Admin
         initAdminPanel();
 
     } catch (error) {
         console.error("Gagal mengambil konfigurasi dari Backend:", error);
-        alert("Sistem Admin gagal terhubung ke Server.");
+        alert("Sistem Admin gagal terhubung ke API tersembunyi.");
     }
 });
 
@@ -60,14 +60,12 @@ function initAdminPanel() {
 
     logoutBtn.addEventListener('click', () => signOut(auth));
 
-    // Maps Update
     document.getElementById('maps-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const link = document.getElementById('maps-input').value;
         set(ref(db, 'settings/mapsLink'), link).then(() => alert('Link Maps berhasil diperbarui!'));
     });
 
-    // QRIS Update
     document.getElementById('qris-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const file = document.getElementById('qris-input').files[0];
@@ -102,7 +100,6 @@ function initAdminPanel() {
         }
     });
 
-    // Target Update
     document.getElementById('target-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const target = document.getElementById('target-input').value;
@@ -113,7 +110,6 @@ function initAdminPanel() {
         if(snapshot.exists()) document.getElementById('target-input').value = snapshot.val();
     });
 
-    // Expense Update
     document.getElementById('expense-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('exp-btn');
