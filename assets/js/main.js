@@ -5,20 +5,30 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-let db; // Variabel database global
+let db; 
 let machinesData = [];
 
+// Inisialisasi Firebase via Backend + Menghilangkan Preloader dengan Cepat
 document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Hilangkan Preloader secepatnya (Tanpa menunggu Maps)
+    const loader = document.getElementById('loader');
+    if (loader) {
+        setTimeout(() => {
+            loader.classList.add('opacity-0');
+            setTimeout(() => { loader.style.display = 'none'; }, 500);
+        }, 500); 
+    }
+
     try {
-        // 1. Panggil API Key secara aman dari Backend Vercel
+        // 2. Panggil API Key secara aman dari Backend Vercel
         const response = await fetch('/api/config');
         const firebaseConfig = await response.json();
 
-        // 2. Inisialisasi Firebase
+        // 3. Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         db = getDatabase(app);
 
-        // 3. Jalankan fungsi utama
+        // 4. Jalankan fungsi utama
         initNavigation();
         initScrollAnimation();
         initFirebaseLiveTracker();
