@@ -33,6 +33,7 @@
             <h2 class="text-2xl font-bold text-pink-400 mb-8">Admin Panel</h2>
             <nav class="space-y-3 flex-1">
                 <button onclick="switchTab('settings')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 font-medium">⚙️ Pengaturan Web</button>
+                <button onclick="switchTab('machines')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">🤖 Kelola Mesin</button>
                 <button onclick="switchTab('donations')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">💖 Kelola Donasi</button>
                 <button onclick="switchTab('feedbacks')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">⭐ Penilaian Mesin</button>
                 <button onclick="switchTab('messages')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">📧 Pesan Masuk</button>
@@ -60,9 +61,10 @@
 
                     <!-- Update Maps -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="font-bold mb-4">📍 Link Google Maps (Live Tracker)</h4>
+                        <h4 class="font-bold mb-2">📍 Link Google Maps (Live Tracker)</h4>
+                        <p class="text-xs text-gray-500 mb-4">Buka Google Maps > Bagikan > <b>Sematkan Peta</b> > Salin HTML-nya dan tempel di sini.</p>
                         <form id="maps-form" class="space-y-4">
-                            <input type="text" id="maps-input" class="w-full px-4 py-2 rounded-xl border border-gray-200" placeholder="https://www.google.com/maps/embed?..." required>
+                            <input type="text" id="maps-input" class="w-full px-4 py-2 rounded-xl border border-gray-200" placeholder='<iframe src="https://www.google.com/maps/embed?...' required>
                             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">Perbarui Maps</button>
                         </form>
                     </div>
@@ -81,7 +83,34 @@
                 </div>
             </div>
 
-            <!-- TAB: Feedbacks (BARU) -->
+            <!-- TAB: Machines (BARU) -->
+            <div id="tab-machines" class="tab-content hidden">
+                <h3 class="text-2xl font-bold mb-6">Kelola Mesin & Stok (Manual)</h3>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                    <h4 class="font-bold mb-4">➕ Tambah / Edit Mesin</h4>
+                    <form id="machine-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="mac-id" placeholder="ID Mesin (Cth: PCM-001)" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
+                        <input type="number" id="mac-stock" placeholder="Stok Pembalut (0 - 100%)" min="0" max="100" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
+                        <input type="text" id="mac-name" placeholder="Nama Mesin (Cth: Dispenser FT UNY)" class="w-full px-4 py-2 rounded-xl border border-gray-200 md:col-span-2" required>
+                        <input type="text" id="mac-loc" placeholder="Lokasi Spesifik (Cth: Lobi Timur Lt.1)" class="w-full px-4 py-2 rounded-xl border border-gray-200 md:col-span-2" required>
+                        <input type="text" id="mac-link" placeholder="Link Google Maps (Biasa, bukan embed)" class="w-full px-4 py-2 rounded-xl border border-gray-200 md:col-span-2" required>
+                        <button type="submit" id="mac-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold md:col-span-2">Simpan Data Mesin</button>
+                    </form>
+                </div>
+
+                <h3 class="text-xl font-bold mb-4">Daftar Mesin Aktif</h3>
+                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 border-b">
+                            <tr><th class="p-4 text-sm">ID Mesin</th><th class="p-4 text-sm">Informasi & Lokasi</th><th class="p-4 text-sm text-center">Stok</th><th class="p-4 text-sm text-center">Aksi</th></tr>
+                        </thead>
+                        <tbody id="table-machines" class="divide-y divide-gray-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: Feedbacks -->
             <div id="tab-feedbacks" class="tab-content hidden">
                 <h3 class="text-2xl font-bold mb-6">Ulasan & Penilaian Pengguna</h3>
                 <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
@@ -134,7 +163,6 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            // Ganti warna tombol aktif
             document.querySelectorAll('aside button').forEach(btn => btn.classList.remove('bg-gray-800'));
             event.currentTarget.classList.add('bg-gray-800');
         }
