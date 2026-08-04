@@ -1,5 +1,6 @@
+// File: api/config.js
 export default function handler(request, response) {
-    // Mengambil data dari Environment Variables Vercel
+    // Mengambil data rahasia dari Environment Variables Vercel
     response.status(200).json({
         apiKey: process.env.FIREBASE_API_KEY,
         authDomain: process.env.FIREBASE_AUTH_DOMAIN,
