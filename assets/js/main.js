@@ -1,24 +1,24 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Firebase Config sekarang dipanggil dari Backend Vercel
+ * Konfigurasi API disembunyikan dan dipanggil dari Backend Vercel
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-let db; // Variabel db dibuat global
+let db; // Variabel database global
 let machinesData = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // 1. Ambil konfigurasi dari Backend Vercel API
+        // 1. Panggil API Key secara aman dari Backend Vercel
         const response = await fetch('/api/config');
         const firebaseConfig = await response.json();
 
-        // 2. Inisialisasi Firebase dengan config yang aman
+        // 2. Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         db = getDatabase(app);
 
-        // 3. Jalankan UI dan Fitur setelah Firebase siap
+        // 3. Jalankan fungsi utama
         initNavigation();
         initScrollAnimation();
         initFirebaseLiveTracker();
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         initFormValidationAndSubmission(); 
 
     } catch (error) {
-        console.error("Gagal mengambil konfigurasi dari Backend:", error);
+        console.error("Gagal mengambil konfigurasi API:", error);
     }
 });
 
@@ -58,16 +58,6 @@ const initScrollAnimation = () => {
     }, { threshold: 0.1 });
     animatedElements.forEach(el => observer.observe(el));
 };
-
-window.addEventListener('load', () => {
-    const loader = document.getElementById('loader');
-    if (loader) {
-        setTimeout(() => {
-            loader.classList.add('opacity-0');
-            setTimeout(() => { loader.style.display = 'none'; }, 500);
-        }, 500); 
-    }
-});
 
 const initFirebaseLiveTracker = () => {
     const container = document.getElementById('machine-list-container');
@@ -246,7 +236,7 @@ const initFormValidationAndSubmission = () => {
                     form.reset(); 
                     setTimeout(() => { successMsg.classList.add('hidden'); }, 5000);
                 } catch (error) {
-                    alert("Terjadi kesalahan saat menghubungi server. Silakan coba lagi.");
+                    alert("Terjadi kesalahan saat menghubungi server.");
                 } finally {
                     btn.textContent = originalText;
                     btn.disabled = false;
