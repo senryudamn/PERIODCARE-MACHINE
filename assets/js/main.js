@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Konfigurasi API disembunyikan dan dipanggil dari Backend Vercel
+ * API disembunyikan di Vercel Backend
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -8,9 +8,7 @@ import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebas
 let db; 
 let machinesData = [];
 
-// Inisialisasi Firebase via Backend + Menghilangkan Preloader dengan Cepat
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Hilangkan Preloader secepatnya (Tanpa menunggu Maps)
     const loader = document.getElementById('loader');
     if (loader) {
         setTimeout(() => {
@@ -20,21 +18,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        // 2. Panggil API Key secara aman dari Backend Vercel
         const response = await fetch('/api/config');
         const firebaseConfig = await response.json();
-
-        // 3. Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         db = getDatabase(app);
 
-        // 4. Jalankan fungsi utama
         initNavigation();
         initScrollAnimation();
         initFirebaseLiveTracker();
         initDonationDashboard();
-        initDynamicSettings();
-        initFormValidationAndSubmission(); 
+        initDynamicSettings(); // Menarik Info Maps, QRIS, & Call Center
+        initFormValidationAndSubmission(); // Memproses Form Feedback, dll
 
     } catch (error) {
         console.error("Gagal mengambil konfigurasi API:", error);
@@ -46,7 +40,6 @@ const initNavigation = () => {
     const mobileMenu = document.getElementById('mobile-menu');
     const navbar = document.getElementById('navbar');
     const mobileLinks = document.querySelectorAll('.mobile-link');
-
     if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
     mobileLinks.forEach(link => link.addEventListener('click', () => mobileMenu.classList.add('hidden')));
     window.addEventListener('scroll', () => {
@@ -77,10 +70,7 @@ const initFirebaseLiveTracker = () => {
 
     const renderMachines = (data) => {
         container.innerHTML = ''; 
-        if(data.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-center py-4">Memuat data sensor atau mesin tidak ditemukan...</p>';
-            return;
-        }
+        if(data.length === 0) { container.innerHTML = '<p class="text-gray-500 text-center py-4">Memuat data sensor atau mesin tidak ditemukan...</p>'; return; }
         data.forEach(machine => {
             let statusColor, statusBg, statusText;
             if (machine.stock > 50) { statusColor = 'bg-green-500'; statusBg = 'bg-green-50'; statusText = 'Aman'; } 
@@ -88,68 +78,33 @@ const initFirebaseLiveTracker = () => {
             else { statusColor = 'bg-red-500'; statusBg = 'bg-red-50'; statusText = 'Kosong'; }
             const card = document.createElement('div');
             card.className = `p-4 rounded-xl border border-gray-100 ${statusBg} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:shadow-md`;
-            card.innerHTML = `
-                <div class="w-full sm:w-auto flex-1">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs font-mono font-bold text-gray-500">${machine.id}</span>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${statusColor}">${statusText}</span>
-                    </div>
-                    <h4 class="font-bold text-dark text-sm mb-1">${machine.name}</h4>
-                    <p class="text-xs text-gray-600 mb-2">${machine.location}</p>
-                    <a href="${machine.mapsLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-[11px] font-semibold text-gray-600 hover:text-primary hover:border-primary hover:shadow-sm transition-all">📍 Buka di Maps</a>
-                </div>
-                <div class="text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0">
-                    <div class="text-xs text-gray-500 font-semibold mb-1">Stok IoT:</div>
-                    <div class="text-2xl font-bold text-dark leading-none">${machine.stock}%</div>
-                    <div class="w-full sm:w-24 bg-gray-200 rounded-full h-1.5 mt-2"><div class="${statusColor} h-1.5 rounded-full" style="width: ${machine.stock}%"></div></div>
-                </div>
-            `;
+            card.innerHTML = `<div class="w-full sm:w-auto flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-xs font-mono font-bold text-gray-500">${machine.id}</span><span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${statusColor}">${statusText}</span></div><h4 class="font-bold text-dark text-sm mb-1">${machine.name}</h4><p class="text-xs text-gray-600 mb-2">${machine.location}</p><a href="${machine.mapsLink}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-[11px] font-semibold text-gray-600 hover:text-primary hover:border-primary hover:shadow-sm transition-all">📍 Buka di Maps</a></div><div class="text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0"><div class="text-xs text-gray-500 font-semibold mb-1">Stok IoT:</div><div class="text-2xl font-bold text-dark leading-none">${machine.stock}%</div><div class="w-full sm:w-24 bg-gray-200 rounded-full h-1.5 mt-2"><div class="${statusColor} h-1.5 rounded-full" style="width: ${machine.stock}%"></div></div></div>`;
             container.appendChild(card);
         });
     };
-
     const applyFilters = () => {
         const query = searchInput.value.toLowerCase();
         const status = filterSelect.value;
         const filtered = machinesData.filter(m => {
             const matchSearch = m.name.toLowerCase().includes(query) || m.location.toLowerCase().includes(query);
-            let mStatus = 'aman';
-            if(m.stock === 0) mStatus = 'kosong'; else if(m.stock <= 50) mStatus = 'hampir-habis';
-            const matchStatus = (status === 'all') || (mStatus === status);
-            return matchSearch && matchStatus;
+            let mStatus = 'aman'; if(m.stock === 0) mStatus = 'kosong'; else if(m.stock <= 50) mStatus = 'hampir-habis';
+            return matchSearch && (status === 'all' || mStatus === status);
         });
         renderMachines(filtered);
     };
-
     onValue(ref(db, 'machines'), (snapshot) => {
-        const data = snapshot.val();
-        machinesData = []; 
-        if (data) {
-            for (let key in data) {
-                machinesData.push({
-                    id: key, name: data[key].name || 'Mesin Tanpa Nama', location: data[key].location || 'Lokasi Belum Diatur',
-                    stock: data[key].stock || 0, mapsLink: data[key].mapsLink || '#'
-                });
-            }
-        }
+        const data = snapshot.val(); machinesData = []; 
+        if (data) for (let key in data) machinesData.push({ id: key, name: data[key].name || 'Mesin Tanpa Nama', location: data[key].location || 'Lokasi Belum Diatur', stock: data[key].stock || 0, mapsLink: data[key].mapsLink || '#' });
         applyFilters(); 
-    }, (error) => {
-        container.innerHTML = '<p class="text-red-500 text-center py-4">Gagal terhubung ke database. Cek koneksi Anda.</p>';
-    });
-
-    searchInput.addEventListener('input', applyFilters);
-    filterSelect.addEventListener('change', applyFilters);
+    }, () => { container.innerHTML = '<p class="text-red-500 text-center py-4">Gagal terhubung ke database. Cek koneksi Anda.</p>'; });
+    searchInput.addEventListener('input', applyFilters); filterSelect.addEventListener('change', applyFilters);
 };
 
 const initDonationDashboard = () => {
     const totalEl = document.getElementById('total-donation-text');
     if(!totalEl) return; 
-    
     const formatIDR = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
-
-    let targetValue = 50000000; 
-    let collectedValue = 0;
-
+    let targetValue = 50000000; let collectedValue = 0;
     const updateProgressUI = () => {
         document.getElementById('target-donation-text').textContent = formatIDR(targetValue);
         totalEl.textContent = formatIDR(collectedValue);
@@ -158,50 +113,17 @@ const initDonationDashboard = () => {
         document.getElementById('progress-bar').style.width = `${percentage}%`; 
         document.getElementById('progress-percent').textContent = `${percentage}% Tercapai`;
     };
-
-    onValue(ref(db, 'settings/targetDonation'), (snapshot) => {
-        if(snapshot.exists()) targetValue = parseInt(snapshot.val());
-        updateProgressUI();
-    });
-
-    onValue(ref(db, 'donations'), (snapshot) => {
-        collectedValue = 0;
-        if(snapshot.exists()) {
-            snapshot.forEach(child => {
-                const data = child.val();
-                if(data.amount) collectedValue += parseInt(data.amount);
-            });
-        }
-        updateProgressUI();
-    });
-
+    onValue(ref(db, 'settings/targetDonation'), (snapshot) => { if(snapshot.exists()) targetValue = parseInt(snapshot.val()); updateProgressUI(); });
+    onValue(ref(db, 'donations'), (snapshot) => { collectedValue = 0; if(snapshot.exists()) snapshot.forEach(child => { if(child.val().amount) collectedValue += parseInt(child.val().amount); }); updateProgressUI(); });
     onValue(ref(db, 'expenses'), (snapshot) => {
-        const tbody = document.getElementById('expenses-table-body');
-        tbody.innerHTML = ''; 
-
-        if (!snapshot.exists()) {
-            tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-sm text-gray-500">Belum ada data pengeluaran tercatat.</td></tr>';
-            return;
-        }
-
-        const expensesArray = [];
-        snapshot.forEach(child => expensesArray.push(child.val()));
+        const tbody = document.getElementById('expenses-table-body'); tbody.innerHTML = ''; 
+        if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-sm text-gray-500">Belum ada data pengeluaran tercatat.</td></tr>'; return; }
+        const expensesArray = []; snapshot.forEach(child => expensesArray.push(child.val()));
         expensesArray.sort((a, b) => new Date(b.date) - new Date(a.date));
-
         expensesArray.forEach(exp => {
-            let badgeColor = 'bg-gray-100 text-gray-600';
-            if(exp.category === 'Pembelian Stok') badgeColor = 'bg-pink-100 text-primary';
-            if(exp.category === 'Maintenance') badgeColor = 'bg-orange-100 text-accent';
-            if(exp.category === 'Operasional') badgeColor = 'bg-blue-100 text-blue-600';
-
-            const tr = document.createElement('tr');
-            tr.className = 'border-b border-gray-50 hover:bg-gray-50 transition-colors';
-            tr.innerHTML = `
-                <td class="py-3 px-4 text-sm text-gray-500 whitespace-nowrap">${exp.date}</td>
-                <td class="py-3 px-4 text-sm"><span class="px-2 py-1 rounded text-xs font-semibold ${badgeColor}">${exp.category}</span></td>
-                <td class="py-3 px-4 text-sm text-gray-700">${exp.desc}</td>
-                <td class="py-3 px-4 text-sm font-bold text-dark text-right whitespace-nowrap">${formatIDR(exp.amount)}</td>
-            `;
+            let badgeColor = 'bg-gray-100 text-gray-600'; if(exp.category === 'Pembelian Stok') badgeColor = 'bg-pink-100 text-primary'; if(exp.category === 'Maintenance') badgeColor = 'bg-orange-100 text-accent'; if(exp.category === 'Operasional') badgeColor = 'bg-blue-100 text-blue-600';
+            const tr = document.createElement('tr'); tr.className = 'border-b border-gray-50 hover:bg-gray-50 transition-colors';
+            tr.innerHTML = `<td class="py-3 px-4 text-sm text-gray-500 whitespace-nowrap">${exp.date}</td><td class="py-3 px-4 text-sm"><span class="px-2 py-1 rounded text-xs font-semibold ${badgeColor}">${exp.category}</span></td><td class="py-3 px-4 text-sm text-gray-700">${exp.desc}</td><td class="py-3 px-4 text-sm font-bold text-dark text-right whitespace-nowrap">${formatIDR(exp.amount)}</td>`;
             tbody.appendChild(tr);
         });
     });
@@ -219,6 +141,18 @@ const initDynamicSettings = () => {
                 const qrisImg = document.getElementById('qris-img');
                 if (qrisImg) qrisImg.src = settings.qrisUrl;
             }
+            // Fitur Baru: Menampilkan Nomor Call Center
+            if (settings.callCenter) {
+                const callText = document.getElementById('call-center-text');
+                const callLink = document.getElementById('call-center-link');
+                if (callText) callText.textContent = settings.callCenter;
+                if (callLink) {
+                    // Cek jika nomor mulai dari 0, ubah ke 62 agar bisa buka WhatsApp/Telepon
+                    let parsedNum = settings.callCenter.replace(/\D/g,'');
+                    if(parsedNum.startsWith('0')) parsedNum = '62' + parsedNum.substring(1);
+                    callLink.href = `https://wa.me/${parsedNum}`;
+                }
+            }
         }
     });
 };
@@ -233,43 +167,29 @@ const initFormValidationAndSubmission = () => {
                 e.preventDefault(); 
                 const btn = form.querySelector('button[type="submit"]');
                 const originalText = btn.textContent;
-                btn.textContent = 'Mengirim...';
-                btn.disabled = true;
-                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                btn.textContent = 'Mengirim...'; btn.disabled = true; btn.classList.add('opacity-70', 'cursor-not-allowed');
 
                 try {
                     const dataToPush = getDataCallback();
                     dataToPush.timestamp = new Date().toISOString(); 
                     await push(ref(db, dbNode), dataToPush);
 
-                    successMsg.classList.remove('hidden');
-                    form.reset(); 
+                    successMsg.classList.remove('hidden'); form.reset(); 
                     setTimeout(() => { successMsg.classList.add('hidden'); }, 5000);
-                } catch (error) {
-                    alert("Terjadi kesalahan saat menghubungi server.");
-                } finally {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
-                }
+                } catch (error) { alert("Terjadi kesalahan saat menghubungi server.");
+                } finally { btn.textContent = originalText; btn.disabled = false; btn.classList.remove('opacity-70', 'cursor-not-allowed'); }
             });
         }
     };
 
-    handleFormSubmit('donation-form', 'donasi-success', 'donations', () => ({
-        name: document.getElementById('donator-name').value || 'Anonim',
-        amount: document.getElementById('donation-amount').value
-    }));
-
-    handleFormSubmit('volunteer-form', 'volunteer-success', 'volunteers', () => ({
-        name: document.getElementById('vol-name').value,
-        email: document.getElementById('vol-email').value,
-        role: document.getElementById('vol-role').value
-    }));
-
-    handleFormSubmit('contact-form', 'contact-success', 'messages', () => ({
-        name: document.getElementById('contact-name').value,
-        email: document.getElementById('contact-email').value,
-        message: document.getElementById('contact-message').value
+    handleFormSubmit('donation-form', 'donasi-success', 'donations', () => ({ name: document.getElementById('donator-name').value || 'Anonim', amount: document.getElementById('donation-amount').value }));
+    handleFormSubmit('volunteer-form', 'volunteer-success', 'volunteers', () => ({ name: document.getElementById('vol-name').value, email: document.getElementById('vol-email').value, role: document.getElementById('vol-role').value }));
+    handleFormSubmit('contact-form', 'contact-success', 'messages', () => ({ name: document.getElementById('contact-name').value, email: document.getElementById('contact-email').value, message: document.getElementById('contact-message').value }));
+    
+    // Fitur Baru: Mengirim Form Penilaian/Feedback Mesin
+    handleFormSubmit('feedback-form', 'feedback-success', 'feedbacks', () => ({
+        name: document.getElementById('fb-name').value || 'Pengguna Anonim',
+        rating: document.getElementById('fb-rating').value,
+        message: document.getElementById('fb-message').value
     }));
 };
