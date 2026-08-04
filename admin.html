@@ -18,9 +18,9 @@
                 <p class="text-gray-500 text-sm">Masuk untuk mengelola sistem</p>
             </div>
             <form id="login-form" class="space-y-4">
-                <input type="email" id="login-email" placeholder="Email Admin" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300" required>
-                <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300" required>
-                <button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 rounded-xl hover:bg-pink-600 transition-colors">Masuk</button>
+                <input type="email" id="login-email" placeholder="Email Admin" class="w-full px-4 py-3 rounded-xl border border-gray-200" required>
+                <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-3 rounded-xl border border-gray-200" required>
+                <button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 rounded-xl hover:bg-pink-600">Masuk</button>
                 <p id="login-error" class="text-red-500 text-sm text-center hidden"></p>
             </form>
         </div>
@@ -29,11 +29,12 @@
     <!-- MAIN DASHBOARD -->
     <div id="dashboard-screen" class="hidden w-full flex flex-col md:flex-row h-full">
         <!-- Sidebar -->
-        <aside class="w-full md:w-64 bg-gray-900 text-white p-6 flex flex-col">
+        <aside class="w-full md:w-64 bg-gray-900 text-white p-6 flex flex-col overflow-y-auto">
             <h2 class="text-2xl font-bold text-pink-400 mb-8">Admin Panel</h2>
-            <nav class="space-y-4 flex-1">
+            <nav class="space-y-3 flex-1">
                 <button onclick="switchTab('settings')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 font-medium">⚙️ Pengaturan Web</button>
                 <button onclick="switchTab('donations')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">💖 Kelola Donasi</button>
+                <button onclick="switchTab('feedbacks')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">⭐ Penilaian Mesin</button>
                 <button onclick="switchTab('messages')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">📧 Pesan Masuk</button>
                 <button onclick="switchTab('volunteers')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">🤝 Data Relawan</button>
             </nav>
@@ -47,108 +48,95 @@
             <!-- TAB: Settings -->
             <div id="tab-settings" class="tab-content">
                 <h3 class="text-2xl font-bold mb-6">Pengaturan Tampilan Publik</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Update Call Center -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+                        <h4 class="font-bold mb-4">📞 Nomor WhatsApp / Call Center</h4>
+                        <form id="callcenter-form" class="flex gap-4">
+                            <input type="text" id="callcenter-input" class="flex-1 px-4 py-2 rounded-xl border border-gray-200" placeholder="Contoh: 081234567890" required>
+                            <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded-lg text-sm font-bold">Simpan Nomor</button>
+                        </form>
+                    </div>
+
                     <!-- Update Maps -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <h4 class="font-bold mb-4">📍 Link Google Maps (Live Tracker)</h4>
                         <form id="maps-form" class="space-y-4">
-                            <label class="text-xs text-gray-500">Masukkan Link Embed Maps (src) / URL Biasa</label>
                             <input type="text" id="maps-input" class="w-full px-4 py-2 rounded-xl border border-gray-200" placeholder="https://www.google.com/maps/embed?..." required>
-                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold">Perbarui Maps</button>
+                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">Perbarui Maps</button>
                         </form>
                     </div>
 
                     <!-- Update QRIS -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <h4 class="font-bold mb-4">💳 Upload Foto QRIS Baru</h4>
-                        <form id="qris-form" class="space-y-4">
-                            <input type="file" id="qris-input" accept="image/*" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
+                        <form id="qris-form" class="space-y-3">
+                            <input type="file" id="qris-input" accept="image/*" class="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm" required>
                             <input type="text" id="cloud-name" placeholder="Cloud Name (Cloudinary)" class="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm" required>
                             <input type="text" id="upload-preset" placeholder="Upload Preset (Unsigned)" class="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm" required>
-                            <button type="submit" id="qris-btn" class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">Upload & Perbarui QRIS</button>
+                            <button type="submit" id="qris-btn" class="bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">Upload & Perbarui QRIS</button>
                             <p id="qris-status" class="text-xs font-bold text-center"></p>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB: Donations & Expenses (DIPERBARUI) -->
+            <!-- TAB: Feedbacks (BARU) -->
+            <div id="tab-feedbacks" class="tab-content hidden">
+                <h3 class="text-2xl font-bold mb-6">Ulasan & Penilaian Pengguna</h3>
+                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 border-b">
+                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama</th><th class="p-4 text-sm">Bintang</th><th class="p-4 text-sm">Pesan / Masukan</th></tr>
+                        </thead>
+                        <tbody id="table-feedbacks" class="divide-y divide-gray-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: Donations & Expenses -->
             <div id="tab-donations" class="tab-content hidden">
                 <h3 class="text-2xl font-bold mb-6">Kelola Dana & Donasi</h3>
-                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                    <!-- Set Target Donasi -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <h4 class="font-bold mb-4">🎯 Set Target Donasi</h4>
                         <form id="target-form" class="space-y-4">
-                            <label class="text-xs text-gray-500">Angka akan muncul di progress bar halaman utama.</label>
                             <input type="number" id="target-input" class="w-full px-4 py-2 rounded-xl border border-gray-200" placeholder="Contoh: 50000000" required>
                             <button type="submit" class="bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">Update Target</button>
                         </form>
                     </div>
-
-                    <!-- Input Pengeluaran Baru -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
                         <h4 class="font-bold mb-4">💸 Catat Pengeluaran Baru</h4>
                         <form id="expense-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input type="date" id="exp-date" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
                             <select id="exp-category" class="w-full px-4 py-2 rounded-xl border border-gray-200" required>
-                                <option value="" disabled selected>Pilih Kategori</option>
-                                <option value="Pembelian Stok">Pembelian Stok</option>
-                                <option value="Maintenance">Maintenance</option>
-                                <option value="Operasional">Operasional</option>
+                                <option value="" disabled selected>Pilih Kategori</option><option value="Pembelian Stok">Pembelian Stok</option><option value="Maintenance">Maintenance</option><option value="Operasional">Operasional</option>
                             </select>
-                            <input type="text" id="exp-desc" placeholder="Deskripsi Pengeluaran (Cth: Beli 10 Karton Softex)" class="w-full px-4 py-2 rounded-xl border border-gray-200 md:col-span-2" required>
+                            <input type="text" id="exp-desc" placeholder="Deskripsi Pengeluaran" class="w-full px-4 py-2 rounded-xl border border-gray-200 md:col-span-2" required>
                             <input type="number" id="exp-amount" placeholder="Nominal Pengeluaran (Rp)" class="w-full px-4 py-2 rounded-xl border border-gray-200 md:col-span-2" required>
-                            <button type="submit" id="exp-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold md:col-span-2">Catat ke Laporan Publik</button>
+                            <button type="submit" id="exp-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold md:col-span-2">Catat ke Laporan</button>
                         </form>
                     </div>
                 </div>
-
-                <h3 class="text-xl font-bold mb-4">Riwayat Donasi Masuk (Dari Formulir Web)</h3>
-                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 border-b">
-                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama Donatur</th><th class="p-4 text-sm text-right">Nominal Konfirmasi (Rp)</th></tr>
-                        </thead>
-                        <tbody id="table-donations" class="divide-y divide-gray-100 text-sm"></tbody>
-                    </table>
-                </div>
+                <h3 class="text-xl font-bold mb-4">Riwayat Donasi Masuk</h3>
+                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 border-b"><tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama Donatur</th><th class="p-4 text-sm text-right">Nominal (Rp)</th></tr></thead><tbody id="table-donations" class="divide-y divide-gray-100 text-sm"></tbody></table></div>
             </div>
 
             <!-- TAB: Messages -->
-            <div id="tab-messages" class="tab-content hidden">
-                <h3 class="text-2xl font-bold mb-6">Pesan Masuk & Tawaran Kolaborasi</h3>
-                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 border-b">
-                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama/Instansi</th><th class="p-4 text-sm">Email</th><th class="p-4 text-sm">Pesan</th></tr>
-                        </thead>
-                        <tbody id="table-messages" class="divide-y divide-gray-100 text-sm"></tbody>
-                    </table>
-                </div>
-            </div>
+            <div id="tab-messages" class="tab-content hidden"><h3 class="text-2xl font-bold mb-6">Pesan Kolaborasi</h3><div class="bg-white rounded-2xl shadow-sm overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 border-b"><tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Instansi</th><th class="p-4 text-sm">Email</th><th class="p-4 text-sm">Pesan</th></tr></thead><tbody id="table-messages" class="divide-y divide-gray-100 text-sm"></tbody></table></div></div>
 
             <!-- TAB: Volunteers -->
-            <div id="tab-volunteers" class="tab-content hidden">
-                <h3 class="text-2xl font-bold mb-6">Pendaftar Relawan</h3>
-                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 border-b">
-                            <tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama Lengkap</th><th class="p-4 text-sm">Email</th><th class="p-4 text-sm">Peran Diminati</th></tr>
-                        </thead>
-                        <tbody id="table-volunteers" class="divide-y divide-gray-100 text-sm"></tbody>
-                    </table>
-                </div>
-            </div>
+            <div id="tab-volunteers" class="tab-content hidden"><h3 class="text-2xl font-bold mb-6">Pendaftar Relawan</h3><div class="bg-white rounded-2xl shadow-sm overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 border-b"><tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama</th><th class="p-4 text-sm">Email</th><th class="p-4 text-sm">Peran</th></tr></thead><tbody id="table-volunteers" class="divide-y divide-gray-100 text-sm"></tbody></table></div></div>
         </main>
     </div>
 
-    <!-- UI Tab Switcher Logic -->
     <script>
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
+            // Ganti warna tombol aktif
+            document.querySelectorAll('aside button').forEach(btn => btn.classList.remove('bg-gray-800'));
+            event.currentTarget.classList.add('bg-gray-800');
         }
     </script>
     <script type="module" src="assets/js/admin.js"></script>
