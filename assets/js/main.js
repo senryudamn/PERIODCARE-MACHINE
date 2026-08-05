@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Fitur: Mesin Interaktif, Fisika Super Natural, Cooldown Darurat, IoT Tracker
+ * Fitur: Mesin Interaktif, Fisika Lemparan Natural, Cooldown Darurat, IoT Tracker
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -18,8 +18,7 @@ let visualMachine = {
 };
 
 let activePads = []; 
-// Physics ditingkatkan: Pembalut meluncur lebih licin (friction diubah), pantulan lebih pas (bounce).
-const physics = { gravity: 0.8, friction: 0.98, bounce: 0.35 };
+const physics = { gravity: 0.6, friction: 0.96, bounce: 0.35 };
 
 document.addEventListener('DOMContentLoaded', async () => {
     const loader = document.getElementById('loader');
@@ -40,6 +39,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         initNavigation(); initScrollAnimation(); initFirebaseLiveTracker(); initDonationDashboard(); initDynamicSettings(); initFormValidationAndSubmission(); 
     } catch (error) { console.error("Firebase API Error"); }
 });
+
+/* =======================================================
+   MODUL MESIN INTERAKTIF & PHYSICS (DRAG, DROP, GRAVITY)
+   ======================================================= */
 
 function renderPhysicalStacks() {
     const stackReg = document.getElementById('stack-regular'); const stackMax = document.getElementById('stack-maxi');
@@ -81,7 +84,6 @@ function dispensePad(type) {
     setTimeout(() => {
         if(type === 'reguler') visualMachine.stockReguler--; else visualMachine.stockMaxi--;
         renderPhysicalStacks(); updatePhysicalScreen();
-        
         spawnDraggablePad(type); 
 
         visualMachine.isProcessing = false;
@@ -154,8 +156,8 @@ function spawnDraggablePad(type) {
         const pageX = e.touches ? e.touches[0].pageX : e.pageX;
         const pageY = e.touches ? e.touches[0].pageY : e.pageY;
         
-        padObj.vx = (pageX - lastX) * 0.8; 
-        padObj.vy = (pageY - lastY) * 0.8;
+        padObj.vx = (pageX - lastX) * 0.6; 
+        padObj.vy = (pageY - lastY) * 0.6;
         
         padObj.x = pageX - offsetX; 
         padObj.y = pageY - offsetY;
@@ -170,7 +172,6 @@ function spawnDraggablePad(type) {
         if(!padObj.isDragging) return;
         padObj.isDragging = false;
         pad.classList.remove('cursor-grabbing', 'scale-110'); pad.classList.add('cursor-grab');
-        
         padObj.vr = padObj.vx * 0.5;
 
         window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp);
@@ -195,7 +196,8 @@ function spawnDraggablePad(type) {
         offsetY = pageY - padObj.y;
         
         window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchend', onUp);
+        window.addEventListener('touchmove', onMove, {passive: false}); 
+        window.addEventListener('touchend', onUp);
     };
 
     pad.addEventListener('pointerdown', onDown);
@@ -204,18 +206,18 @@ function spawnDraggablePad(type) {
 
 function checkDonationDrop(padObj) {
     const dropZones = document.querySelectorAll('.drop-zone');
-    let padCenterX = padObj.x + padObj.w/2;
-    let padCenterY = padObj.y + padObj.h/2 - window.scrollY; 
+    let padViewportX = padObj.x + padObj.w/2 - window.scrollX;
+    let padViewportY = padObj.y + padObj.h/2 - window.scrollY; 
 
     for (let zone of dropZones) {
         let zRect = zone.getBoundingClientRect();
         
-        if (padCenterX > zRect.left && padCenterX < zRect.right && padCenterY > zRect.top && padCenterY < zRect.bottom) {
+        if (padViewportX > zRect.left && padViewportX < zRect.right && padViewportY > zRect.top && padViewportY < zRect.bottom) {
             let slotType = zone.getAttribute('data-type');
             
             if (slotType !== padObj.type) {
                 padObj.el.style.backgroundColor = '#fecaca'; 
-                padObj.vy = -10; padObj.vx = (Math.random() - 0.5) * 15; 
+                padObj.vy = -12; padObj.vx = (Math.random() - 0.5) * 15; 
                 setTimeout(() => padObj.el.style.backgroundColor = '', 500);
                 return;
             }
@@ -255,11 +257,12 @@ function physicsLoop() {
         pad.y += pad.vy;
         pad.rotation += pad.vr;
 
+        // Pengecekan Batas Layar Horizontal
         if (pad.x < 0) { pad.x = 0; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
-        let docWidth = document.documentElement.scrollWidth;
-        if (pad.x + pad.w > docWidth) { pad.x = docWidth - pad.w; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
+        // PERBAIKAN: Gunakan window.innerWidth agar tidak overflow ke kanan
+        if (pad.x + pad.w > window.innerWidth) { pad.x = window.innerWidth - pad.w; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
 
-        let docHeight = document.documentElement.scrollHeight;
+        let docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
         if (pad.y + pad.h > docHeight) {
             pad.y = docHeight - pad.h;
             pad.vy *= -physics.bounce;
@@ -295,6 +298,9 @@ function physicsLoop() {
     requestAnimationFrame(physicsLoop);
 }
 
+/* =======================================================
+   KODE LAMA (TRACKER IOT ASLI, NAVIGASI, DASHBOARD, DLL)
+   ======================================================= */
 const initNavigation = () => {
     const mobileMenuBtn = document.getElementById('mobile-menu-btn'); const mobileMenu = document.getElementById('mobile-menu'); const navbar = document.getElementById('navbar');
     if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
