@@ -57,16 +57,16 @@
             }
             .animate-swipe-cursor { animation: swipe-up-cursor 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
 
-            /* FISIKA JATUH (PENGAMBILAN) - SIDE VIEW */
+            /* FISIKA JATUH (PENGAMBILAN) - SIDE VIEW (DIPERBAIKI) */
             @keyframes side-push-drop {
                 0%   { transform: translate(0px, 0px) rotate(0deg); opacity: 1; }
-                15%  { transform: translate(-45px, 0px) rotate(0deg); opacity: 1; } 
-                30%  { transform: translate(-55px, 10px) rotate(-15deg); opacity: 1; } 
-                60%  { transform: translate(-55px, 80px) rotate(-15deg); opacity: 1; } 
-                80%  { transform: translate(-70px, 100px) rotate(-15deg); opacity: 1; } 
-                100% { transform: translate(-95px, 110px) rotate(-15deg); opacity: 0; } 
+                15%  { transform: translate(-45px, 0px) rotate(0deg); opacity: 1; }  /* Didorong pendorong */
+                30%  { transform: translate(-55px, 10px) rotate(-15deg); opacity: 1; } /* Ujung lorong */
+                60%  { transform: translate(-55px, 80px) rotate(-15deg); opacity: 1; } /* Terjun vertikal */
+                80%  { transform: translate(-70px, 100px) rotate(-25deg); opacity: 1; } /* Menghantam ramp */
+                100% { transform: translate(-100px, 115px) rotate(-25deg); opacity: 0; } /* Meluncur keluar */
             }
-            .animate-side-push-drop { animation: side-push-drop 0.8s cubic-bezier(0.4, 0, 1, 1) forwards; }
+            .animate-side-push-drop { animation: side-push-drop 0.9s cubic-bezier(0.3, 0, 0.8, 1) forwards; } /* Transisi kurva diperhalus */
 
             /* FISIKA JATUH (DONASI MASUK) - SIDE VIEW */
             @keyframes side-donate-drop {
@@ -150,13 +150,10 @@
                         
                         <!-- Kabel Data IoT Penghubung antar Mesin -->
                         <svg class="absolute top-[180px] left-[150px] w-[200px] h-[100px] pointer-events-none z-0 hidden sm:block" viewBox="0 0 200 100" fill="none">
-                            <!-- Kabel Background -->
                             <path d="M 40,80 C 100,80 120,20 180,20" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
-                            <!-- Kabel Animasi Data Flow -->
                             <path d="M 40,80 C 100,80 120,20 180,20" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" class="animate-data-flow"/>
                         </svg>
 
-                        <!-- Label Sistem -->
                         <div class="absolute top-4 left-6 text-xs font-mono font-bold text-gray-400 tracking-widest hidden sm:block">SYSTEM_SCHEMATIC_V2</div>
 
                         <!-- 1. MESIN TAMPILAN DEPAN (FRONT VIEW) -->
@@ -254,12 +251,12 @@
                             <!-- Saluran Donasi Masuk (Top Chute) -->
                             <div class="absolute top-0 right-[40px] w-14 h-[40px] bg-gray-800/80 border-x-4 border-gray-700 z-0"></div>
                             
-                            <!-- Animasi Donasi Jatuh (Disembunyikan default) -->
+                            <!-- Animasi Donasi Jatuh -->
                             <div id="side-donate-pad" class="w-12 h-[6px] bg-pink-100 rounded-[1px] shadow border border-pink-300 absolute top-[30px] right-[44px] z-30 opacity-0 pointer-events-none"></div>
 
-                            <!-- Tempat Isi Ulang (Tumpukan Pembalut) -->
-                            <div id="stack-side-container" class="absolute bottom-[140px] right-[40px] w-14 h-[240px] bg-gray-900/70 border-4 border-gray-700 border-b-0 rounded-t-xl flex flex-col-reverse items-center pb-[1px] gap-[2px] z-10 overflow-hidden shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)]">
-                                <div id="stack-side" class="w-full flex flex-col-reverse items-center gap-[2px]"></div>
+                            <!-- PERBAIKAN: Tempat Isi Ulang (Tumpukan Pembalut) -->
+                            <div class="absolute bottom-[140px] right-[40px] w-14 h-[240px] bg-gray-900/70 border-4 border-gray-700 border-b-0 rounded-t-xl flex flex-col-reverse items-center pb-[1px] gap-[2px] z-10 overflow-hidden shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)]" id="stack-side">
+                                <!-- ID dipindah ke sini agar JS bisa mengenali pembungkus utama -->
                             </div>
 
                             <!-- Tempat Mekanisme Pendorong -->
@@ -290,7 +287,7 @@
             </div>
         </section>
 
-        <!-- SISA KODE WEBSITE (About, Locations, FAQ, Donate, Footer) -->
+        <!-- About Section -->
         <section id="about" class="bg-white py-20 border-t border-gray-100">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-10 scroll-animate opacity-0 translate-y-10">
@@ -301,6 +298,7 @@
             </div>
         </section>
 
+        <!-- Locations & Tracker -->
         <section id="locations" class="py-20 bg-light border-t border-gray-200">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
