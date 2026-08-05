@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Fitur: Mesin Interaktif, Fisika Lemparan Natural, Cooldown Darurat, IoT Tracker
+ * Fitur: Mesin Interaktif, Fisika Super Natural, Cooldown Darurat, IoT Tracker
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -18,7 +18,9 @@ let visualMachine = {
 };
 
 let activePads = []; 
-const physics = { gravity: 0.6, friction: 0.96, bounce: 0.35 };
+let hintTimeout; // Variabel untuk kontrol durasi animasi tangan
+
+const physics = { gravity: 0.8, friction: 0.98, bounce: 0.35 };
 
 document.addEventListener('DOMContentLoaded', async () => {
     const loader = document.getElementById('loader');
@@ -39,6 +41,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         initNavigation(); initScrollAnimation(); initFirebaseLiveTracker(); initDonationDashboard(); initDynamicSettings(); initFormValidationAndSubmission(); 
     } catch (error) { console.error("Firebase API Error"); }
 });
+
+/* =======================================================
+   ANIMASI TUTORIAL DRAG (HAND POINTER)
+   ======================================================= */
+function showDragHint() {
+    const hint = document.getElementById('drag-hint-wrapper');
+    const icon = document.getElementById('drag-hint-icon');
+    if(hint && icon) {
+        hint.classList.remove('hidden');
+        icon.classList.add('animate-swipe-hand');
+        clearTimeout(hintTimeout);
+        // Sembunyikan otomatis setelah 8 detik (4 kali pengulangan gerakan)
+        hintTimeout = setTimeout(() => {
+            hint.classList.add('hidden');
+            icon.classList.remove('animate-swipe-hand');
+        }, 8000); 
+    }
+}
+
+function hideDragHint() {
+    const hint = document.getElementById('drag-hint-wrapper');
+    const icon = document.getElementById('drag-hint-icon');
+    if(hint && icon) {
+        hint.classList.add('hidden');
+        icon.classList.remove('animate-swipe-hand');
+        clearTimeout(hintTimeout);
+    }
+}
 
 /* =======================================================
    MODUL MESIN INTERAKTIF & PHYSICS (DRAG, DROP, GRAVITY)
@@ -84,7 +114,11 @@ function dispensePad(type) {
     setTimeout(() => {
         if(type === 'reguler') visualMachine.stockReguler--; else visualMachine.stockMaxi--;
         renderPhysicalStacks(); updatePhysicalScreen();
+        
         spawnDraggablePad(type); 
+        
+        // Munculkan animasi tangan setelah pad selesai jatuh (600ms kemudian)
+        setTimeout(showDragHint, 600);
 
         visualMachine.isProcessing = false;
         visualMachine.isOnCooldown = true;
@@ -156,8 +190,8 @@ function spawnDraggablePad(type) {
         const pageX = e.touches ? e.touches[0].pageX : e.pageX;
         const pageY = e.touches ? e.touches[0].pageY : e.pageY;
         
-        padObj.vx = (pageX - lastX) * 0.6; 
-        padObj.vy = (pageY - lastY) * 0.6;
+        padObj.vx = (pageX - lastX) * 0.8; 
+        padObj.vy = (pageY - lastY) * 0.8;
         
         padObj.x = pageX - offsetX; 
         padObj.y = pageY - offsetY;
@@ -172,6 +206,7 @@ function spawnDraggablePad(type) {
         if(!padObj.isDragging) return;
         padObj.isDragging = false;
         pad.classList.remove('cursor-grabbing', 'scale-110'); pad.classList.add('cursor-grab');
+        
         padObj.vr = padObj.vx * 0.5;
 
         window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp);
@@ -182,6 +217,10 @@ function spawnDraggablePad(type) {
 
     const onDown = (e) => {
         e.preventDefault();
+        
+        // HILANGKAN ANIMASI TANGAN BEGITU USER MENYENTUH PEMBALUT
+        hideDragHint();
+
         padObj.isDragging = true;
         padObj.isResting = false; 
         padObj.vx = 0; padObj.vy = 0; padObj.vr = 0;
@@ -196,8 +235,7 @@ function spawnDraggablePad(type) {
         offsetY = pageY - padObj.y;
         
         window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-        window.addEventListener('touchmove', onMove, {passive: false}); 
-        window.addEventListener('touchend', onUp);
+        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchend', onUp);
     };
 
     pad.addEventListener('pointerdown', onDown);
@@ -259,7 +297,6 @@ function physicsLoop() {
 
         // Pengecekan Batas Layar Horizontal
         if (pad.x < 0) { pad.x = 0; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
-        // PERBAIKAN: Gunakan window.innerWidth agar tidak overflow ke kanan
         if (pad.x + pad.w > window.innerWidth) { pad.x = window.innerWidth - pad.w; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
 
         let docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
