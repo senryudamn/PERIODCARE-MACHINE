@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Fitur: Mesin Interaktif, Panel Skematik, ESP32 IoT, Smooth Physics, Sinkronisasi Donasi Samping
+ * Fitur: Mesin Interaktif, Skematik 3-Panel, Real Physics, Sinkronisasi Donasi Kanan-Kiri
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -13,7 +13,6 @@ let visualMachine = {
     stockReguler: 12, 
     stockMaxi: 12, 
     maxPerStack: 24, 
-    sideStock: 24, 
     isProcessing: false,
     isOnCooldown: false 
 };
@@ -21,14 +20,12 @@ let visualMachine = {
 let activePads = []; 
 let hintTimeout; 
 
-// Physics Sangat Mulus: Gravitasi pas, Pantulan (Bounce) dikurangi sedikit agar tidak lompat-loncat aneh
 const physics = { gravity: 0.85, friction: 0.95, bounce: 0.30 };
 
 document.addEventListener('DOMContentLoaded', async () => {
     const loader = document.getElementById('loader');
     if (loader) setTimeout(() => { loader.classList.add('opacity-0'); setTimeout(() => { loader.style.display = 'none'; }, 500); }, 500); 
 
-    visualMachine.sideStock = visualMachine.stockReguler + visualMachine.stockMaxi; 
     renderPhysicalStacks(); updatePhysicalScreen();
     requestAnimationFrame(physicsLoop); 
 
@@ -73,30 +70,46 @@ function hideDragHint() {
 }
 
 /* =======================================================
-   MODUL MESIN INTERAKTIF & PHYSICS (DRAG, DROP, GRAVITY)
+   MODUL MESIN INTERAKTIF & SINKRONISASI TIGA PANEL
    ======================================================= */
 
 function renderPhysicalStacks() {
+    // 1. Tumpukan Mesin Utama (Tengah)
     const stackReg = document.getElementById('stack-regular'); 
     const stackMax = document.getElementById('stack-maxi');
-    const stackSide = document.getElementById('stack-side'); 
-    
     if(stackReg && stackMax) {
         stackReg.innerHTML = '<div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1 z-10">REGULER</div>';
         stackMax.innerHTML = '<div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1 z-10">MAXI</div>';
-        for(let i = 0; i < visualMachine.stockReguler; i++) stackReg.innerHTML += `<div class="w-[80%] h-[7px] bg-pink-100 rounded-sm border border-pink-200 pad-item shadow-sm z-0 transition-all duration-300"></div>`;
-        for(let i = 0; i < visualMachine.stockMaxi; i++) stackMax.innerHTML += `<div class="w-[90%] h-[7px] bg-orange-100 rounded-sm border border-orange-200 pad-item shadow-sm z-0 transition-all duration-300"></div>`;
+        for(let i = 0; i < visualMachine.stockReguler; i++) stackReg.innerHTML += `<div class="w-[80%] h-[7px] bg-pink-100 rounded-[1px] border border-pink-300 pad-item shadow-sm z-0 transition-all duration-300"></div>`;
+        for(let i = 0; i < visualMachine.stockMaxi; i++) stackMax.innerHTML += `<div class="w-[90%] h-[7px] bg-orange-100 rounded-[1px] border border-orange-300 pad-item shadow-sm z-0 transition-all duration-300"></div>`;
     }
 
-    if(stackSide) {
-        stackSide.innerHTML = '';
-        let sideVisualCount = Math.ceil(visualMachine.sideStock / 2); 
-        // Batasi tinggi tumpukan agar tidak melebihi kotak kaca (max 38 lapis)
-        if(sideVisualCount > 38) sideVisualCount = 38; 
+    // Batasan visual agar tumpukan samping tidak menembus atap (Max 36 lapis)
+    let regVisualCount = Math.min(visualMachine.stockReguler, 36);
+    let maxiVisualCount = Math.min(visualMachine.stockMaxi, 36);
 
-        for(let i = 0; i < sideVisualCount; i++) {
-            stackSide.innerHTML += `<div class="w-[85%] h-[6px] bg-white/60 rounded-[1px] border border-white/30 shadow-[0_1px_2px_rgba(0,0,0,0.5)] z-0 shrink-0 transition-all duration-300"></div>`;
-        }
+    // 2. Tumpukan Mesin Kiri (Reguler Depan, Maxi Belakang Blur)
+    const stackLeftFrontReg = document.getElementById('stack-left-front-reg');
+    const stackLeftBackMaxi = document.getElementById('stack-left-back-maxi');
+    if(stackLeftFrontReg) {
+        stackLeftFrontReg.innerHTML = '';
+        for(let i=0; i<regVisualCount; i++) stackLeftFrontReg.innerHTML += `<div class="w-[85%] h-[6px] bg-pink-200 rounded-[1px] border border-pink-400 shadow-[0_1px_2px_rgba(0,0,0,0.5)] shrink-0 transition-all duration-300"></div>`;
+    }
+    if(stackLeftBackMaxi) {
+        stackLeftBackMaxi.innerHTML = '';
+        for(let i=0; i<maxiVisualCount; i++) stackLeftBackMaxi.innerHTML += `<div class="w-[85%] h-[6px] bg-orange-300/40 rounded-[1px] border border-orange-400/40 shadow-sm shrink-0 transition-all duration-300"></div>`;
+    }
+
+    // 3. Tumpukan Mesin Kanan (Maxi Depan, Reguler Belakang Blur)
+    const stackRightFrontMaxi = document.getElementById('stack-right-front-maxi');
+    const stackRightBackReg = document.getElementById('stack-right-back-reg');
+    if(stackRightFrontMaxi) {
+        stackRightFrontMaxi.innerHTML = '';
+        for(let i=0; i<maxiVisualCount; i++) stackRightFrontMaxi.innerHTML += `<div class="w-[85%] h-[6px] bg-orange-200 rounded-[1px] border border-orange-400 shadow-[0_1px_2px_rgba(0,0,0,0.5)] shrink-0 transition-all duration-300"></div>`;
+    }
+    if(stackRightBackReg) {
+        stackRightBackReg.innerHTML = '';
+        for(let i=0; i<regVisualCount; i++) stackRightBackReg.innerHTML += `<div class="w-[85%] h-[6px] bg-pink-300/40 rounded-[1px] border border-pink-400/40 shadow-sm shrink-0 transition-all duration-300"></div>`;
     }
 }
 
@@ -128,35 +141,40 @@ function dispensePad(type) {
     document.getElementById('btn-reguler').disabled = true; document.getElementById('btn-maxi').disabled = true;
     setMachineBusy(true, "MEMPROSES...", "yellow");
 
-    // ANIMASI LENGAN PENDORONG (SERVO)
-    const arm = document.getElementById('pusher-arm');
+    const isReg = type === 'reguler';
+
+    // ANIMASI LENGAN PENDORONG (Pilih Kiri atau Kanan)
+    const armId = isReg ? 'pusher-arm-left' : 'pusher-arm-right';
+    const arm = document.getElementById(armId);
     if(arm) {
         arm.style.transform = 'scaleX(1.8)'; 
         setTimeout(() => { arm.style.transform = 'scaleX(1)'; }, 200); 
     }
 
-    // KURANGI STOK VISUAL LANGSUNG
-    if(type === 'reguler') visualMachine.stockReguler--; else visualMachine.stockMaxi--;
-    visualMachine.sideStock--;
+    // KURANGI STOK VISUAL LANGSUNG SEMUA PANEL
+    if(isReg) visualMachine.stockReguler--; else visualMachine.stockMaxi--;
     renderPhysicalStacks(); updatePhysicalScreen();
 
     // ANIMASI JATUH TAMPILAN SAMPING
-    const sidePad = document.getElementById('side-drop-pad');
+    const sidePadId = isReg ? 'side-drop-pad-left' : 'side-drop-pad-right';
+    const sidePad = document.getElementById(sidePadId);
+
     if(sidePad) {
-        const isReg = type === 'reguler';
-        sidePad.className = `w-12 h-[6px] rounded-[1px] shadow border absolute bottom-[144px] right-[44px] z-30 pointer-events-none opacity-100 ${isReg ? 'bg-pink-100 border-pink-300' : 'bg-orange-100 border-orange-300'}`;
+        sidePad.className = `w-12 h-[6px] rounded-[1px] shadow border absolute bottom-[144px] right-[44px] z-30 pointer-events-none opacity-100 ${isReg ? 'bg-pink-200 border-pink-400' : 'bg-orange-200 border-orange-400'}`;
         
-        // Pancing reflow browser agar animasi css berulang sempurna
-        void sidePad.offsetWidth;
+        void sidePad.offsetWidth; // Reflow browser
         sidePad.classList.add('animate-side-push-drop'); 
         
+        // Tunggu animasi jatuh samping selesai (800ms)
         setTimeout(() => {
             sidePad.classList.remove('animate-side-push-drop');
             sidePad.style.opacity = '0'; 
             
+            // SETELAH SAMPAI BAWAH, MUNCULKAN DI KOTAK MESIN TENGAH
             spawnDraggablePad(type); 
             setTimeout(showDragHint, 600);
 
+            // Kunci Darurat (Cooldown)
             visualMachine.isProcessing = false;
             visualMachine.isOnCooldown = true;
             setMachineBusy(true, "TUNGGU 5 DETIK", "red"); 
@@ -210,7 +228,6 @@ function spawnDraggablePad(type) {
     };
     activePads.push(padObj);
 
-    // Animasi jatuh awal menggunakan CSS transform untuk kehalusan maksimal
     requestAnimationFrame(() => {
         pad.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
         pad.style.transform = `translate(${startX}px, ${targetY}px)`;
@@ -287,7 +304,6 @@ function checkDonationDrop(padObj) {
     for (let zone of dropZones) {
         let zRect = zone.getBoundingClientRect();
         
-        // Pengecekan Area (Collision)
         if (padViewportX > zRect.left && padViewportX < zRect.right && padViewportY > zRect.top && padViewportY < zRect.bottom) {
             let slotType = zone.getAttribute('data-type');
             
@@ -303,7 +319,9 @@ function checkDonationDrop(padObj) {
                 alert('Rak Donasi di dalam mesin sudah penuh!'); return;
             }
 
-            // Hapus pad yang diseret (Animasi Tersedot di Mesin Depan)
+            const isReg = slotType === 'reguler';
+
+            // Sedot masuk di mesin depan
             activePads = activePads.filter(p => p !== padObj);
             padObj.el.style.transition = 'all 0.5s ease-in';
             padObj.el.style.transform = `translate(${zRect.left + window.scrollX}px, ${zRect.top + window.scrollY + 20}px) scale(0) rotate(90deg)`;
@@ -311,17 +329,17 @@ function checkDonationDrop(padObj) {
             
             setMachineBusy(true, "MENERIMA DONASI...", "pink");
 
-            // JALANKAN ANIMASI JATUH DI SIDE VIEW (DONASI)
-            const sideDonatePad = document.getElementById('side-donate-pad');
+            // JALANKAN ANIMASI JATUH DI SIDE VIEW KIRI/KANAN (DONASI MASUK)
+            const sideDonatePadId = isReg ? 'side-donate-pad-left' : 'side-donate-pad-right';
+            const sideDonatePad = document.getElementById(sideDonatePadId);
+
             if(sideDonatePad) {
-                const isReg = slotType === 'reguler';
-                sideDonatePad.className = `w-12 h-[6px] rounded-[1px] shadow border absolute top-[30px] right-[44px] z-30 pointer-events-none opacity-100 ${isReg ? 'bg-pink-100 border-pink-300' : 'bg-orange-100 border-orange-300'}`;
+                sideDonatePad.className = `w-12 h-[6px] rounded-[1px] shadow border absolute top-[30px] right-[44px] z-30 pointer-events-none opacity-100 ${isReg ? 'bg-pink-200 border-pink-400' : 'bg-orange-200 border-orange-400'}`;
                 
                 void sideDonatePad.offsetWidth; // Reflow
                 sideDonatePad.classList.add('animate-side-donate-drop');
             }
 
-            // Tunggu 500ms agar pad samping jatuh mengenai tumpukan
             setTimeout(() => {
                 padObj.el.remove();
                 if(sideDonatePad) {
@@ -329,9 +347,8 @@ function checkDonationDrop(padObj) {
                     sideDonatePad.style.opacity = '0';
                 }
                 
-                // Tambahkan Stok Aktual
-                if(slotType === 'reguler') visualMachine.stockReguler++; else visualMachine.stockMaxi++;
-                visualMachine.sideStock++;
+                // Tambahkan Stok Aktual Keseluruhan
+                if(isReg) visualMachine.stockReguler++; else visualMachine.stockMaxi++;
                 
                 renderPhysicalStacks(); updatePhysicalScreen();
                 setMachineBusy(false, "TERIMA KASIH!", "green");
