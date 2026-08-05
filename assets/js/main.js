@@ -14,11 +14,12 @@ let visualMachine = {
     stockMaxi: 12, 
     maxPerStack: 24, 
     isProcessing: false,
-    isOnCooldown: false 
+    isOnCooldown: false // Fitur Jeda (Lock) Mesin
 };
 
 let activePads = []; 
-const physics = { gravity: 0.5, friction: 0.95, bounce: 0.25 };
+// Fisika disesuaikan: Pembalut itu ringan (gravitasi kecil, pantulan empuk)
+const physics = { gravity: 0.6, friction: 0.96, bounce: 0.35 };
 
 document.addEventListener('DOMContentLoaded', async () => {
     const loader = document.getElementById('loader');
@@ -27,8 +28,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderPhysicalStacks(); updatePhysicalScreen();
     requestAnimationFrame(physicsLoop); 
 
-    document.getElementById('btn-reguler').addEventListener('click', () => dispensePad('reguler'));
-    document.getElementById('btn-maxi').addEventListener('click', () => dispensePad('maxi'));
+    // Sambungkan tombol fisik di mesin
+    const btnReg = document.getElementById('btn-reguler');
+    const btnMax = document.getElementById('btn-maxi');
+    if(btnReg) btnReg.addEventListener('click', () => dispensePad('reguler'));
+    if(btnMax) btnMax.addEventListener('click', () => dispensePad('maxi'));
 
     try {
         const response = await fetch('/api/config');
@@ -62,12 +66,16 @@ function updatePhysicalScreen() {
 }
 
 function setMachineBusy(isBusy, msg, color) {
-    document.getElementById('machine-led').className = `w-4 h-4 rounded-full bg-${color}-500 shadow-[0_0_12px_var(--tw-shadow-color)] shadow-${color}-500 ${isBusy ? 'led-blink-fast' : ''}`;
-    document.getElementById('screen-status').textContent = msg;
-    document.getElementById('screen-status').className = `text-${color}-400 text-[12px] font-mono font-bold text-center px-1 ${isBusy ? 'led-blink-fast' : 'animate-pulse'}`;
+    const led = document.getElementById('machine-led');
+    const screen = document.getElementById('screen-status');
+    if(led) led.className = `w-4 h-4 rounded-full bg-${color}-500 shadow-[0_0_12px_var(--tw-shadow-color)] shadow-${color}-500 ${isBusy ? 'led-blink-fast' : ''}`;
+    if(screen) {
+        screen.textContent = msg;
+        screen.className = `text-${color}-400 text-[12px] font-mono font-bold text-center px-1 ${isBusy ? 'led-blink-fast' : 'animate-pulse'}`;
+    }
 }
 
-// 1. KELUARKAN PEMBALUT (DENGAN COOLDOWN DARURAT)
+// 1. KELUARKAN PEMBALUT (DENGAN COOLDOWN DARURAT 5 DETIK)
 function dispensePad(type) {
     if (visualMachine.isProcessing || visualMachine.isOnCooldown) return;
     if ((type === 'reguler' && visualMachine.stockReguler <= 0) || (type === 'maxi' && visualMachine.stockMaxi <= 0)) return alert("Stok Kosong!");
@@ -77,12 +85,14 @@ function dispensePad(type) {
     setMachineBusy(true, "MEMPROSES...", "yellow");
 
     setTimeout(() => {
+        // Kurangi stok di dalam kaca
         if(type === 'reguler') visualMachine.stockReguler--; else visualMachine.stockMaxi--;
         renderPhysicalStacks(); updatePhysicalScreen();
         
+        // Ciptakan pembalut fisik
         spawnDraggablePad(type); 
 
-        // FITUR BARU: COOLDOWN 5 DETIK
+        // FITUR JEDA: Kunci mesin selama 5 detik
         visualMachine.isProcessing = false;
         visualMachine.isOnCooldown = true;
         setMachineBusy(true, "TUNGGU 5 DETIK", "red"); 
@@ -104,26 +114,22 @@ function dispensePad(type) {
     }, 800); 
 }
 
-// 2. FISIKA DRAG & DROP NATURAL (PERBAIKAN POSISI SPAWN)
+// 2. FISIKA DRAG & DROP NATURAL
 function spawnDraggablePad(type) {
     const pad = document.createElement('div');
     const isReg = type === 'reguler';
     
-    pad.className = `absolute z-[99999] cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'w-12 h-5 bg-pink-100 border-pink-300 text-pink-600' : 'w-16 h-5 bg-orange-100 border-orange-300 text-orange-600'}`;
+    // PERBAIKAN: Menambahkan 'top-0 left-0' agar spawn sempurna
+    pad.className = `absolute top-0 left-0 z-[99999] cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'w-12 h-5 bg-pink-100 border-pink-300 text-pink-600' : 'w-16 h-5 bg-orange-100 border-orange-300 text-orange-600'}`;
     pad.innerHTML = `<span class="text-[8px] font-bold pointer-events-none">${isReg ? 'REG' : 'MAXI'}</span>`;
     
-    // PERBAIKAN: Mengambil kordinat absolut berdasarkan body web
     const box = document.getElementById('pickup-box');
     const boxRect = box.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     
-    let boxAbsoluteTop = boxRect.top + scrollTop;
-    let boxAbsoluteLeft = boxRect.left + scrollLeft;
-
-    let startX = boxAbsoluteLeft + (boxRect.width/2) - (isReg ? 24 : 32);
-    let startY = boxAbsoluteTop - 20; 
-    let targetY = boxAbsoluteTop + boxRect.height - 35; 
+    // Perhitungkan Posisi Absolut
+    let startX = boxRect.left + window.scrollX + (boxRect.width/2) - (isReg ? 24 : 32);
+    let startY = boxRect.top + window.scrollY + 10; 
+    let targetY = boxRect.top + window.scrollY + boxRect.height - 35; 
     
     document.body.appendChild(pad);
 
@@ -134,7 +140,7 @@ function spawnDraggablePad(type) {
         vx: 0, vy: 0, 
         rotation: 0, vr: 0, 
         isDragging: false,
-        isResting: true 
+        isResting: true // Menunggu diambil, jangan jatuh dulu
     };
     activePads.push(padObj);
 
@@ -145,10 +151,10 @@ function spawnDraggablePad(type) {
     setTimeout(() => {
         padObj.y = targetY;
         pad.style.transform = `translate(${startX}px, ${targetY}px)`;
-        setTimeout(() => pad.style.transition = 'none', 450);
+        setTimeout(() => pad.style.transition = 'none', 450); // Hapus transition agar siap di drag
     }, 50);
 
-    // LOGIKA DRAG
+    // LOGIKA DRAG MOUSE / TOUCH
     let lastX = 0, lastY = 0;
     let offsetX = 0, offsetY = 0; 
     
@@ -157,14 +163,14 @@ function spawnDraggablePad(type) {
         const pageX = e.touches ? e.touches[0].pageX : e.pageX;
         const pageY = e.touches ? e.touches[0].pageY : e.pageY;
         
-        padObj.vx = (pageX - lastX) * 0.8; 
-        padObj.vy = (pageY - lastY) * 0.8;
+        // Sensitivitas lemparan dilembutkan
+        padObj.vx = (pageX - lastX) * 0.6; 
+        padObj.vy = (pageY - lastY) * 0.6;
         
         padObj.x = pageX - offsetX; 
         padObj.y = pageY - offsetY;
         
         lastX = pageX; lastY = pageY;
-
         padObj.rotation = padObj.vx * 1.5; 
         pad.style.transform = `translate(${padObj.x}px, ${padObj.y}px) rotate(${padObj.rotation}deg) scale(1.1)`;
     };
@@ -173,7 +179,6 @@ function spawnDraggablePad(type) {
         if(!padObj.isDragging) return;
         padObj.isDragging = false;
         pad.classList.remove('cursor-grabbing', 'scale-110'); pad.classList.add('cursor-grab');
-        
         padObj.vr = padObj.vx * 0.5;
 
         window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp);
@@ -184,8 +189,7 @@ function spawnDraggablePad(type) {
 
     const onDown = (e) => {
         e.preventDefault();
-        padObj.isDragging = true;
-        padObj.isResting = false; 
+        padObj.isDragging = true; padObj.isResting = false; 
         padObj.vx = 0; padObj.vy = 0; padObj.vr = 0;
         
         pad.classList.remove('cursor-grab'); pad.classList.add('cursor-grabbing');
@@ -194,35 +198,36 @@ function spawnDraggablePad(type) {
         const pageY = e.touches ? e.touches[0].pageY : e.pageY;
 
         lastX = pageX; lastY = pageY;
-        offsetX = pageX - padObj.x;
-        offsetY = pageY - padObj.y;
+        offsetX = pageX - padObj.x; offsetY = pageY - padObj.y;
         
         window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchmove', preventDefaultTouch, {passive: false}); window.addEventListener('touchend', onUp);
+        window.addEventListener('touchmove', onMove, {passive: false}); 
+        window.addEventListener('touchend', onUp);
     };
-
-    const preventDefaultTouch = (e) => { if(padObj.isDragging) e.preventDefault(); };
 
     pad.addEventListener('pointerdown', onDown);
     pad.addEventListener('touchstart', onDown, {passive: false});
 }
 
-// 3. LOGIKA SLOT DONASI
+// 3. LOGIKA SLOT DONASI (ATAS MESIN)
 function checkDonationDrop(padObj) {
     const dropZones = document.querySelectorAll('.drop-zone');
-    let padCenterX = padObj.x + padObj.w/2;
-    // Perhitungkan scrollY untuk mendeteksi Dropzone dengan akurat
-    let padCenterY = padObj.y + padObj.h/2 - window.scrollY; 
+    
+    // Perhitungkan koordinat terhadap layar (Viewport) agar sama dengan kotak slot
+    let padViewportX = padObj.x + padObj.w/2 - window.scrollX;
+    let padViewportY = padObj.y + padObj.h/2 - window.scrollY; 
 
     for (let zone of dropZones) {
         let zRect = zone.getBoundingClientRect();
         
-        if (padCenterX > zRect.left && padCenterX < zRect.right && padCenterY > zRect.top && padCenterY < zRect.bottom) {
+        // Cek jika pembalut dilepas tepat di atas slot donasi
+        if (padViewportX > zRect.left && padViewportX < zRect.right && padViewportY > zRect.top && padViewportY < zRect.bottom) {
             let slotType = zone.getAttribute('data-type');
             
+            // JIKA UKURAN SALAH
             if (slotType !== padObj.type) {
                 padObj.el.style.backgroundColor = '#fecaca'; 
-                padObj.vy = -10; padObj.vx = (Math.random() - 0.5) * 15; 
+                padObj.vy = -12; padObj.vx = (Math.random() - 0.5) * 15; // Terpental
                 setTimeout(() => padObj.el.style.backgroundColor = '', 500);
                 return;
             }
@@ -232,6 +237,7 @@ function checkDonationDrop(padObj) {
                 alert('Rak Donasi di dalam mesin sudah penuh!'); return;
             }
 
+            // JIKA UKURAN BENAR: Sedot ke dalam mesin
             activePads = activePads.filter(p => p !== padObj);
             padObj.el.style.transition = 'all 0.5s ease-in';
             padObj.el.style.transform = `translate(${zRect.left + window.scrollX}px, ${zRect.top + window.scrollY + 20}px) scale(0) rotate(90deg)`;
@@ -248,7 +254,7 @@ function checkDonationDrop(padObj) {
     }
 }
 
-// 4. ENGINE FISIKA NATURAL
+// 4. ENGINE FISIKA (GRAVITASI & PANTULAN)
 function physicsLoop() {
     const colliders = Array.from(document.querySelectorAll('.collider'));
 
