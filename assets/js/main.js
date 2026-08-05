@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Fitur: Mesin Interaktif, Fisika Super Natural, Cooldown Darurat, IoT Tracker
+ * Fitur: Mesin Interaktif, Side View Sinkron, Fisika Natural, Cooldown Darurat
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -52,7 +52,6 @@ function showDragHint() {
         hint.classList.remove('hidden');
         icon.classList.add('animate-swipe-cursor');
         clearTimeout(hintTimeout);
-        // Sembunyikan otomatis setelah 10 detik (4 kali animasi)
         hintTimeout = setTimeout(() => {
             hint.classList.add('hidden');
             icon.classList.remove('animate-swipe-cursor');
@@ -75,12 +74,24 @@ function hideDragHint() {
    ======================================================= */
 
 function renderPhysicalStacks() {
-    const stackReg = document.getElementById('stack-regular'); const stackMax = document.getElementById('stack-maxi');
-    if(!stackReg || !stackMax) return;
-    stackReg.innerHTML = '<div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1 z-10">REGULER</div>';
-    stackMax.innerHTML = '<div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1 z-10">MAXI</div>';
-    for(let i = 0; i < visualMachine.stockReguler; i++) stackReg.innerHTML += `<div class="w-[80%] h-[7px] bg-pink-100 rounded-sm border border-pink-200 pad-item shadow-sm z-0"></div>`;
-    for(let i = 0; i < visualMachine.stockMaxi; i++) stackMax.innerHTML += `<div class="w-[90%] h-[7px] bg-orange-100 rounded-sm border border-orange-200 pad-item shadow-sm z-0"></div>`;
+    const stackReg = document.getElementById('stack-regular'); 
+    const stackMax = document.getElementById('stack-maxi');
+    const stackSide = document.getElementById('stack-side'); // Tumpukan mesin samping
+    
+    if(stackReg && stackMax) {
+        stackReg.innerHTML = '<div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1 z-10">REGULER</div>';
+        stackMax.innerHTML = '<div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1 z-10">MAXI</div>';
+        for(let i = 0; i < visualMachine.stockReguler; i++) stackReg.innerHTML += `<div class="w-[80%] h-[7px] bg-pink-100 rounded-sm border border-pink-200 pad-item shadow-sm z-0"></div>`;
+        for(let i = 0; i < visualMachine.stockMaxi; i++) stackMax.innerHTML += `<div class="w-[90%] h-[7px] bg-orange-100 rounded-sm border border-orange-200 pad-item shadow-sm z-0"></div>`;
+    }
+
+    if(stackSide) {
+        stackSide.innerHTML = '';
+        let maxSide = Math.max(visualMachine.stockReguler, visualMachine.stockMaxi);
+        for(let i = 0; i < maxSide; i++) {
+            stackSide.innerHTML += `<div class="w-[90%] h-[7px] bg-white/70 rounded-sm border border-white/50 shadow-sm z-0"></div>`;
+        }
+    }
 }
 
 function updatePhysicalScreen() {
@@ -111,34 +122,46 @@ function dispensePad(type) {
     document.getElementById('btn-reguler').disabled = true; document.getElementById('btn-maxi').disabled = true;
     setMachineBusy(true, "MEMPROSES...", "yellow");
 
-    setTimeout(() => {
-        if(type === 'reguler') visualMachine.stockReguler--; else visualMachine.stockMaxi--;
-        renderPhysicalStacks(); updatePhysicalScreen();
+    // Kurangi stok di awal agar animasi di Side View langsung berkurang
+    if(type === 'reguler') visualMachine.stockReguler--; else visualMachine.stockMaxi--;
+    renderPhysicalStacks(); updatePhysicalScreen();
+
+    // JALANKAN ANIMASI JATUH DI SIDE VIEW
+    const sidePad = document.getElementById('side-drop-pad');
+    if(sidePad) {
+        const isReg = type === 'reguler';
+        sidePad.className = `w-14 h-4 rounded-sm shadow border absolute top-[180px] z-20 opacity-100 ${isReg ? 'bg-pink-100 border-pink-300' : 'bg-orange-100 border-orange-300'}`;
+        sidePad.classList.add('animate-side-drop'); // Trigger animasi jatuh css
         
-        spawnDraggablePad(type); 
-        
-        // Memunculkan Kursor Animasi
-        setTimeout(showDragHint, 600);
+        // Tunggu hingga pembalut samping sampai di seluncuran bawah (800ms)
+        setTimeout(() => {
+            sidePad.classList.remove('animate-side-drop');
+            sidePad.style.opacity = '0'; // reset side view pad
+            
+            // SETELAH SAMPAI BAWAH, MUNCULKAN DI KOTAK MESIN DEPAN
+            spawnDraggablePad(type); 
+            setTimeout(showDragHint, 600);
 
-        visualMachine.isProcessing = false;
-        visualMachine.isOnCooldown = true;
-        setMachineBusy(true, "TUNGGU 5 DETIK", "red"); 
+            // Mulai kunci cooldown
+            visualMachine.isProcessing = false;
+            visualMachine.isOnCooldown = true;
+            setMachineBusy(true, "TUNGGU 5 DETIK", "red"); 
 
-        let countdown = 5;
-        const cdInterval = setInterval(() => {
-            countdown--;
-            if (countdown > 0) {
-                document.getElementById('screen-status').textContent = `TUNGGU ${countdown} DETIK`;
-            } else {
-                clearInterval(cdInterval);
-                visualMachine.isOnCooldown = false;
-                document.getElementById('btn-reguler').disabled = false; 
-                document.getElementById('btn-maxi').disabled = false;
-                setMachineBusy(false, "SIAP DIGUNAKAN", "green");
-            }
-        }, 1000);
-
-    }, 800); 
+            let countdown = 5;
+            const cdInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    document.getElementById('screen-status').textContent = `TUNGGU ${countdown} DETIK`;
+                } else {
+                    clearInterval(cdInterval);
+                    visualMachine.isOnCooldown = false;
+                    document.getElementById('btn-reguler').disabled = false; 
+                    document.getElementById('btn-maxi').disabled = false;
+                    setMachineBusy(false, "SIAP DIGUNAKAN", "green");
+                }
+            }, 1000);
+        }, 800); // 800ms sinkron dengan @keyframes side-drop
+    }
 }
 
 function spawnDraggablePad(type) {
@@ -218,7 +241,6 @@ function spawnDraggablePad(type) {
     const onDown = (e) => {
         e.preventDefault();
         
-        // HILANGKAN ANIMASI KURSOR BEGITU USER MENYENTUH PEMBALUT
         hideDragHint();
 
         padObj.isDragging = true;
@@ -270,13 +292,10 @@ function checkDonationDrop(padObj) {
             padObj.el.style.transform = `translate(${zRect.left + window.scrollX}px, ${zRect.top + window.scrollY + 20}px) scale(0) rotate(90deg)`;
             padObj.el.style.opacity = '0';
             
-            setMachineBusy(true, "MENERIMA DONASI...", "pink");
-
             setTimeout(() => {
                 padObj.el.remove();
                 if(slotType === 'reguler') visualMachine.stockReguler++; else visualMachine.stockMaxi++;
                 renderPhysicalStacks(); updatePhysicalScreen();
-                setMachineBusy(false, "TERIMA KASIH!", "green"); // Dihapus emoji kaku-nya
             }, 500);
             
             return;
