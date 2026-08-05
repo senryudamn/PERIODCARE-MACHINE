@@ -63,39 +63,68 @@ function setMachineBusy(isBusy, msg, color) {
     document.getElementById('screen-status').className = `text-${color}-400 text-[12px] font-mono font-bold text-center px-1 ${isBusy ? 'led-blink-fast' : 'animate-pulse'}`;
 }
 
-// 1. KELUARKAN PEMBALUT KE PICKUP BOX
+// 1. KELUARKAN PEMBALUT KE PICKUP BOX (DENGAN JEDA)
 function dispensePad(type) {
     if (visualMachine.isProcessing) return;
     if ((type === 'reguler' && visualMachine.stockReguler <= 0) || (type === 'maxi' && visualMachine.stockMaxi <= 0)) return alert("Stok Kosong!");
     
     setMachineBusy(true, "MEMPROSES...", "yellow");
 
+    // Jeda 1.5 Detik agar mesin seolah memproses secara mekanik
     setTimeout(() => {
         if(type === 'reguler') visualMachine.stockReguler--; else visualMachine.stockMaxi--;
         renderPhysicalStacks(); updatePhysicalScreen();
         
-        spawnDraggablePad(type); // Munculkan pad fisik yang bisa didrag
-        setMachineBusy(false, "SIAP DIGUNAKAN", "green");
-    }, 1000);
+        spawnDraggablePad(type); 
+        
+        setTimeout(() => {
+            setMachineBusy(false, "SIAP DIGUNAKAN", "green");
+        }, 500); // Tunggu animasi pad jatuh selesai
+    }, 1500);
 }
 
-// 2. CIPTAKAN PEMBALUT FISIK (DRAGGABLE)
+// 2. CIPTAKAN PEMBALUT FISIK (ANIMASI JATUH & DRAGGABLE)
 function spawnDraggablePad(type) {
     const pad = document.createElement('div');
     const isReg = type === 'reguler';
-    pad.className = `fixed z-[99999] cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] transition-transform ${isReg ? 'w-12 h-5 bg-pink-100 border-pink-300 text-pink-600' : 'w-16 h-5 bg-orange-100 border-orange-300 text-orange-600'}`;
+    pad.className = `fixed top-0 left-0 z-[99999] cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'w-12 h-5 bg-pink-100 border-pink-300 text-pink-600' : 'w-16 h-5 bg-orange-100 border-orange-300 text-orange-600'}`;
     pad.innerHTML = `<span class="text-[8px] font-bold pointer-events-none">${isReg ? 'REG' : 'MAXI'}</span>`;
     
     const box = document.getElementById('pickup-box').getBoundingClientRect();
+    
+    // Titik awal dari dalam mesin (atas), titik akhir di dasar kotak
     let startX = box.left + box.width/2 - (isReg ? 24 : 32);
-    let startY = box.top + box.height - 30;
+    let startY = box.top - 20; 
+    let targetY = box.top + box.height - 35; 
     
     document.body.appendChild(pad);
 
-    let padObj = { el: pad, type: type, x: startX, y: startY, w: isReg ? 48 : 64, h: 20, vx: 0, vy: 0, isDragging: false };
+    let padObj = { 
+        el: pad, type: type, 
+        x: startX, y: startY, 
+        w: isReg ? 48 : 64, h: 20, 
+        vx: 0, vy: 0, 
+        isDragging: false,
+        isResting: true // Mencegah gravitasi langsung menariknya tembus layar
+    };
     activePads.push(padObj);
 
-    // Event Drag & Drop
+    // Animasi Pantulan Jatuh (Bounce)
+    pad.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    pad.style.transform = `translate(${startX}px, ${startY}px)`;
+
+    // Paksa browser membaca titik awal sebelum animasi
+    void pad.offsetWidth;
+
+    // Gerakkan ke dasar Pickup Box
+    padObj.y = targetY;
+    pad.style.transform = `translate(${startX}px, ${targetY}px)`;
+
+    setTimeout(() => {
+        pad.style.transition = 'none'; // Hapus CSS transition agar drag lancar
+    }, 450);
+
+    // Logika Mouse/Touch (Sistem Drag)
     let lastX = 0, lastY = 0;
     
     const onMove = (e) => {
@@ -103,27 +132,30 @@ function spawnDraggablePad(type) {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         
-        padObj.vx = clientX - lastX; padObj.vy = clientY - lastY; // Hitung kekuatan lemparan
-        padObj.x = clientX - padObj.w/2; padObj.y = clientY - padObj.h/2;
+        padObj.vx = clientX - lastX; 
+        padObj.vy = clientY - lastY;
+        padObj.x = clientX - padObj.w/2; 
+        padObj.y = clientY - padObj.h/2;
         lastX = clientX; lastY = clientY;
-        pad.style.transform = `translate(${padObj.x}px, ${padObj.y}px) rotate(${padObj.vx}deg) scale(1.1)`;
+        pad.style.transform = `translate(${padObj.x}px, ${padObj.y}px) rotate(${padObj.vx * 2}deg) scale(1.1)`;
     };
 
     const onUp = (e) => {
         if(!padObj.isDragging) return;
         padObj.isDragging = false;
-        pad.classList.remove('cursor-grabbing'); pad.classList.add('cursor-grab');
+        pad.classList.remove('cursor-grabbing', 'scale-110'); pad.classList.add('cursor-grab');
         pad.style.transform = `translate(${padObj.x}px, ${padObj.y}px) rotate(0deg) scale(1)`;
         
         window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp);
         window.removeEventListener('touchmove', onMove); window.removeEventListener('touchend', onUp);
         
-        checkDonationDrop(padObj); // Cek apakah dilepas di slot donasi
+        checkDonationDrop(padObj);
     };
 
     const onDown = (e) => {
         e.preventDefault();
         padObj.isDragging = true;
+        padObj.isResting = false; // Melepas efek anti-gravitasi
         padObj.vx = 0; padObj.vy = 0;
         pad.classList.remove('cursor-grab'); pad.classList.add('cursor-grabbing');
         
@@ -136,8 +168,6 @@ function spawnDraggablePad(type) {
 
     pad.addEventListener('pointerdown', onDown);
     pad.addEventListener('touchstart', onDown, {passive: false});
-    
-    pad.style.transform = `translate(${startX}px, ${startY}px)`;
 }
 
 // 3. LOGIKA SLOT DONASI (VALIDASI UKURAN)
@@ -149,26 +179,26 @@ function checkDonationDrop(padObj) {
 
     for (let zone of dropZones) {
         let zRect = zone.getBoundingClientRect();
+        // Cek apakah pembalut dilepas tepat di atas slot donasi
         if (padCenterX > zRect.left && padCenterX < zRect.right && padCenterY > zRect.top && padCenterY < zRect.bottom) {
             
             let slotType = zone.getAttribute('data-type');
             
-            // Validasi Ukuran
+            // Validasi Ukuran (Beda Ukuran = Terpental)
             if (slotType !== padObj.type) {
-                // SALAH LUBANG -> Terpental mundur
-                padObj.el.style.backgroundColor = '#fecaca'; // Merah error
+                padObj.el.style.backgroundColor = '#fecaca'; // Kedip Merah Error
                 padObj.vy = -15; padObj.vx = (Math.random() - 0.5) * 20; 
                 setTimeout(() => padObj.el.style.backgroundColor = '', 500);
                 return;
             }
 
-            // BENAR -> Donasi Diterima
+            // Benar, masuk!
             if((slotType === 'reguler' && visualMachine.stockReguler >= visualMachine.maxPerStack) || 
                (slotType === 'maxi' && visualMachine.stockMaxi >= visualMachine.maxPerStack)) {
-                alert('Rak sudah penuh!'); return;
+                alert('Rak Donasi di dalam mesin sudah penuh!'); return;
             }
 
-            // Hapus dari physics & DOM, animasi masuk
+            // Hapus dari list fisika, jalankan animasi tersedot
             activePads = activePads.filter(p => p !== padObj);
             padObj.el.style.transition = 'all 0.5s ease-in';
             padObj.el.style.transform = `translate(${zRect.left}px, ${zRect.top + 20}px) scale(0) rotate(90deg)`;
@@ -177,7 +207,7 @@ function checkDonationDrop(padObj) {
             setMachineBusy(true, "MENERIMA DONASI...", "pink");
             
             setTimeout(() => {
-                padObj.el.remove();
+                padObj.el.remove(); // Hapus elemen
                 if(slotType === 'reguler') visualMachine.stockReguler++; else visualMachine.stockMaxi++;
                 renderPhysicalStacks(); updatePhysicalScreen();
                 setMachineBusy(false, "TERIMA KASIH! 💖", "green");
@@ -194,48 +224,46 @@ function physicsLoop() {
     const colliders = Array.from(document.querySelectorAll('.collider'));
 
     activePads.forEach(pad => {
-        if (pad.isDragging) return;
+        if (pad.isDragging || pad.isResting) return; // Abaikan gravitasi jika sedang ditarik atau diam di kotak bawah
 
-        pad.vy += physics.gravity; // Gravitasi
+        pad.vy += physics.gravity; // Terapkan Gravitasi
         pad.x += pad.vx;
         pad.y += pad.vy;
 
-        // Batas Kiri Kanan Layar (Memantul)
+        // Batas Kiri Kanan Layar
         if (pad.x < 0) { pad.x = 0; pad.vx *= -physics.bounce; }
         if (pad.x + pad.w > window.innerWidth) { pad.x = window.innerWidth - pad.w; pad.vx *= -physics.bounce; }
 
-        // Batas Bawah Layar (Lantai Browser)
+        // Batas Bawah Layar
         if (pad.y + pad.h > window.innerHeight) {
             pad.y = window.innerHeight - pad.h;
             pad.vy *= -physics.bounce;
             pad.vx *= physics.friction;
-            if(Math.abs(pad.vy) < 1) pad.vy = 0; // Stop jitter
+            if(Math.abs(pad.vy) < 1) pad.vy = 0;
         }
 
-        // Tumbukan (Collision) dengan elemen Web (.collider)
-        let isResting = false;
+        // Tumbukan (Collision) dengan elemen HTML (.collider)
+        let isRestingOnCollider = false;
         for (let el of colliders) {
             let rect = el.getBoundingClientRect();
-            // Jika jatuh menabrak bagian ATAS elemen
+            // Cek tumbukan atas
             if (pad.vy > 0 && 
-                pad.y + pad.h >= rect.top && pad.y + pad.h - pad.vy <= rect.top + 15 && // Penetration depth
+                pad.y + pad.h >= rect.top && pad.y + pad.h - pad.vy <= rect.top + 15 && 
                 pad.x + pad.w > rect.left && pad.x < rect.right) {
                     pad.y = rect.top - pad.h;
                     pad.vy *= -physics.bounce;
                     pad.vx *= physics.friction;
-                    isResting = true;
+                    isRestingOnCollider = true;
             }
-            // Pantulan tembok samping elemen (Sederhana)
+            // Pantulan tembok elemen
             else if (pad.y + pad.h > rect.top && pad.y < rect.bottom) {
                 if (pad.vx > 0 && pad.x + pad.w >= rect.left && pad.x + pad.w - pad.vx <= rect.left) { pad.x = rect.left - pad.w; pad.vx *= -physics.bounce; }
                 else if (pad.vx < 0 && pad.x <= rect.right && pad.x - pad.vx >= rect.right) { pad.x = rect.right; pad.vx *= -physics.bounce; }
             }
         }
 
-        // Terapkan gesekan udara jika melayang
-        if(!isResting && pad.vy !== 0) pad.vx *= 0.99; 
+        if(!isRestingOnCollider && pad.vy !== 0) pad.vx *= 0.99; // Gesekan udara
 
-        // Update CSS Visual
         pad.el.style.transform = `translate(${pad.x}px, ${pad.y}px)`;
     });
 
