@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Fitur: Mesin Interaktif, Skematik 3-Panel, Real Physics, Sinkronisasi Donasi Kanan-Kiri
+ * Fitur: Mesin Interaktif, Skematik 3-Panel, Real Physics, Visual Reward, Fade UI
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -74,7 +74,6 @@ function hideDragHint() {
    ======================================================= */
 
 function renderPhysicalStacks() {
-    // 1. Tumpukan Mesin Utama (Tengah)
     const stackReg = document.getElementById('stack-regular'); 
     const stackMax = document.getElementById('stack-maxi');
     if(stackReg && stackMax) {
@@ -84,11 +83,9 @@ function renderPhysicalStacks() {
         for(let i = 0; i < visualMachine.stockMaxi; i++) stackMax.innerHTML += `<div class="w-[90%] h-[7px] bg-orange-100 rounded-[1px] border border-orange-300 pad-item shadow-sm z-0 transition-all duration-300"></div>`;
     }
 
-    // Batasan visual agar tumpukan samping tidak menembus atap (Max 36 lapis)
     let regVisualCount = Math.min(visualMachine.stockReguler, 36);
     let maxiVisualCount = Math.min(visualMachine.stockMaxi, 36);
 
-    // 2. Tumpukan Mesin Kiri (Reguler Depan, Maxi Belakang Blur)
     const stackLeftFrontReg = document.getElementById('stack-left-front-reg');
     const stackLeftBackMaxi = document.getElementById('stack-left-back-maxi');
     if(stackLeftFrontReg) {
@@ -100,7 +97,6 @@ function renderPhysicalStacks() {
         for(let i=0; i<maxiVisualCount; i++) stackLeftBackMaxi.innerHTML += `<div class="w-[85%] h-[6px] bg-orange-300/40 rounded-[1px] border border-orange-400/40 shadow-sm shrink-0 transition-all duration-300"></div>`;
     }
 
-    // 3. Tumpukan Mesin Kanan (Maxi Depan, Reguler Belakang Blur)
     const stackRightFrontMaxi = document.getElementById('stack-right-front-maxi');
     const stackRightBackReg = document.getElementById('stack-right-back-reg');
     if(stackRightFrontMaxi) {
@@ -126,10 +122,18 @@ function updatePhysicalScreen() {
 function setMachineBusy(isBusy, msg, color) {
     const led = document.getElementById('machine-led');
     const screen = document.getElementById('screen-status');
+    
     if(led) led.className = `w-4 h-4 rounded-full bg-${color}-500 shadow-[0_0_12px_var(--tw-shadow-color)] shadow-${color}-500 ${isBusy ? 'led-blink-fast' : ''}`;
+    
+    // TRANSISI FADE IN/OUT UNTUK LAYAR OS
     if(screen) {
-        screen.textContent = msg;
-        screen.className = `text-${color}-400 text-[12px] font-mono font-bold text-center px-1 ${isBusy ? 'led-blink-fast' : 'animate-pulse'}`;
+        screen.classList.remove('opacity-100');
+        screen.classList.add('opacity-0');
+        
+        setTimeout(() => {
+            screen.textContent = msg;
+            screen.className = `text-${color}-400 text-[12px] font-mono font-bold text-center px-2 transition-opacity duration-300 ease-in-out opacity-100 ${isBusy ? 'led-blink-fast' : 'animate-pulse'}`;
+        }, 300);
     }
 }
 
@@ -139,11 +143,11 @@ function dispensePad(type) {
     
     visualMachine.isProcessing = true;
     document.getElementById('btn-reguler').disabled = true; document.getElementById('btn-maxi').disabled = true;
+    
     setMachineBusy(true, "MEMPROSES...", "yellow");
 
     const isReg = type === 'reguler';
 
-    // ANIMASI LENGAN PENDORONG (Pilih Kiri atau Kanan)
     const armId = isReg ? 'pusher-arm-left' : 'pusher-arm-right';
     const arm = document.getElementById(armId);
     if(arm) {
@@ -151,30 +155,25 @@ function dispensePad(type) {
         setTimeout(() => { arm.style.transform = 'scaleX(1)'; }, 200); 
     }
 
-    // KURANGI STOK VISUAL LANGSUNG SEMUA PANEL
     if(isReg) visualMachine.stockReguler--; else visualMachine.stockMaxi--;
     renderPhysicalStacks(); updatePhysicalScreen();
 
-    // ANIMASI JATUH TAMPILAN SAMPING
     const sidePadId = isReg ? 'side-drop-pad-left' : 'side-drop-pad-right';
     const sidePad = document.getElementById(sidePadId);
 
     if(sidePad) {
         sidePad.className = `w-12 h-[6px] rounded-[1px] shadow border absolute bottom-[144px] right-[44px] z-30 pointer-events-none opacity-100 ${isReg ? 'bg-pink-200 border-pink-400' : 'bg-orange-200 border-orange-400'}`;
         
-        void sidePad.offsetWidth; // Reflow browser
+        void sidePad.offsetWidth; 
         sidePad.classList.add('animate-side-push-drop'); 
         
-        // Tunggu animasi jatuh samping selesai (800ms)
         setTimeout(() => {
             sidePad.classList.remove('animate-side-push-drop');
             sidePad.style.opacity = '0'; 
             
-            // SETELAH SAMPAI BAWAH, MUNCULKAN DI KOTAK MESIN TENGAH
             spawnDraggablePad(type); 
             setTimeout(showDragHint, 600);
 
-            // Kunci Darurat (Cooldown)
             visualMachine.isProcessing = false;
             visualMachine.isOnCooldown = true;
             setMachineBusy(true, "TUNGGU 5 DETIK", "red"); 
@@ -289,7 +288,7 @@ function spawnDraggablePad(type) {
         offsetY = pageY - padObj.y;
         
         window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchend', onUp);
+        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchend', onUp);
     };
 
     pad.addEventListener('pointerdown', onDown);
@@ -321,7 +320,6 @@ function checkDonationDrop(padObj) {
 
             const isReg = slotType === 'reguler';
 
-            // Sedot masuk di mesin depan
             activePads = activePads.filter(p => p !== padObj);
             padObj.el.style.transition = 'all 0.5s ease-in';
             padObj.el.style.transform = `translate(${zRect.left + window.scrollX}px, ${zRect.top + window.scrollY + 20}px) scale(0) rotate(90deg)`;
@@ -329,15 +327,27 @@ function checkDonationDrop(padObj) {
             
             setMachineBusy(true, "MENERIMA DONASI...", "pink");
 
-            // JALANKAN ANIMASI JATUH DI SIDE VIEW KIRI/KANAN (DONASI MASUK)
             const sideDonatePadId = isReg ? 'side-donate-pad-left' : 'side-donate-pad-right';
             const sideDonatePad = document.getElementById(sideDonatePadId);
 
             if(sideDonatePad) {
                 sideDonatePad.className = `w-12 h-[6px] rounded-[1px] shadow border absolute top-[30px] right-[44px] z-30 pointer-events-none opacity-100 ${isReg ? 'bg-pink-200 border-pink-400' : 'bg-orange-200 border-orange-400'}`;
                 
-                void sideDonatePad.offsetWidth; // Reflow
+                void sideDonatePad.offsetWidth; 
                 sideDonatePad.classList.add('animate-side-donate-drop');
+            }
+
+            // EFEK VISUAL REWARD PARTIKEL DONASI
+            for(let i=0; i<4; i++){
+                setTimeout(() => {
+                    let star = document.createElement('div');
+                    star.innerHTML = '✨'; 
+                    star.className = 'absolute text-xl z-[100000] pointer-events-none animate-float-up drop-shadow-md';
+                    star.style.left = (zRect.left + zRect.width/2 - 10 + (Math.random()*30 - 15) + window.scrollX) + 'px';
+                    star.style.top = (zRect.top + window.scrollY - 10) + 'px';
+                    document.body.appendChild(star);
+                    setTimeout(() => star.remove(), 1000);
+                }, i * 150);
             }
 
             setTimeout(() => {
@@ -347,7 +357,6 @@ function checkDonationDrop(padObj) {
                     sideDonatePad.style.opacity = '0';
                 }
                 
-                // Tambahkan Stok Aktual Keseluruhan
                 if(isReg) visualMachine.stockReguler++; else visualMachine.stockMaxi++;
                 
                 renderPhysicalStacks(); updatePhysicalScreen();
@@ -359,7 +368,7 @@ function checkDonationDrop(padObj) {
     }
 }
 
-// MESIN FISIKA (GRAVITASI MULUS)
+// MESIN FISIKA (GRAVITASI MULUS + Z-INDEX FIX)
 function physicsLoop() {
     const colliders = Array.from(document.querySelectorAll('.collider'));
 
