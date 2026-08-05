@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Pabrik 3D PeriodCare</title>
+    <!-- Memanggil library 3D dari GitHub / Unpkg -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        body { font-family: sans-serif; background-color: #FFF5F7; text-align: center; padding-top: 50px; }
+        #status { font-size: 24px; font-weight: bold; color: #FF4D85; }
+        .sub-text { font-size: 14px; color: #718096; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="status">⏳ Sedang Merakit & Mewarnai Komponen .GLB... Mohon Tunggu...</div>
+    <div class="sub-text">Proses ini akan otomatis mengunduh file "periodcare_final.glb" saat selesai.</div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        // MENGGUNAKAN GLTF LOADER KARENA FORMAT SUDAH .GLB
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+        const scene = new THREE.Scene();
+        const loader = new GLTFLoader();
+
+        // DAFTAR FILE GLB DAN KODE WARNA HEX-NYA
+        const parts = [
+            { file: '1-Bodi.glb', color: 0xFFB3C6, opacity: 1, transparent: false },
+            { file: '2-Pintu.glb', color: 0x4A4A4A, opacity: 1, transparent: false },
+            { file: '3-TombolReg.glb', color: 0xFF4D85, opacity: 1, transparent: false },
+            { file: '4-TombolMaxi.glb', color: 0xFF7043, opacity: 1, transparent: false },
+            { file: '5-Teks.glb', color: 0x2D3748, opacity: 1, transparent: false },
+            // Kaca menggunakan warna kebiruan dengan transparansi 40%
+            { file: '6-Kaca.glb', color: 0x87CEFA, opacity: 0.4, transparent: true }
+        ];
+
+        let loadedCount = 0;
+
+        // Proses memuat, mewarnai, dan merakit ke dalam scene
+        parts.forEach(part => {
+            loader.load(part.file, function (gltf) {
+                const model = gltf.scene;
+
+                // Memaksa penimpaan material/warna baru ke dalam semua mesh GLB
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = new THREE.MeshStandardMaterial({ 
+                            color: part.color,
+                            transparent: part.transparent,
+                            opacity: part.opacity,
+                            roughness: 0.4, // Sedikit mengkilap
+                            metalness: 0.1
+                        });
+                    }
+                });
+                
+                // Penyesuaian rotasi karena konversi dari OpenSCAD
+                model.rotation.x = -Math.PI / 2;
+                
+                scene.add(model);
+                loadedCount++;
+                
+                // Jika semua 6 file sudah berhasil dimuat dan diwarnai, langsung ekspor!
+                if (loadedCount === parts.length) {
+                    exportGLB(scene);
+                }
+            }, undefined, function (error) {
+                console.error('Gagal memuat file:', part.file, error);
+                document.getElementById('status').innerText = '❌ Error: Gagal memuat ' + part.file + '. Pastikan ejaan nama huruf besar/kecilnya sama persis!';
+                document.getElementById('status').style.color = "#ef4444";
+            });
+        });
+
+        // Fungsi Ekspor kembali menjadi 1 File .GLB Utuh
+        function exportGLB(scene) {
+            const exporter = new GLTFExporter();
+            exporter.parse(
+                scene,
+                function (gltf) {
+                    const blob = new Blob([gltf], { type: 'application/octet-stream' });
+                    const link = document.createElement('a');
+                    link.style.display = 'none';
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'periodcare_final.glb';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    document.getElementById('status').innerText = "✅ Selesai! File 'periodcare_final.glb' telah berhasil dirakit!";
+                    document.getElementById('status').style.color = "#22c55e";
+                },
+                function (error) {
+                    console.error('Terjadi kesalahan saat proses render', error);
+                },
+                { binary: true } // Menghasilkan output .glb (Binary format)
+            );
+        }
+    </script>
+</body>
+</html>
