@@ -9,7 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Script untuk merender 3D Model GLB di Website -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -31,65 +33,15 @@
             .btn { @apply inline-flex items-center justify-center px-6 py-3 rounded-full font-semibold transition-all duration-300 focus:outline-none focus:ring-4; }
             .btn-primary { @apply bg-primary text-white hover:bg-pink-600 hover:shadow-soft focus:ring-soft; }
             .btn-accent { @apply bg-accent text-white hover:bg-orange-600 hover:shadow-lg focus:ring-orange-200; }
-            .btn-outline { @apply border-2 border-primary text-primary hover:bg-primary hover:text-white bg-transparent; }
             .heading-1 { @apply text-4xl md:text-5xl lg:text-6xl font-bold text-dark leading-tight; }
             .heading-2 { @apply text-3xl md:text-4xl font-bold text-dark leading-snug; }
             .body-text { @apply text-base md:text-lg text-gray-600 leading-relaxed; }
             .form-input { @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-pink-100 transition-all; }
-            
-            /* Animasi Hardware LED & Kabel Data */
-            .led-blink-fast { animation: blink-fast 0.2s infinite alternate; }
-            .led-blink-slow { animation: blink-slow 1s infinite alternate; }
-            @keyframes blink-fast { from { opacity: 1; box-shadow: 0 0 15px currentColor; } to { opacity: 0.2; box-shadow: 0 0 0px currentColor; } }
-            @keyframes blink-slow { from { opacity: 1; box-shadow: 0 0 10px currentColor; } to { opacity: 0.4; box-shadow: 0 0 2px currentColor; } }
-            @keyframes data-flow { 0% { stroke-dashoffset: 24; } 100% { stroke-dashoffset: 0; } }
-            .animate-data-flow { animation: data-flow 1s linear infinite; stroke-dasharray: 6; }
-
-            /* Kursor Tutorial */
-            @keyframes swipe-up-cursor {
-                0% { transform: translate(-50%, 40px) scale(0.8); opacity: 0; }
-                15% { transform: translate(-50%, 10px) scale(1); opacity: 1; }
-                65% { transform: translate(-50%, -240px) scale(1); opacity: 1; }
-                85% { transform: translate(-50%, -260px) scale(0.8); opacity: 0; }
-                100% { transform: translate(-50%, -260px) scale(0.8); opacity: 0; }
-            }
-            .animate-swipe-cursor { animation: swipe-up-cursor 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
-
-            /* Animasi Partikel Reward Donasi */
-            @keyframes float-up {
-                0% { transform: translateY(0) scale(0.5); opacity: 0; }
-                20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
-                100% { transform: translateY(-80px) scale(1); opacity: 0; }
-            }
-            .animate-float-up { animation: float-up 1s ease-out forwards; }
-
-            /* FISIKA JATUH (PENGAMBILAN) - SIDE VIEW */
-            @keyframes side-push-drop {
-                0%   { transform: translate(0px, 0px) rotate(0deg); opacity: 1; }
-                15%  { transform: translate(-40px, 0px) rotate(0deg); opacity: 1; }  
-                25%  { transform: translate(-50px, 10px) rotate(-30deg); opacity: 1; } 
-                60%  { transform: translate(-50px, 80px) rotate(-30deg); opacity: 1; } 
-                75%  { transform: translate(-55px, 95px) rotate(-12deg); opacity: 1; } 
-                100% { transform: translate(-110px, 110px) rotate(-12deg); opacity: 0; } 
-            }
-            .animate-side-push-drop { animation: side-push-drop 0.8s cubic-bezier(0.3, 0, 0.8, 1) forwards; }
-
-            /* FISIKA JATUH (DONASI MASUK) - SIDE VIEW */
-            @keyframes side-donate-drop {
-                0%   { transform: translateY(-80px); opacity: 0; }
-                10%  { opacity: 1; }
-                80%  { transform: translateY(0px); opacity: 1; }
-                100% { transform: translateY(0px); opacity: 0; }
-            }
-            .animate-side-donate-drop { animation: side-donate-drop 0.5s cubic-bezier(0.4, 0, 0.8, 1) forwards; }
-
-            /* Efek Partikel Reward */
-            @keyframes particle-burst {
-                0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
-                100% { transform: translate(var(--tx), var(--ty)) scale(1.5); opacity: 0; }
-            }
-            .animate-particle { animation: particle-burst 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; position: absolute; font-size: 1.5rem; pointer-events: none; z-index: 999999; }
         }
+        
+        /* Loading Screen Pulse */
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     </style>
 </head>
 <body class="bg-light font-sans text-dark antialiased overflow-x-hidden">
@@ -133,7 +85,7 @@
             <div class="flex flex-col xl:flex-row items-center justify-between gap-12">
                 
                 <!-- BAGIAN TEKS KIRI -->
-                <div class="w-full xl:w-[35%] text-center xl:text-left scroll-animate opacity-0 translate-y-10">
+                <div class="w-full xl:w-[35%] text-center xl:text-left scroll-animate opacity-0 translate-y-10 transition-all duration-700">
                     <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce">Inovasi Sosial 2026</span>
                     <h1 class="heading-1 mb-6 text-4xl lg:text-5xl">PERIODCARE MACHINE</h1>
                     <p class="body-text mb-6 text-center xl:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
@@ -141,11 +93,11 @@
                     <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 shadow-sm flex flex-col items-center xl:items-start gap-3 text-center xl:text-left">
                         <div class="inline-flex items-center gap-2 w-fit py-1.5 px-3 rounded-lg bg-pink-200 text-pink-700 font-bold text-xs tracking-wider uppercase animate-pulse">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Prototipe Interaktif & Game
+                            Prototipe 3D Interaktif
                         </div>
                         <p class="text-sm font-medium text-pink-900 leading-relaxed flex items-start gap-2">
                             <svg class="w-5 h-5 mt-0.5 shrink-0 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                            <span><b>Cara Main:</b> Tekan tombol mesin, lihat otak mekaniknya beroperasi pada panel kiri dan kanan, lalu tarik pembalut yang keluar ke arah slot donasi atas!</span>
+                            <span><b>Cara Melihat:</b> Sentuh dan geser (swipe) model 3D di samping untuk memutarnya. Gunakan dua jari untuk melakukan Zoom In/Out.</span>
                         </p>
                     </div>
 
@@ -154,157 +106,54 @@
                     </div>
                 </div>
                 
-                <!-- CONTAINER KETIGA MESIN -->
-                <div class="w-full xl:w-[65%] flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 h-[280px] sm:h-[380px] md:h-[500px] lg:h-[560px] xl:h-[620px] items-start">
-                    <div class="bg-gray-50 border border-gray-200 rounded-[2.5rem] p-3 sm:p-6 shadow-inner flex flex-row justify-center items-end gap-2 sm:gap-6 relative origin-top scale-[0.45] sm:scale-[0.60] md:scale-[0.80] lg:scale-[0.90] xl:scale-[1]">
-                        
-                        <div class="absolute top-4 left-6 text-xs font-mono font-bold text-gray-400 tracking-widest hidden sm:block">SYSTEM_SCHEMATIC_V3_FINAL</div>
-
-                        <!-- 1. LEFT SIDE VIEW (REGULER) -->
-                        <div class="relative w-48 h-[530px] bg-gradient-to-r from-gray-200 to-gray-300 rounded-[2rem] border-[5px] border-white shadow-xl z-0 shrink-0 select-none overflow-hidden">
-                            <div class="absolute top-3 left-3 text-[7px] font-bold text-gray-600 tracking-widest bg-white/70 px-2 py-1 rounded shadow-sm z-30">SIDE KIRI (REGULER)</div>
-                            
-                            <!-- Otak IoT (ESP32) & Kabel -->
-                            <div class="absolute top-8 left-4 w-12 h-16 bg-green-900 rounded border-2 border-green-700 shadow-inner z-20 flex flex-col items-center justify-center p-1 gap-1">
-                                <span class="text-[5px] text-gray-400 font-mono font-bold">ESP32</span>
-                                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
-                            </div>
-                            <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" fill="none">
-                                <path d="M 45,90 C 45,300 150,200 150,390" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4"/>
-                                <circle cx="150" cy="390" r="3" fill="#3b82f6" class="animate-pulse"/>
-                            </svg>
-
-                            <!-- Saluran Donasi -->
-                            <div class="absolute top-0 right-[40px] w-14 h-[40px] bg-gray-800/80 border-x-4 border-gray-700 z-0"></div>
-                            <div id="side-donate-pad-left" class="w-12 h-[6px] rounded-[1px] shadow border absolute top-[30px] right-[44px] z-30 opacity-0 pointer-events-none"></div>
-
-                            <!-- Tumpukan -->
-                            <div class="absolute bottom-[145px] right-[25px] w-14 h-[240px] bg-gray-900/40 border-4 border-gray-700/50 border-b-0 rounded-t-xl flex flex-col-reverse items-center pb-[1px] gap-[2px] z-0 overflow-hidden">
-                                <div id="stack-left-back-maxi" class="w-full flex flex-col-reverse items-center gap-[2px]"></div>
-                            </div>
-                            <div class="absolute bottom-[140px] right-[40px] w-14 h-[240px] bg-gray-900/80 border-4 border-gray-700 border-b-0 rounded-t-xl flex flex-col-reverse items-center pb-[1px] gap-[2px] z-10 overflow-hidden shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)]">
-                                <div id="stack-left-front-reg" class="w-full flex flex-col-reverse items-center gap-[2px]"></div>
-                            </div>
-
-                            <!-- Pendorong Servo -->
-                            <div class="absolute bottom-[140px] right-[10px] w-24 h-12 bg-gray-800 border-4 border-gray-600 rounded-r-lg z-20 flex items-center p-1 shadow-2xl">
-                                <div class="w-5 h-8 bg-blue-800 rounded border border-blue-600 flex justify-center items-center z-10 relative"><div class="w-3 h-3 bg-gray-400 rounded-full"></div></div>
-                                <div id="pusher-arm-left" class="w-16 h-3 bg-gray-400 absolute right-6 rounded-l-sm transition-transform duration-200 ease-out origin-right border-y border-l border-gray-300"></div>
-                            </div>
-
-                            <!-- Chute -->
-                            <div class="absolute bottom-[75px] right-[102px] w-12 h-[300px] bg-gray-800/40 border-l-4 border-gray-700 z-0"></div>
-                            <div class="absolute bottom-[56px] right-[40px] w-[114px] h-[84px] bg-gray-900 border-4 border-gray-700 rounded-bl-[1.5rem] z-10 overflow-hidden shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)]"><div class="w-[150%] h-4 bg-gray-600 absolute bottom-1 -left-4 -rotate-12 shadow-md border-t border-gray-400"></div></div>
-                            <div id="side-drop-pad-left" class="w-12 h-[6px] rounded-[1px] shadow border absolute bottom-[144px] right-[44px] opacity-0 z-30 pointer-events-none"></div>
-                        </div>
-
-                        <!-- 2. FRONT VIEW (MESIN UTAMA DI TENGAH) -->
-                        <div id="machine-body" class="relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-20 shrink-0 select-none">
-                            
-                            <!-- Kursor Animasi -->
-                            <div id="drag-hint-wrapper" class="absolute bottom-24 left-1/2 z-[100000] pointer-events-none hidden">
-                                <svg id="drag-hint-icon" class="w-12 h-12 text-white drop-shadow-[0_8px_12px_rgba(255,77,133,0.8)] -translate-x-1/2" fill="currentColor" viewBox="0 0 24 24"><path d="M4.34 2.72l15.93 9.4c1.1.65.65 2.37-.58 2.37h-5.46l3.43 6.3c.3.56.09 1.25-.46 1.55l-1.78.96c-.56.3-1.25.09-1.55-.46l-3.43-6.3L6.5 21.05c-.96.7-2.5-.02-2.5-1.2V3.9c0-1.18 1.4-1.85 2.34-1.18z"/></svg>
-                            </div>
-
-                            <!-- Panel Atas: Slot -->
-                            <div class="w-full flex justify-between items-center mb-3 px-2">
-                                <div class="flex gap-4">
-                                    <div class="flex flex-col gap-1 items-center relative transition-transform w-10">
-                                        <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN REG</span>
-                                        <div class="w-10 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center"><div class="w-6 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div></div>
-                                        <!-- Area Drop Diperbaiki: Ukuran Pas & Absolute Center (Anti-Overlap) -->
-                                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 drop-zone pointer-events-none" data-type="reguler"></div>
-                                    </div>
-                                    <div class="flex flex-col gap-1 items-center relative transition-transform w-14">
-                                        <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN MAXI</span>
-                                        <div class="w-14 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center"><div class="w-10 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div></div>
-                                        <!-- Area Drop Diperbaiki: Ukuran Pas & Absolute Center (Anti-Overlap) -->
-                                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-14 drop-zone pointer-events-none" data-type="maxi"></div>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-end gap-1"><span class="text-[8px] font-bold text-gray-400">STATUS</span><div id="machine-led" class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e] text-green-500 transition-colors duration-300"></div></div>
-                            </div>
-
-                            <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
-                                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
-                                <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
-                                <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-regular"></div>
-                                <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-maxi"></div>
-                            </div>
-
-                            <!-- Layar OS -->
-                            <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden collider">
-                                <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
-                                <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
-                                <span id="screen-status" class="text-white text-[13px] font-mono font-bold text-center px-2 transition-opacity duration-300 ease-in-out opacity-100 animate-pulse">SIAP DIGUNAKAN</span>
-                                <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold transition-colors">Stok: 24/48</span>
-                            </div>
-
-                            <!-- Tombol Dispense -->
-                            <div class="flex gap-6 mb-5 w-full justify-center px-4">
-                                <button id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50 group">
-                                    <svg class="w-7 h-7 pointer-events-none drop-shadow-md group-active:scale-95 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
-                                    <span class="text-[8px] font-bold mt-1 pointer-events-none">REG</span>
-                                </button>
-                                <button id="btn-maxi" class="w-16 h-16 rounded-full bg-gradient-to-b from-orange-400 to-accent shadow-[0_6px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-orange-300 focus:outline-none disabled:opacity-50 group">
-                                    <svg class="w-7 h-7 pointer-events-none drop-shadow-md group-active:scale-95 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"></path></svg>
-                                    <span class="text-[8px] font-bold mt-1 pointer-events-none">MAXI</span>
-                                </button>
-                            </div>
-
-                            <!-- Pick-up Box (Z-Index fix with internal floor) -->
-                            <div id="pickup-box" class="w-56 h-20 bg-gray-900 rounded-b-2xl rounded-t shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 flex justify-center items-end pb-3 relative overflow-hidden mt-auto z-20">
-                                <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md z-10"></div>
-                                <div class="absolute bottom-0 w-full h-10 bg-gray-900 border-t border-gray-800 shadow-[inset_0_5px_10px_rgba(0,0,0,0.5)] z-30 pointer-events-none rounded-b-2xl"></div>
-                            </div>
-                        </div>
-
-                        <!-- 3. RIGHT SIDE VIEW (MAXI) DI-MIRROR -->
-                        <div class="relative w-48 h-[530px] bg-gradient-to-l from-gray-200 to-gray-300 rounded-[2rem] border-[5px] border-white shadow-xl z-0 shrink-0 select-none overflow-hidden">
-                            <div class="absolute top-3 right-3 text-[7px] font-bold text-gray-600 tracking-widest bg-white/70 px-2 py-1 rounded shadow-sm z-30">SIDE KANAN (MAXI)</div>
-                            
-                            <!-- WRAPPER MIRROR -->
-                            <div class="absolute inset-0 scale-x-[-1]">
-                                <!-- Otak IoT & Kabel -->
-                                <div class="absolute top-8 left-4 w-12 h-16 bg-green-900 rounded border-2 border-green-700 shadow-inner z-20 flex flex-col items-center justify-center p-1 gap-1">
-                                    <span class="text-[5px] text-gray-400 font-mono font-bold scale-x-[-1]">ESP32</span>
-                                    <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                                </div>
-                                <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" fill="none">
-                                    <path d="M 45,90 C 45,300 150,200 150,390" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4"/>
-                                    <circle cx="150" cy="390" r="3" fill="#ef4444" class="animate-pulse"/>
-                                </svg>
-
-                                <div class="absolute top-0 right-[40px] w-14 h-[40px] bg-gray-800/80 border-x-4 border-gray-700 z-0"></div>
-                                <div id="side-donate-pad-right" class="w-12 h-[6px] rounded-[1px] shadow border absolute top-[30px] right-[44px] z-30 opacity-0 pointer-events-none"></div>
-
-                                <div class="absolute bottom-[145px] right-[25px] w-14 h-[240px] bg-gray-900/40 border-4 border-gray-700/50 border-b-0 rounded-t-xl flex flex-col-reverse items-center pb-[1px] gap-[2px] z-0 overflow-hidden">
-                                    <div id="stack-right-back-reg" class="w-full flex flex-col-reverse items-center gap-[2px]"></div>
-                                </div>
-                                <div class="absolute bottom-[140px] right-[40px] w-14 h-[240px] bg-gray-900/80 border-4 border-gray-700 border-b-0 rounded-t-xl flex flex-col-reverse items-center pb-[1px] gap-[2px] z-10 overflow-hidden shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)]">
-                                    <div id="stack-right-front-maxi" class="w-full flex flex-col-reverse items-center gap-[2px]"></div>
-                                </div>
-
-                                <div class="absolute bottom-[140px] right-[10px] w-24 h-12 bg-gray-800 border-4 border-gray-600 rounded-r-lg z-20 flex items-center p-1 shadow-2xl">
-                                    <div class="w-5 h-8 bg-blue-800 rounded border border-blue-600 flex justify-center items-center z-10 relative"><div class="w-3 h-3 bg-gray-400 rounded-full"></div></div>
-                                    <div id="pusher-arm-right" class="w-16 h-3 bg-gray-400 absolute right-6 rounded-l-sm transition-transform duration-200 ease-out origin-right border-y border-l border-gray-300"></div>
-                                </div>
-
-                                <div class="absolute bottom-[75px] right-[102px] w-12 h-[300px] bg-gray-800/40 border-l-4 border-gray-700 z-0"></div>
-                                <div class="absolute bottom-[56px] right-[40px] w-[114px] h-[84px] bg-gray-900 border-4 border-gray-700 rounded-bl-[1.5rem] z-10 overflow-hidden shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)]"><div class="w-[150%] h-4 bg-gray-600 absolute bottom-1 -left-4 -rotate-12 shadow-md border-t border-gray-400"></div></div>
-                                <div id="side-drop-pad-right" class="w-12 h-[6px] rounded-[1px] shadow border absolute bottom-[144px] right-[44px] opacity-0 z-30 pointer-events-none"></div>
-                            </div>
-                        </div>
-
+                <!-- CONTAINER KETIGA MESIN 3D GLB -->
+                <div class="w-full xl:w-[65%] flex justify-center items-center scroll-animate opacity-0 translate-y-10 delay-100 h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[750px] relative">
+                    
+                    <!-- Latar Belakang Estetik -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-pink-50 to-white border border-pink-100 rounded-[2.5rem] shadow-xl overflow-hidden">
+                        <!-- Pola Latar Belakang -->
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#FF4D85 2px, transparent 2px); background-size: 30px 30px;"></div>
+                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse-slow"></div>
+                        <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse-slow" style="animation-delay: 1.5s;"></div>
                     </div>
+
+                    <!-- 3D MODEL VIEWER -->
+                    <model-viewer 
+                        src="assets/periodcare.glb" 
+                        alt="3D Model PeriodCare Machine"
+                        auto-rotate
+                        rotation-per-second="30deg"
+                        camera-controls
+                        shadow-intensity="1.5"
+                        shadow-softness="1"
+                        exposure="1.2"
+                        environment-image="neutral"
+                        camera-orbit="-35deg 75deg 105%"
+                        min-camera-orbit="auto auto 5%"
+                        max-camera-orbit="auto auto 200%"
+                        class="w-full h-full relative z-10 outline-none cursor-grab active:cursor-grabbing">
+                        
+                        <!-- Poster Overlay Saat Loading 3D -->
+                        <div slot="poster" class="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm">
+                            <div class="w-12 h-12 border-4 border-pink-200 border-t-primary rounded-full animate-spin mb-4"></div>
+                            <span class="text-sm font-bold text-primary tracking-widest uppercase">Memuat 3D...</span>
+                        </div>
+                    </model-viewer>
+                    
+                    <!-- Label Instruksi -->
+                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur px-5 py-2.5 rounded-full shadow-lg border border-pink-100 flex items-center gap-2 z-20 pointer-events-none">
+                        <svg class="w-5 h-5 text-primary animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                        <span class="text-xs font-bold text-gray-700 tracking-wide">Putar 360° dengan Jari</span>
+                    </div>
+
                 </div>
             </div>
         </section>
 
-        <!-- SISA KODE WEBSITE -->
+        <!-- SISA KODE WEBSITE BAWAHAN (About, Locations, FAQ, Donate, Footer) -->
         <section id="about" class="bg-white py-20 border-t border-gray-100">
             <div class="container mx-auto px-6">
-                <div class="text-center mb-10 scroll-animate opacity-0 translate-y-10">
+                <div class="text-center mb-10 scroll-animate opacity-0 translate-y-10 transition-all duration-700">
                     <h2 class="heading-2 mb-4">Mengapa PERIODCARE MACHINE Hadir?</h2><br>
                     <p class="body-text max-w-3xl mx-auto">Fenomena Period Poverty berdampak langsung pada hilangnya hari efektif sekolah. Mesin ini hadir untuk menguji efektivitas penyediaan pembalut gratis yang terintegrasi IoT untuk distribusi transparan dan tepat sasaran.</p>
                 </div>
@@ -313,13 +162,13 @@
 
         <section id="locations" class="py-20 bg-light border-t border-gray-200">
             <div class="container mx-auto px-6">
-                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
+                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10 transition-all duration-700">
                     <h2 class="heading-2 mb-4">Live Tracker & Lokasi Mesin</h2><br>
                     <p class="body-text max-w-2xl mx-auto">Pantau ketersediaan stok pembalut secara real-time. Temukan lokasi mesin terdekat melalui Google Maps untuk kemudahan akses.</p>
                 </div>
-                <div class="flex flex-col lg:flex-row gap-8 mb-24 scroll-animate opacity-0 translate-y-10">
+                <div class="flex flex-col lg:flex-row gap-8 mb-24 scroll-animate opacity-0 translate-y-10 transition-all duration-700 delay-100">
                     <div class="w-full lg:w-1/2 bg-white rounded-2xl p-2 shadow-sm border border-gray-100 flex h-[350px] lg:h-[450px]">
-                        <iframe id="maps-iframe" src="https://www.google.com/maps/embed?..." class="w-full h-full rounded-xl flex-1" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        <iframe id="maps-iframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.0981313337996!2d110.3844!3d-7.7793!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a59b2d45b4b8f%3A0x89db78f8c4424987!2sUniversitas%20Negeri%20Yogyakarta!5e0!3m2!1sid!2sid!4v1716301234567!5m2!1sid!2sid" class="w-full h-full rounded-xl flex-1" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                     </div>
                     <div class="w-full lg:w-1/2 flex flex-col">
                         <div class="flex flex-col sm:flex-row gap-4 mb-6">
@@ -335,10 +184,10 @@
                     </div>
                 </div>
 
-                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
+                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10 transition-all duration-700">
                     <h2 class="heading-2 mb-4">Dashboard Transparansi Donasi</h2>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 scroll-animate opacity-0 translate-y-10">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 scroll-animate opacity-0 translate-y-10 transition-all duration-700 delay-100">
                     <div class="lg:col-span-1 space-y-6">
                         <div class="bg-gradient-to-br from-primary to-soft rounded-2xl p-6 text-white shadow-soft">
                             <h3 class="text-sm font-semibold uppercase tracking-wider mb-2 opacity-90">Total Donasi Terkumpul</h3>
@@ -366,11 +215,11 @@
 
         <section id="faq" class="py-20 bg-white border-t border-pink-100">
             <div class="container mx-auto px-6 max-w-4xl">
-                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
+                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10 transition-all duration-700">
                     <h2 class="heading-2 mb-4">Pertanyaan yang Sering Diajukan (FAQ)</h2><br>
                     <p class="body-text">Pelajari lebih lanjut tentang cara kerja, keamanan, dan visi di balik PeriodCare Machine.</p>
                 </div>
-                <div class="space-y-4 scroll-animate opacity-0 translate-y-10">
+                <div class="space-y-4 scroll-animate opacity-0 translate-y-10 transition-all duration-700 delay-100">
                     <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group" open>
                         <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors"><span>1. Apakah aman dan steril jika saya menyumbangkan pembalut langsung ke dalam mesin?</span><span class="transition group-open:rotate-180"><svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span></summary><p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm"><b>Sangat aman!</b> Mesin PeriodCare didesain dengan kompartemen tertutup yang menjaga kebersihan. Kami menerapkan aturan ketat bahwa pembalut yang disumbangkan secara fisik <b>wajib masih dalam kemasan plastik segel aslinya (belum terbuka)</b>.</p>
                     </details>
@@ -392,8 +241,8 @@
 
         <section id="donate" class="py-20 bg-light border-t border-gray-200 relative">
             <div class="container mx-auto px-6">
-                <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10"><h2 class="heading-2 mb-4">Waktunya Mengambil Peran</h2><br><p class="body-text max-w-2xl mx-auto">Pilih cara Anda berkontribusi. Menjadi donatur untuk operasional mesin, atau bergabung sebagai relawan.</p></div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 scroll-animate opacity-0 translate-y-10">
+                <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10 transition-all duration-700"><h2 class="heading-2 mb-4">Waktunya Mengambil Peran</h2><br><p class="body-text max-w-2xl mx-auto">Pilih cara Anda berkontribusi. Menjadi donatur untuk operasional mesin, atau bergabung sebagai relawan.</p></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 scroll-animate opacity-0 translate-y-10 transition-all duration-700 delay-100">
                     <div class="bg-white rounded-3xl p-8 border border-pink-100 shadow-sm">
                         <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-xl"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div><h3 class="text-2xl font-bold text-dark">Berdonasi</h3></div>
                         <p class="text-gray-600 mb-6 text-sm">Scan QRIS di bawah ini melalui aplikasi M-Banking atau e-Wallet Anda.</p>
@@ -418,7 +267,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-dark rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl scroll-animate opacity-0 translate-y-10">
+                <div class="bg-dark rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl scroll-animate opacity-0 translate-y-10 transition-all duration-700">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div><h3 class="text-3xl font-bold mb-4">Punya Ide Kolaborasi?</h3><br><p class="text-gray-400 mb-8">Kami membuka pintu seluas-luasnya untuk pemerintah daerah, NGO, maupun swasta.</p>
                             <div class="space-y-4">
@@ -445,6 +294,33 @@
         </div>
     </footer>
 
+    <!-- Karena kita membuang interaktif 2D lama, kita juga harus menghentikan js fisika lama agar website tidak berat -->
+    <!-- Jika masih menggunakan js lama untuk navbar dan firebase, script ini tetap dipertahankan -->
     <script type="module" src="assets/js/main.js"></script>
+    <script>
+        // Script ringan untuk animasi fade saat website pertama kali di-load
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                setTimeout(() => { 
+                    loader.classList.add('opacity-0'); 
+                    setTimeout(() => { loader.style.display = 'none'; }, 700); 
+                }, 500);
+            }
+            
+            // Intersection Observer untuk scroll animation
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => { 
+                    if (entry.isIntersecting) { 
+                        entry.target.classList.remove('opacity-0', 'translate-y-10'); 
+                        entry.target.classList.add('opacity-100', 'translate-y-0'); 
+                        obs.unobserve(entry.target); 
+                    } 
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.scroll-animate').forEach(el => observer.observe(el));
+        });
+    </script>
 </body>
 </html>
