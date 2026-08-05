@@ -18,7 +18,7 @@ let visualMachine = {
 };
 
 let activePads = []; 
-let hintTimeout; // Variabel untuk kontrol durasi animasi tangan
+let hintTimeout; // Variabel kontrol animasi kursor
 
 const physics = { gravity: 0.8, friction: 0.98, bounce: 0.35 };
 
@@ -43,20 +43,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* =======================================================
-   ANIMASI TUTORIAL DRAG (HAND POINTER)
+   ANIMASI TUTORIAL DRAG (KURSOR ESTETIK)
    ======================================================= */
 function showDragHint() {
     const hint = document.getElementById('drag-hint-wrapper');
     const icon = document.getElementById('drag-hint-icon');
     if(hint && icon) {
         hint.classList.remove('hidden');
-        icon.classList.add('animate-swipe-hand');
+        icon.classList.add('animate-swipe-cursor');
         clearTimeout(hintTimeout);
-        // Sembunyikan otomatis setelah 8 detik (4 kali pengulangan gerakan)
+        // Sembunyikan otomatis setelah 10 detik (4 kali animasi)
         hintTimeout = setTimeout(() => {
             hint.classList.add('hidden');
-            icon.classList.remove('animate-swipe-hand');
-        }, 8000); 
+            icon.classList.remove('animate-swipe-cursor');
+        }, 10000); 
     }
 }
 
@@ -65,7 +65,7 @@ function hideDragHint() {
     const icon = document.getElementById('drag-hint-icon');
     if(hint && icon) {
         hint.classList.add('hidden');
-        icon.classList.remove('animate-swipe-hand');
+        icon.classList.remove('animate-swipe-cursor');
         clearTimeout(hintTimeout);
     }
 }
@@ -117,7 +117,7 @@ function dispensePad(type) {
         
         spawnDraggablePad(type); 
         
-        // Munculkan animasi tangan setelah pad selesai jatuh (600ms kemudian)
+        // Memunculkan Kursor Animasi
         setTimeout(showDragHint, 600);
 
         visualMachine.isProcessing = false;
@@ -218,7 +218,7 @@ function spawnDraggablePad(type) {
     const onDown = (e) => {
         e.preventDefault();
         
-        // HILANGKAN ANIMASI TANGAN BEGITU USER MENYENTUH PEMBALUT
+        // HILANGKAN ANIMASI KURSOR BEGITU USER MENYENTUH PEMBALUT
         hideDragHint();
 
         padObj.isDragging = true;
@@ -270,10 +270,13 @@ function checkDonationDrop(padObj) {
             padObj.el.style.transform = `translate(${zRect.left + window.scrollX}px, ${zRect.top + window.scrollY + 20}px) scale(0) rotate(90deg)`;
             padObj.el.style.opacity = '0';
             
+            setMachineBusy(true, "MENERIMA DONASI...", "pink");
+
             setTimeout(() => {
                 padObj.el.remove();
                 if(slotType === 'reguler') visualMachine.stockReguler++; else visualMachine.stockMaxi++;
                 renderPhysicalStacks(); updatePhysicalScreen();
+                setMachineBusy(false, "TERIMA KASIH!", "green"); // Dihapus emoji kaku-nya
             }, 500);
             
             return;
@@ -295,7 +298,6 @@ function physicsLoop() {
         pad.y += pad.vy;
         pad.rotation += pad.vr;
 
-        // Pengecekan Batas Layar Horizontal
         if (pad.x < 0) { pad.x = 0; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
         if (pad.x + pad.w > window.innerWidth) { pad.x = window.innerWidth - pad.w; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
 
