@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Fitur: Mesin Interaktif, Skematik 3-Panel, Real Physics, Visual Reward, Fade UI
+ * Fitur: Skematik 3-Panel, Real Scale Physics, Local Coordinates Drag, Visual Reward Partikel
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -125,11 +125,9 @@ function setMachineBusy(isBusy, msg, color) {
     
     if(led) led.className = `w-4 h-4 rounded-full bg-${color}-500 shadow-[0_0_12px_var(--tw-shadow-color)] shadow-${color}-500 ${isBusy ? 'led-blink-fast' : ''}`;
     
-    // TRANSISI FADE IN/OUT UNTUK LAYAR OS
+    // TRANSISI LAYAR OLED (FADE IN OUT HALUS)
     if(screen) {
-        screen.classList.remove('opacity-100');
-        screen.classList.add('opacity-0');
-        
+        screen.classList.replace('opacity-100', 'opacity-0');
         setTimeout(() => {
             screen.textContent = msg;
             screen.className = `text-${color}-400 text-[12px] font-mono font-bold text-center px-2 transition-opacity duration-300 ease-in-out opacity-100 ${isBusy ? 'led-blink-fast' : 'animate-pulse'}`;
@@ -171,6 +169,7 @@ function dispensePad(type) {
             sidePad.classList.remove('animate-side-push-drop');
             sidePad.style.opacity = '0'; 
             
+            // SPAWN DI MESIN TENGAH
             spawnDraggablePad(type); 
             setTimeout(showDragHint, 600);
 
@@ -182,7 +181,7 @@ function dispensePad(type) {
             const cdInterval = setInterval(() => {
                 countdown--;
                 if (countdown > 0) {
-                    document.getElementById('screen-status').textContent = `TUNGGU ${countdown} DETIK`;
+                    setMachineBusy(true, `TUNGGU ${countdown} DETIK`, "red");
                 } else {
                     clearInterval(cdInterval);
                     visualMachine.isOnCooldown = false;
@@ -195,31 +194,36 @@ function dispensePad(type) {
     }
 }
 
+// ========================================================
+// CORE FIX: LOCAL COORDINATE PHYSICS SYSTEM
+// ========================================================
 function spawnDraggablePad(type) {
+    const machine = document.getElementById('machine-body');
+    if(!machine) return;
+
     const pad = document.createElement('div');
     const isReg = type === 'reguler';
     
-    pad.className = `absolute top-0 left-0 z-[99999] cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'w-12 h-5 bg-pink-100 border-pink-300 text-pink-600' : 'w-16 h-5 bg-orange-100 border-orange-300 text-orange-600'}`;
+    // Z-index 10 memastikan pad berada di belakang front-lip kotak pengambilan (z-30)
+    pad.className = `absolute z-10 cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'bg-pink-100 border-pink-300 text-pink-600' : 'bg-orange-100 border-orange-300 text-orange-600'}`;
     pad.innerHTML = `<span class="text-[8px] font-bold pointer-events-none">${isReg ? 'REG' : 'MAXI'}</span>`;
     
-    const box = document.getElementById('pickup-box');
-    const boxRect = box.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-    
-    let boxAbsoluteTop = boxRect.top + scrollTop;
-    let boxAbsoluteLeft = boxRect.left + scrollLeft;
+    // Ukuran fixed, akan di-scale otomatis karena masuk di dalam #machine-body
+    let padW = isReg ? 48 : 64;
+    pad.style.width = padW + 'px';
+    pad.style.height = '20px';
 
-    let startX = boxAbsoluteLeft + (boxRect.width/2) - (isReg ? 24 : 32);
-    let startY = boxAbsoluteTop - 20; 
-    let targetY = boxAbsoluteTop + boxRect.height - 35; 
-    
-    document.body.appendChild(pad);
+    machine.appendChild(pad);
+
+    // Koordinat relatif di dalam kotak berukuran 320x560
+    let startX = (320 / 2) - (padW / 2);
+    let startY = 400; // Tengah mesin
+    let targetY = 525; // Jatuh tepat di atas lantai kotak hitam
 
     let padObj = { 
         el: pad, type: type, 
         x: startX, y: startY, 
-        w: isReg ? 48 : 64, h: 20, 
+        w: padW, h: 20, 
         vx: 0, vy: 0, 
         rotation: 0, vr: 0, 
         isDragging: false,
@@ -227,6 +231,7 @@ function spawnDraggablePad(type) {
     };
     activePads.push(padObj);
 
+    // Animasi jatuh awal menggunakan transition
     requestAnimationFrame(() => {
         pad.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
         pad.style.transform = `translate(${startX}px, ${targetY}px)`;
@@ -242,16 +247,28 @@ function spawnDraggablePad(type) {
     
     const onMove = (e) => {
         if(!padObj.isDragging) return;
+        e.preventDefault(); // Mengunci scroll layar secara total saat drag
+
+        const mRect = machine.getBoundingClientRect();
+        const scale = mRect.width / 320; // Hitung rasio scale dinamis saat ini
+        const absoluteLeft = mRect.left + window.scrollX;
+        const absoluteTop = mRect.top + window.scrollY;
+
         const pageX = e.touches ? e.touches[0].pageX : e.pageX;
         const pageY = e.touches ? e.touches[0].pageY : e.pageY;
+
+        // Konversi koordinat sentuhan layar (Global) menjadi koordinat mesin (Lokal)
+        const localX = (pageX - absoluteLeft) / scale;
+        const localY = (pageY - absoluteTop) / scale;
+
+        padObj.vx = (localX - lastX) * 0.7; 
+        padObj.vy = (localY - lastY) * 0.7;
         
-        padObj.vx = (pageX - lastX) * 0.7; 
-        padObj.vy = (pageY - lastY) * 0.7;
+        padObj.x = localX - offsetX; 
+        padObj.y = localY - offsetY;
         
-        padObj.x = pageX - offsetX; 
-        padObj.y = pageY - offsetY;
-        
-        lastX = pageX; lastY = pageY;
+        lastX = localX; 
+        lastY = localY;
 
         padObj.rotation = padObj.vx * 1.2; 
         pad.style.transform = `translate(${padObj.x}px, ${padObj.y}px) rotate(${padObj.rotation}deg) scale(1.1)`;
@@ -261,7 +278,6 @@ function spawnDraggablePad(type) {
         if(!padObj.isDragging) return;
         padObj.isDragging = false;
         pad.classList.remove('cursor-grabbing', 'scale-110'); pad.classList.add('cursor-grab');
-        
         padObj.vr = padObj.vx * 0.5;
 
         window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp);
@@ -274,21 +290,33 @@ function spawnDraggablePad(type) {
         e.preventDefault();
         hideDragHint();
 
+        // Naikkan z-index agar berada di atas slot donasi saat dipegang
+        pad.classList.replace('z-10', 'z-50');
+
         padObj.isDragging = true;
         padObj.isResting = false; 
         padObj.vx = 0; padObj.vy = 0; padObj.vr = 0;
         
         pad.classList.remove('cursor-grab'); pad.classList.add('cursor-grabbing');
         
+        const mRect = machine.getBoundingClientRect();
+        const scale = mRect.width / 320;
+        const absoluteLeft = mRect.left + window.scrollX;
+        const absoluteTop = mRect.top + window.scrollY;
+
         const pageX = e.touches ? e.touches[0].pageX : e.pageX;
         const pageY = e.touches ? e.touches[0].pageY : e.pageY;
 
-        lastX = pageX; lastY = pageY;
-        offsetX = pageX - padObj.x;
-        offsetY = pageY - padObj.y;
+        const localX = (pageX - absoluteLeft) / scale;
+        const localY = (pageY - absoluteTop) / scale;
+
+        lastX = localX; 
+        lastY = localY;
+        offsetX = localX - padObj.x;
+        offsetY = localY - padObj.y;
         
         window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchend', onUp);
+        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchend', onUp);
     };
 
     pad.addEventListener('pointerdown', onDown);
@@ -297,13 +325,21 @@ function spawnDraggablePad(type) {
 
 function checkDonationDrop(padObj) {
     const dropZones = document.querySelectorAll('.drop-zone');
-    let padViewportX = padObj.x + padObj.w/2 - window.scrollX;
-    let padViewportY = padObj.y + padObj.h/2 - window.scrollY; 
+    const machine = document.getElementById('machine-body');
+    const mRect = machine.getBoundingClientRect();
+    const scale = mRect.width / 320;
+    const absoluteLeft = mRect.left + window.scrollX;
+    const absoluteTop = mRect.top + window.scrollY;
+
+    // Kalkulasi presisi titik pusat pembalut di layar global
+    let padScreenCenterX = absoluteLeft + (padObj.x + padObj.w/2) * scale;
+    let padScreenCenterY = absoluteTop + (padObj.y + padObj.h/2) * scale; 
 
     for (let zone of dropZones) {
         let zRect = zone.getBoundingClientRect();
         
-        if (padViewportX > zRect.left && padViewportX < zRect.right && padViewportY > zRect.top && padViewportY < zRect.bottom) {
+        // Pengecekan tabrakan menggunakan koordinat layar
+        if (padScreenCenterX > zRect.left && padScreenCenterX < zRect.right && padScreenCenterY > zRect.top && padScreenCenterY < zRect.bottom) {
             let slotType = zone.getAttribute('data-type');
             
             if (slotType !== padObj.type) {
@@ -320,36 +356,45 @@ function checkDonationDrop(padObj) {
 
             const isReg = slotType === 'reguler';
 
+            // Efek Sedot Mesin Utama
             activePads = activePads.filter(p => p !== padObj);
-            padObj.el.style.transition = 'all 0.5s ease-in';
-            padObj.el.style.transform = `translate(${zRect.left + window.scrollX}px, ${zRect.top + window.scrollY + 20}px) scale(0) rotate(90deg)`;
+            padObj.el.style.transition = 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+            
+            // Konversi kembali dari Global ke Lokal agar sedotannya presisi di slot
+            let targetLocalX = (zRect.left + window.scrollX - absoluteLeft) / scale;
+            let targetLocalY = (zRect.top + window.scrollY + 20 - absoluteTop) / scale;
+            
+            padObj.el.style.transform = `translate(${targetLocalX}px, ${targetLocalY}px) scale(0) rotate(90deg)`;
             padObj.el.style.opacity = '0';
             
             setMachineBusy(true, "MENERIMA DONASI...", "pink");
 
+            // Animasi Jatuh Donasi (Panel Samping)
             const sideDonatePadId = isReg ? 'side-donate-pad-left' : 'side-donate-pad-right';
             const sideDonatePad = document.getElementById(sideDonatePadId);
 
             if(sideDonatePad) {
                 sideDonatePad.className = `w-12 h-[6px] rounded-[1px] shadow border absolute top-[30px] right-[44px] z-30 pointer-events-none opacity-100 ${isReg ? 'bg-pink-200 border-pink-400' : 'bg-orange-200 border-orange-400'}`;
-                
                 void sideDonatePad.offsetWidth; 
                 sideDonatePad.classList.add('animate-side-donate-drop');
             }
 
-            // EFEK VISUAL REWARD PARTIKEL DONASI
-            for(let i=0; i<4; i++){
+            // REWARD VISUAL PARTIKEL (Bintang & Hati)
+            for(let i=0; i<6; i++){
                 setTimeout(() => {
-                    let star = document.createElement('div');
-                    star.innerHTML = '✨'; 
-                    star.className = 'absolute text-xl z-[100000] pointer-events-none animate-float-up drop-shadow-md';
-                    star.style.left = (zRect.left + zRect.width/2 - 10 + (Math.random()*30 - 15) + window.scrollX) + 'px';
-                    star.style.top = (zRect.top + window.scrollY - 10) + 'px';
-                    document.body.appendChild(star);
-                    setTimeout(() => star.remove(), 1000);
-                }, i * 150);
+                    let particle = document.createElement('div');
+                    particle.innerHTML = ['✨','💖','⭐','🎀'][Math.floor(Math.random()*4)];
+                    particle.className = 'animate-particle drop-shadow-md';
+                    particle.style.left = (padScreenCenterX - 15) + 'px';
+                    particle.style.top = padScreenCenterY + 'px';
+                    particle.style.setProperty('--tx', `${(Math.random() - 0.5) * 80}px`);
+                    particle.style.setProperty('--ty', `${(Math.random() - 1) * 120}px`);
+                    document.body.appendChild(particle);
+                    setTimeout(() => particle.remove(), 1000);
+                }, i * 100);
             }
 
+            // Selesai Donasi
             setTimeout(() => {
                 padObj.el.remove();
                 if(sideDonatePad) {
@@ -358,19 +403,24 @@ function checkDonationDrop(padObj) {
                 }
                 
                 if(isReg) visualMachine.stockReguler++; else visualMachine.stockMaxi++;
-                
                 renderPhysicalStacks(); updatePhysicalScreen();
                 setMachineBusy(false, "TERIMA KASIH!", "green");
-            }, 500);
+            }, 600);
             
             return;
         }
     }
 }
 
-// MESIN FISIKA (GRAVITASI MULUS + Z-INDEX FIX)
 function physicsLoop() {
+    const machineBody = document.getElementById('machine-body');
+    if(!machineBody) return requestAnimationFrame(physicsLoop);
+
     const colliders = Array.from(document.querySelectorAll('.collider'));
+    const mRect = machineBody.getBoundingClientRect();
+    const scale = mRect.width / 320;
+    const absoluteLeft = mRect.left + window.scrollX;
+    const absoluteTop = mRect.top + window.scrollY;
 
     activePads.forEach(pad => {
         if (pad.isDragging || pad.isResting) return; 
@@ -383,36 +433,58 @@ function physicsLoop() {
         pad.y += pad.vy;
         pad.rotation += pad.vr;
 
-        if (pad.x < 0) { pad.x = 0; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
-        if (pad.x + pad.w > window.innerWidth) { pad.x = window.innerWidth - pad.w; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
+        // Batas Layar Dikonversi ke Koordinat Lokal Mesin
+        const minX = -absoluteLeft / scale;
+        const maxX = (document.documentElement.scrollWidth - absoluteLeft) / scale - pad.w;
+        const minY = -absoluteTop / scale;
+        const maxY = (Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - absoluteTop) / scale - pad.h;
 
-        let docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
-        if (pad.y + pad.h > docHeight) {
-            pad.y = docHeight - pad.h;
+        if (pad.x < minX) { pad.x = minX; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
+        if (pad.x > maxX) { pad.x = maxX; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
+
+        if (pad.y > maxY) {
+            pad.y = maxY;
             pad.vy *= -physics.bounce;
             pad.vx *= 0.8; 
             pad.vr *= 0.5;
             if(Math.abs(pad.vy) < 1) { pad.vy = 0; pad.vr = 0; }
         }
 
+        // Pengecekan Tabrakan Objek Fisik (Collider) via Global Screen Coordinates
         let isRestingOnCollider = false;
+        let padScreenX = absoluteLeft + pad.x * scale;
+        let padScreenY = absoluteTop + pad.y * scale;
+        let padScreenW = pad.w * scale;
+        let padScreenH = pad.h * scale;
+
         for (let el of colliders) {
+            if (el.id === 'machine-body') continue; // Cegah self-collision
+
             let rect = el.getBoundingClientRect();
             let elTop = rect.top + window.scrollY;
             let elBottom = rect.bottom + window.scrollY;
             let elLeft = rect.left + window.scrollX;
             let elRight = rect.right + window.scrollX;
 
-            if (pad.vy > 0 && pad.y + pad.h >= elTop && pad.y + pad.h - pad.vy <= elTop + 15 && pad.x + pad.w > elLeft && pad.x < elRight) {
-                pad.y = elTop - pad.h;
+            let vyScreen = pad.vy * scale;
+            let vxScreen = pad.vx * scale;
+
+            if (vyScreen > 0 && padScreenY + padScreenH >= elTop && padScreenY + padScreenH - vyScreen <= elTop + 20 && padScreenX + padScreenW > elLeft && padScreenX < elRight) {
+                pad.y = (elTop - absoluteTop) / scale - pad.h; // Konversi balik mendarat lokal
                 pad.vy *= -physics.bounce;
                 pad.vx *= 0.8;
                 pad.vr *= 0.5;
                 isRestingOnCollider = true;
             }
-            else if (pad.y + pad.h > elTop && pad.y < elBottom) {
-                if (pad.vx > 0 && pad.x + pad.w >= elLeft && pad.x + pad.w - pad.vx <= elLeft) { pad.x = elLeft - pad.w; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
-                else if (pad.vx < 0 && pad.x <= elRight && pad.x - pad.vx >= elRight) { pad.x = elRight; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
+            else if (padScreenY + padScreenH > elTop && padScreenY < elBottom) {
+                if (vxScreen > 0 && padScreenX + padScreenW >= elLeft && padScreenX + padScreenW - vxScreen <= elLeft) { 
+                    pad.x = (elLeft - absoluteLeft) / scale - pad.w; 
+                    pad.vx *= -physics.bounce; pad.vr *= -0.5; 
+                }
+                else if (vxScreen < 0 && padScreenX <= elRight && padScreenX - vxScreen >= elRight) { 
+                    pad.x = (elRight - absoluteLeft) / scale; 
+                    pad.vx *= -physics.bounce; pad.vr *= -0.5; 
+                }
             }
         }
 
