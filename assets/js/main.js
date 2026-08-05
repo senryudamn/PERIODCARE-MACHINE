@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * Fitur: Skematik 3-Panel, Real Scale Physics, Local Coordinates Drag, Visual Reward Partikel
+ * Fitur: Skematik 3-Panel, Real Scale Physics, Global Coordinates Drag, Visual Reward Partikel
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -195,7 +195,7 @@ function dispensePad(type) {
 }
 
 // ========================================================
-// CORE FIX: LOCAL COORDINATE PHYSICS SYSTEM
+// CORE FIX: LOCAL COORDINATE PHYSICS SYSTEM & DRAG FIX
 // ========================================================
 function spawnDraggablePad(type) {
     const machine = document.getElementById('machine-body');
@@ -205,20 +205,21 @@ function spawnDraggablePad(type) {
     const isReg = type === 'reguler';
     
     // Z-index 10 memastikan pad berada di belakang front-lip kotak pengambilan (z-30)
+    // Menambahkan touch-none agar saat pad ditarik, tidak memicu scroll layar
     pad.className = `absolute z-10 cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'bg-pink-100 border-pink-300 text-pink-600' : 'bg-orange-100 border-orange-300 text-orange-600'}`;
     pad.innerHTML = `<span class="text-[8px] font-bold pointer-events-none">${isReg ? 'REG' : 'MAXI'}</span>`;
     
-    // Ukuran fixed, akan di-scale otomatis karena masuk di dalam #machine-body
+    // Ukuran fixed mesin (320x560)
     let padW = isReg ? 48 : 64;
     pad.style.width = padW + 'px';
     pad.style.height = '20px';
 
     machine.appendChild(pad);
 
-    // Koordinat relatif di dalam kotak berukuran 320x560
-    let startX = (320 / 2) - (padW / 2);
-    let startY = 400; // Tengah mesin
-    let targetY = 525; // Jatuh tepat di atas lantai kotak hitam
+    // Koordinat relatif di dalam kotak mesin berukuran 320x560
+    let startX = 160 - (padW / 2); // Center of 320px
+    let startY = 380; // Jatuh dari atas layar OS
+    let targetY = 510; // Menginjak dasar kotak hitam
 
     let padObj = { 
         el: pad, type: type, 
@@ -231,7 +232,7 @@ function spawnDraggablePad(type) {
     };
     activePads.push(padObj);
 
-    // Animasi jatuh awal menggunakan transition
+    // Animasi jatuh awal menggunakan transition murni
     requestAnimationFrame(() => {
         pad.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
         pad.style.transform = `translate(${startX}px, ${targetY}px)`;
@@ -247,10 +248,11 @@ function spawnDraggablePad(type) {
     
     const onMove = (e) => {
         if(!padObj.isDragging) return;
-        e.preventDefault(); // Mengunci scroll layar secara total saat drag
+        e.preventDefault(); // Mengunci scroll layar secara total HANYA saat pad ditarik
 
         const mRect = machine.getBoundingClientRect();
-        const scale = mRect.width / 320; // Hitung rasio scale dinamis saat ini
+        const scale = mRect.width / 320; // Hitung rasio scale dinamis mesin di HP
+        
         const absoluteLeft = mRect.left + window.scrollX;
         const absoluteTop = mRect.top + window.scrollY;
 
@@ -325,21 +327,17 @@ function spawnDraggablePad(type) {
 
 function checkDonationDrop(padObj) {
     const dropZones = document.querySelectorAll('.drop-zone');
-    const machine = document.getElementById('machine-body');
-    const mRect = machine.getBoundingClientRect();
-    const scale = mRect.width / 320;
-    const absoluteLeft = mRect.left + window.scrollX;
-    const absoluteTop = mRect.top + window.scrollY;
-
-    // Kalkulasi presisi titik pusat pembalut di layar global
-    let padScreenCenterX = absoluteLeft + (padObj.x + padObj.w/2) * scale;
-    let padScreenCenterY = absoluteTop + (padObj.y + padObj.h/2) * scale; 
+    
+    // Hitung posisi tengah pembalut di layar global menggunakan GetBoundingClientRect (Bebas dari bug scaling CSS)
+    const padRect = padObj.el.getBoundingClientRect();
+    const padCenterX = padRect.left + padRect.width / 2;
+    const padCenterY = padRect.top + padRect.height / 2;
 
     for (let zone of dropZones) {
         let zRect = zone.getBoundingClientRect();
         
-        // Pengecekan tabrakan menggunakan koordinat layar
-        if (padScreenCenterX > zRect.left && padScreenCenterX < zRect.right && padScreenCenterY > zRect.top && padScreenCenterY < zRect.bottom) {
+        // Pengecekan Tabrakan Presisi Tinggi
+        if (padCenterX > zRect.left && padCenterX < zRect.right && padCenterY > zRect.top && padCenterY < zRect.bottom) {
             let slotType = zone.getAttribute('data-type');
             
             if (slotType !== padObj.type) {
@@ -356,11 +354,17 @@ function checkDonationDrop(padObj) {
 
             const isReg = slotType === 'reguler';
 
-            // Efek Sedot Mesin Utama
+            // Sedot masuk di mesin depan
             activePads = activePads.filter(p => p !== padObj);
             padObj.el.style.transition = 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
             
-            // Konversi kembali dari Global ke Lokal agar sedotannya presisi di slot
+            // Konversi kembali ke lokal (320x560) untuk animasi sedot masuk slot
+            const machine = document.getElementById('machine-body');
+            const mRect = machine.getBoundingClientRect();
+            const scale = mRect.width / 320;
+            const absoluteLeft = mRect.left + window.scrollX;
+            const absoluteTop = mRect.top + window.scrollY;
+
             let targetLocalX = (zRect.left + window.scrollX - absoluteLeft) / scale;
             let targetLocalY = (zRect.top + window.scrollY + 20 - absoluteTop) / scale;
             
@@ -369,7 +373,7 @@ function checkDonationDrop(padObj) {
             
             setMachineBusy(true, "MENERIMA DONASI...", "pink");
 
-            // Animasi Jatuh Donasi (Panel Samping)
+            // JALANKAN ANIMASI JATUH DI SIDE VIEW KIRI/KANAN (DONASI MASUK)
             const sideDonatePadId = isReg ? 'side-donate-pad-left' : 'side-donate-pad-right';
             const sideDonatePad = document.getElementById(sideDonatePadId);
 
@@ -385,8 +389,8 @@ function checkDonationDrop(padObj) {
                     let particle = document.createElement('div');
                     particle.innerHTML = ['✨','💖','⭐','🎀'][Math.floor(Math.random()*4)];
                     particle.className = 'animate-particle drop-shadow-md';
-                    particle.style.left = (padScreenCenterX - 15) + 'px';
-                    particle.style.top = padScreenCenterY + 'px';
+                    particle.style.left = (padCenterX - 15) + 'px';
+                    particle.style.top = padCenterY + 'px';
                     particle.style.setProperty('--tx', `${(Math.random() - 0.5) * 80}px`);
                     particle.style.setProperty('--ty', `${(Math.random() - 1) * 120}px`);
                     document.body.appendChild(particle);
@@ -402,7 +406,9 @@ function checkDonationDrop(padObj) {
                     sideDonatePad.style.opacity = '0';
                 }
                 
+                // Tambahkan Stok Aktual Keseluruhan
                 if(isReg) visualMachine.stockReguler++; else visualMachine.stockMaxi++;
+                
                 renderPhysicalStacks(); updatePhysicalScreen();
                 setMachineBusy(false, "TERIMA KASIH!", "green");
             }, 600);
@@ -412,16 +418,8 @@ function checkDonationDrop(padObj) {
     }
 }
 
+// MESIN FISIKA LOKAL (ANTI JATUH KE LUAR MESIN)
 function physicsLoop() {
-    const machineBody = document.getElementById('machine-body');
-    if(!machineBody) return requestAnimationFrame(physicsLoop);
-
-    const colliders = Array.from(document.querySelectorAll('.collider'));
-    const mRect = machineBody.getBoundingClientRect();
-    const scale = mRect.width / 320;
-    const absoluteLeft = mRect.left + window.scrollX;
-    const absoluteTop = mRect.top + window.scrollY;
-
     activePads.forEach(pad => {
         if (pad.isDragging || pad.isResting) return; 
 
@@ -433,59 +431,18 @@ function physicsLoop() {
         pad.y += pad.vy;
         pad.rotation += pad.vr;
 
-        // Batas Layar Dikonversi ke Koordinat Lokal Mesin
-        const minX = -absoluteLeft / scale;
-        const maxX = (document.documentElement.scrollWidth - absoluteLeft) / scale - pad.w;
-        const minY = -absoluteTop / scale;
-        const maxY = (Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - absoluteTop) / scale - pad.h;
+        // Bounding Box Lokal (Mesin selalu berukuran 320x560)
+        // Mencegah pembalut jatuh menyamping keluar dari mesin
+        if (pad.x < 10) { pad.x = 10; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
+        if (pad.x + pad.w > 310) { pad.x = 310 - pad.w; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
 
-        if (pad.x < minX) { pad.x = minX; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
-        if (pad.x > maxX) { pad.x = maxX; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
-
-        if (pad.y > maxY) {
-            pad.y = maxY;
+        // Membatasi lantai hanya sampai bagian dasar kotak pengambilan hitam
+        if (pad.y + pad.h > 530) {
+            pad.y = 530 - pad.h;
             pad.vy *= -physics.bounce;
             pad.vx *= 0.8; 
             pad.vr *= 0.5;
             if(Math.abs(pad.vy) < 1) { pad.vy = 0; pad.vr = 0; }
-        }
-
-        // Pengecekan Tabrakan Objek Fisik (Collider) via Global Screen Coordinates
-        let isRestingOnCollider = false;
-        let padScreenX = absoluteLeft + pad.x * scale;
-        let padScreenY = absoluteTop + pad.y * scale;
-        let padScreenW = pad.w * scale;
-        let padScreenH = pad.h * scale;
-
-        for (let el of colliders) {
-            if (el.id === 'machine-body') continue; // Cegah self-collision
-
-            let rect = el.getBoundingClientRect();
-            let elTop = rect.top + window.scrollY;
-            let elBottom = rect.bottom + window.scrollY;
-            let elLeft = rect.left + window.scrollX;
-            let elRight = rect.right + window.scrollX;
-
-            let vyScreen = pad.vy * scale;
-            let vxScreen = pad.vx * scale;
-
-            if (vyScreen > 0 && padScreenY + padScreenH >= elTop && padScreenY + padScreenH - vyScreen <= elTop + 20 && padScreenX + padScreenW > elLeft && padScreenX < elRight) {
-                pad.y = (elTop - absoluteTop) / scale - pad.h; // Konversi balik mendarat lokal
-                pad.vy *= -physics.bounce;
-                pad.vx *= 0.8;
-                pad.vr *= 0.5;
-                isRestingOnCollider = true;
-            }
-            else if (padScreenY + padScreenH > elTop && padScreenY < elBottom) {
-                if (vxScreen > 0 && padScreenX + padScreenW >= elLeft && padScreenX + padScreenW - vxScreen <= elLeft) { 
-                    pad.x = (elLeft - absoluteLeft) / scale - pad.w; 
-                    pad.vx *= -physics.bounce; pad.vr *= -0.5; 
-                }
-                else if (vxScreen < 0 && padScreenX <= elRight && padScreenX - vxScreen >= elRight) { 
-                    pad.x = (elRight - absoluteLeft) / scale; 
-                    pad.vx *= -physics.bounce; pad.vr *= -0.5; 
-                }
-            }
         }
 
         pad.el.style.transform = `translate(${pad.x}px, ${pad.y}px) rotate(${pad.rotation}deg)`;
@@ -519,7 +476,7 @@ const initFirebaseLiveTracker = () => {
         data.forEach(m => {
             let stockVal = parseInt(m.stock) || 0; if (stockVal > maxStock) stockVal = maxStock; let percent = Math.round((stockVal / maxStock) * 100);
             let sC = stockVal > 12 ? 'bg-green-500' : (stockVal > 0 ? 'bg-yellow-500' : 'bg-red-500'); let sBg = stockVal > 12 ? 'bg-green-50' : (stockVal > 0 ? 'bg-yellow-50' : 'bg-red-50'); let sT = stockVal > 12 ? 'Aman' : (stockVal > 0 ? 'Hampir Habis' : 'Kosong');
-            container.innerHTML += `<div class="p-4 rounded-xl border border-gray-100 ${sBg} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:shadow-md collider"><div class="w-full sm:w-auto flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-xs font-mono font-bold text-gray-500">${m.id}</span><span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${sC}">${sT}</span></div><h4 class="font-bold text-dark text-sm mb-1">${m.name}</h4><p class="text-xs text-gray-600 mb-2">${m.location}</p><a href="${m.mapsLink}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-[11px] font-semibold text-gray-600 hover:text-primary hover:shadow-sm">📍 Buka di Maps</a></div><div class="text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0"><div class="text-xs text-gray-500 font-semibold mb-1">Stok Mesin:</div><div class="text-2xl font-bold text-dark leading-none">${stockVal} <span class="text-sm font-medium text-gray-400">/ ${maxStock}</span></div><div class="w-full sm:w-24 bg-gray-200 rounded-full h-1.5 mt-2"><div class="${sC} h-1.5 rounded-full" style="width: ${percent}%"></div></div></div></div>`;
+            container.innerHTML += `<div class="p-4 rounded-xl border border-gray-100 ${sBg} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:shadow-md"><div class="w-full sm:w-auto flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-xs font-mono font-bold text-gray-500">${m.id}</span><span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${sC}">${sT}</span></div><h4 class="font-bold text-dark text-sm mb-1">${m.name}</h4><p class="text-xs text-gray-600 mb-2">${m.location}</p><a href="${m.mapsLink}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-[11px] font-semibold text-gray-600 hover:text-primary hover:shadow-sm">📍 Buka di Maps</a></div><div class="text-left sm:text-right w-full sm:w-auto mt-2 sm:mt-0"><div class="text-xs text-gray-500 font-semibold mb-1">Stok Mesin:</div><div class="text-2xl font-bold text-dark leading-none">${stockVal} <span class="text-sm font-medium text-gray-400">/ ${maxStock}</span></div><div class="w-full sm:w-24 bg-gray-200 rounded-full h-1.5 mt-2"><div class="${sC} h-1.5 rounded-full" style="width: ${percent}%"></div></div></div></div>`;
         });
     };
     const applyFilters = () => {
