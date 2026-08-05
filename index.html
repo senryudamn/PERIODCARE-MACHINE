@@ -81,19 +81,19 @@
 
     <main>
         <!-- Hero Section -->
-        <section id="home" class="container mx-auto px-6 py-16 md:py-24">
+        <section id="home" class="container mx-auto px-6 py-12 md:py-24">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
                 
-                <!-- BAGIAN TEKS KIRI (DIRAPIKAN) -->
+                <!-- BAGIAN TEKS KIRI (Responsif Mobile) -->
                 <div class="w-full lg:w-1/2 text-center lg:text-left scroll-animate opacity-0 translate-y-10">
                     <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce collider">Inovasi Sosial 2026</span>
                     
                     <h1 class="heading-1 mb-6 collider">PERIODCARE MACHINE</h1>
                     
-                    <p class="body-text mb-6 collider text-justify sm:text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
+                    <p class="body-text mb-6 collider text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
                     
-                    <!-- KOTAK CARA MAIN (DIRAPIKAN DENGAN FLEXBOX) -->
-                    <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 collider shadow-sm flex flex-col gap-3 text-left">
+                    <!-- KOTAK CARA MAIN -->
+                    <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 collider shadow-sm flex flex-col items-center lg:items-start gap-3 text-center lg:text-left">
                         <div class="inline-block w-fit py-1 px-3 rounded-lg bg-pink-200 text-pink-700 font-bold text-xs tracking-wider uppercase animate-pulse">
                             🕹️ Prototipe Interaktif & Game
                         </div>
@@ -109,8 +109,8 @@
                 </div>
                 
                 <!-- MESIN INTERAKTIF -->
-                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative mt-8 lg:mt-0 scale-[0.85] sm:scale-100 origin-top">
-                    <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
+                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative mt-4 lg:mt-0 scale-[0.85] sm:scale-100 origin-top">
+                    <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none mx-auto">
                         
                         <!-- Panel Atas: 2 Slot Donasi & LED -->
                         <div class="w-full flex justify-between items-center mb-3 px-2">
@@ -182,7 +182,7 @@
         <!-- About Section -->
         <section id="about" class="bg-white py-20 border-t border-gray-100">
             <div class="container mx-auto px-6">
-                <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10">
+                <div class="text-center mb-10 scroll-animate opacity-0 translate-y-10">
                     <h2 class="heading-2 mb-4 collider">Mengapa PERIODCARE MACHINE Hadir?</h2>
                     <p class="body-text max-w-3xl mx-auto collider">Fenomena Period Poverty berdampak langsung pada hilangnya hari efektif sekolah. Mesin ini hadir untuk menguji efektivitas penyediaan pembalut gratis yang terintegrasi IoT untuk distribusi transparan dan tepat sasaran.</p>
                 </div>
@@ -243,19 +243,16 @@
             </div>
         </section>
 
-<!-- FAQ Section -->
-        <section id="faq" class="py-20 bg-light border-t border-pink-100">
+        <!-- FAQ Section -->
+        <section id="faq" class="py-20 bg-white border-t border-pink-100">
             <div class="container mx-auto px-6 max-w-4xl">
                 <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
-                    <h2 class="heading-2 mb-4 inline-block w-fit collider">Pertanyaan yang Sering Diajukan (FAQ)</h2>
-                    <br>
-                    <p class="body-text inline-block w-fit collider">Pelajari lebih lanjut tentang cara kerja, keamanan, dan visi di balik PeriodCare Machine.</p>
+                    <h2 class="heading-2 mb-4 collider">Pertanyaan yang Sering Diajukan (FAQ)</h2>
+                    <p class="body-text collider">Pelajari lebih lanjut tentang cara kerja, keamanan, dan visi di balik PeriodCare Machine.</p>
                 </div>
                 
                 <div class="space-y-4 scroll-animate opacity-0 translate-y-10">
-                    
-                    <!-- FAQ 1 -->
-                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider" open>
+                    <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider" open>
                         <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
                             <span>1. Apakah aman dan steril jika saya menyumbangkan pembalut langsung ke dalam mesin?</span>
                             <span class="transition group-open:rotate-180">
@@ -267,8 +264,7 @@
                         </p>
                     </details>
 
-                    <!-- FAQ 2 -->
-                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider">
+                    <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider">
                         <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
                             <span>2. Bagaimana cara kerja "Donasi Silang" di PeriodCare Machine?</span>
                             <span class="transition group-open:rotate-180">
@@ -282,8 +278,7 @@
                         </p>
                     </details>
 
-                    <!-- FAQ 3 -->
-                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider">
+                    <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider">
                         <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
                             <span>3. Bagaimana cara mengambil pembalut agar tidak disalahgunakan?</span>
                             <span class="transition group-open:rotate-180">
@@ -291,12 +286,11 @@
                             </span>
                         </summary>
                         <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
-                            Pengguna cukup menekan tombol mekanik pada mesin (Reguler/Maxi). Untuk mencegah penimbunan atau vandalisme (pengambilan berulang-ulang), sistem mikrokontroler mesin ini dilengkapi dengan <b>mekanisme Jeda Waktu (Cooldown)</b> selama beberapa saat setelah satu pembalut berhasil dikeluarkan. Alat ini difokuskan untuk kondisi darurat <i>(emergency)</i> di fasilitas publik/pendidikan.
+                            Pengguna cukup menekan tombol mekanik pada mesin (Reguler/Maxi). Untuk mencegah penimbunan atau vandalisme, sistem mikrokontroler mesin ini dilengkapi dengan <b>mekanisme Jeda Waktu (Cooldown)</b> selama beberapa saat setelah satu pembalut berhasil dikeluarkan. Alat ini difokuskan untuk kondisi darurat <i>(emergency)</i> di fasilitas publik/pendidikan.
                         </p>
                     </details>
 
-                    <!-- FAQ 4 -->
-                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider">
+                    <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider">
                         <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
                             <span>4. Apa fungsi dari Live Tracker IoT di website ini?</span>
                             <span class="transition group-open:rotate-180">
@@ -308,8 +302,7 @@
                         </p>
                     </details>
 
-                    <!-- FAQ 5 (BARU: SENSOR KONDISI PEMBALUT) -->
-                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider">
+                    <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider">
                         <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
                             <span>5. Apakah mesin memiliki sistem untuk memantau kondisi pembalut di dalamnya?</span>
                             <span class="transition group-open:rotate-180">
@@ -317,17 +310,15 @@
                             </span>
                         </summary>
                         <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
-                            Tentu saja! Selain menghitung stok, kompartemen mesin PeriodCare terintegrasi dengan <b>Sensor Kondisi Lingkungan (seperti Suhu & Kelembapan)</b>. Sensor ini terus mengumpulkan data di dalam rak penyimpanan secara <i>real-time</i>. Jika parameter lingkungan mencapai titik yang berpotensi merusak higienitas pembalut (misalnya suhu terlalu panas atau terlalu lembap), sistem IoT akan otomatis mengirimkan peringatan dini kepada tim <i>maintenance</i> untuk segera melakukan pengecekan fisik.
+                            Tentu saja! Selain menghitung stok, kompartemen mesin PeriodCare terintegrasi dengan <b>Sensor Kondisi Lingkungan (seperti Suhu & Kelembapan)</b>. Sensor ini terus mengumpulkan data di dalam rak penyimpanan secara <i>real-time</i>. Jika parameter lingkungan mencapai titik yang berpotensi merusak higienitas pembalut, sistem IoT akan otomatis mengirimkan peringatan dini kepada tim <i>maintenance</i> untuk segera melakukan pengecekan fisik.
                         </p>
                     </details>
-
                 </div>
             </div>
         </section>
 
-        
         <!-- Donasi, Relawan & Kontak -->
-        <section id="donate" class="py-20 bg-white border-t border-gray-200 relative">
+        <section id="donate" class="py-20 bg-light border-t border-gray-200 relative">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10">
                     <h2 class="heading-2 mb-4 collider">Waktunya Mengambil Peran</h2>
@@ -335,10 +326,10 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 scroll-animate opacity-0 translate-y-10">
-                    <div class="bg-light rounded-3xl p-8 border border-pink-100 shadow-sm collider">
+                    <div class="bg-white rounded-3xl p-8 border border-pink-100 shadow-sm collider">
                         <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-xl collider">💖</div><h3 class="text-2xl font-bold text-dark collider">Berdonasi</h3></div>
                         <p class="text-gray-600 mb-6 text-sm collider">Scan QRIS di bawah ini melalui aplikasi M-Banking atau e-Wallet Anda.</p>
-                        <div class="bg-white p-2 rounded-2xl border border-gray-200 shadow-inner w-48 h-48 mx-auto flex flex-col items-center justify-center mb-6 overflow-hidden collider">
+                        <div class="bg-light p-2 rounded-2xl border border-gray-200 shadow-inner w-48 h-48 mx-auto flex flex-col items-center justify-center mb-6 overflow-hidden collider">
                             <img id="qris-img" src="https://via.placeholder.com/300?text=Memuat+QRIS..." alt="QRIS Code" class="w-full h-full object-cover rounded-xl">
                         </div>
                         <form id="donation-form" class="space-y-4">
@@ -420,7 +411,7 @@
     <!-- Footer -->
     <footer class="bg-dark pt-8 pb-8 border-t border-gray-800">
         <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
-            <p class="mb-4 md:mb-0 collider">&copy; 2026 PERIODCARE MACHINE. Hak Cipta Dilindungi.</p>
+            <p class="mb-4 md:mb-0 text-center md:text-left collider">&copy; 2026 PERIODCARE MACHINE. Hak Cipta Dilindungi.</p>
             <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6">
                 <p class="collider">Dibuat dengan ❤️ oleh Tim Peneliti UNY</p>
                 <a href="admin.html" class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-primary text-gray-400 hover:text-white rounded-lg transition-all duration-300 border border-gray-700 hover:border-primary shadow-sm collider">
