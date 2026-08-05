@@ -125,7 +125,6 @@ function setMachineBusy(isBusy, msg, color) {
     
     if(led) led.className = `w-4 h-4 rounded-full bg-${color}-500 shadow-[0_0_12px_var(--tw-shadow-color)] shadow-${color}-500 ${isBusy ? 'led-blink-fast' : ''}`;
     
-    // TRANSISI LAYAR OLED (FADE IN OUT HALUS)
     if(screen) {
         screen.classList.replace('opacity-100', 'opacity-0');
         setTimeout(() => {
@@ -169,7 +168,6 @@ function dispensePad(type) {
             sidePad.classList.remove('animate-side-push-drop');
             sidePad.style.opacity = '0'; 
             
-            // SPAWN DI MESIN TENGAH
             spawnDraggablePad(type); 
             setTimeout(showDragHint, 600);
 
@@ -204,54 +202,42 @@ function spawnDraggablePad(type) {
     const pad = document.createElement('div');
     const isReg = type === 'reguler';
     
-    // Z-index 10 memastikan pad berada di belakang front-lip kotak pengambilan (z-30)
-    // Menambahkan touch-none agar saat pad ditarik, tidak memicu scroll layar
-    pad.className = `absolute z-10 cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'bg-pink-100 border-pink-300 text-pink-600' : 'bg-orange-100 border-orange-300 text-orange-600'}`;
+    pad.className = `absolute z-20 cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'bg-pink-100 border-pink-300 text-pink-600' : 'bg-orange-100 border-orange-300 text-orange-600'}`;
     pad.innerHTML = `<span class="text-[8px] font-bold pointer-events-none">${isReg ? 'REG' : 'MAXI'}</span>`;
     
-    // Ukuran fixed mesin (320x560)
     let padW = isReg ? 48 : 64;
     pad.style.width = padW + 'px';
     pad.style.height = '20px';
 
     machine.appendChild(pad);
 
-    // Koordinat relatif di dalam kotak mesin berukuran 320x560
-    let startX = 160 - (padW / 2); // Center of 320px
-    let startY = 380; // Jatuh dari atas layar OS
-    let targetY = 510; // Menginjak dasar kotak hitam
+    let startX = 160 - (padW / 2); 
+    let startY = 460; 
 
     let padObj = { 
         el: pad, type: type, 
         x: startX, y: startY, 
         w: padW, h: 20, 
-        vx: 0, vy: 0, 
-        rotation: 0, vr: 0, 
+        vx: (Math.random() - 0.5) * 4, 
+        vy: -6, // Efek Pop up dari mesin
+        rotation: (Math.random() - 0.5) * 30, 
+        vr: (Math.random() - 0.5) * 10, 
         isDragging: false,
-        isResting: true 
+        isResting: false 
     };
     activePads.push(padObj);
 
-    // Animasi jatuh awal menggunakan transition murni
-    requestAnimationFrame(() => {
-        pad.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-        pad.style.transform = `translate(${startX}px, ${targetY}px)`;
-        padObj.y = targetY;
-        
-        setTimeout(() => {
-            pad.style.transition = 'none'; 
-        }, 450);
-    });
+    pad.style.transform = `translate(${startX}px, ${startY}px) rotate(${padObj.rotation}deg)`;
 
     let lastX = 0, lastY = 0;
     let offsetX = 0, offsetY = 0; 
     
     const onMove = (e) => {
         if(!padObj.isDragging) return;
-        e.preventDefault(); // Mengunci scroll layar secara total HANYA saat pad ditarik
+        e.preventDefault(); 
 
         const mRect = machine.getBoundingClientRect();
-        const scale = mRect.width / 320; // Hitung rasio scale dinamis mesin di HP
+        const scale = mRect.width / 320; 
         
         const absoluteLeft = mRect.left + window.scrollX;
         const absoluteTop = mRect.top + window.scrollY;
@@ -259,7 +245,6 @@ function spawnDraggablePad(type) {
         const pageX = e.touches ? e.touches[0].pageX : e.pageX;
         const pageY = e.touches ? e.touches[0].pageY : e.pageY;
 
-        // Konversi koordinat sentuhan layar (Global) menjadi koordinat mesin (Lokal)
         const localX = (pageX - absoluteLeft) / scale;
         const localY = (pageY - absoluteTop) / scale;
 
@@ -292,8 +277,7 @@ function spawnDraggablePad(type) {
         e.preventDefault();
         hideDragHint();
 
-        // Naikkan z-index agar berada di atas slot donasi saat dipegang
-        pad.classList.replace('z-10', 'z-50');
+        pad.classList.replace('z-20', 'z-50');
 
         padObj.isDragging = true;
         padObj.isResting = false; 
@@ -317,7 +301,7 @@ function spawnDraggablePad(type) {
         offsetX = localX - padObj.x;
         offsetY = localY - padObj.y;
         
-        window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointermove', onMove, {passive: false}); window.addEventListener('pointerup', onUp);
         window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchend', onUp);
     };
 
@@ -328,7 +312,6 @@ function spawnDraggablePad(type) {
 function checkDonationDrop(padObj) {
     const dropZones = document.querySelectorAll('.drop-zone');
     
-    // Hitung posisi tengah pembalut di layar global menggunakan GetBoundingClientRect (Bebas dari bug scaling CSS)
     const padRect = padObj.el.getBoundingClientRect();
     const padCenterX = padRect.left + padRect.width / 2;
     const padCenterY = padRect.top + padRect.height / 2;
@@ -336,7 +319,6 @@ function checkDonationDrop(padObj) {
     for (let zone of dropZones) {
         let zRect = zone.getBoundingClientRect();
         
-        // Pengecekan Tabrakan Presisi Tinggi
         if (padCenterX > zRect.left && padCenterX < zRect.right && padCenterY > zRect.top && padCenterY < zRect.bottom) {
             let slotType = zone.getAttribute('data-type');
             
@@ -354,11 +336,9 @@ function checkDonationDrop(padObj) {
 
             const isReg = slotType === 'reguler';
 
-            // Sedot masuk di mesin depan
             activePads = activePads.filter(p => p !== padObj);
             padObj.el.style.transition = 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
             
-            // Konversi kembali ke lokal (320x560) untuk animasi sedot masuk slot
             const machine = document.getElementById('machine-body');
             const mRect = machine.getBoundingClientRect();
             const scale = mRect.width / 320;
@@ -373,7 +353,6 @@ function checkDonationDrop(padObj) {
             
             setMachineBusy(true, "MENERIMA DONASI...", "pink");
 
-            // JALANKAN ANIMASI JATUH DI SIDE VIEW KIRI/KANAN (DONASI MASUK)
             const sideDonatePadId = isReg ? 'side-donate-pad-left' : 'side-donate-pad-right';
             const sideDonatePad = document.getElementById(sideDonatePadId);
 
@@ -383,7 +362,6 @@ function checkDonationDrop(padObj) {
                 sideDonatePad.classList.add('animate-side-donate-drop');
             }
 
-            // REWARD VISUAL PARTIKEL (Bintang & Hati)
             for(let i=0; i<6; i++){
                 setTimeout(() => {
                     let particle = document.createElement('div');
@@ -398,7 +376,6 @@ function checkDonationDrop(padObj) {
                 }, i * 100);
             }
 
-            // Selesai Donasi
             setTimeout(() => {
                 padObj.el.remove();
                 if(sideDonatePad) {
@@ -406,7 +383,6 @@ function checkDonationDrop(padObj) {
                     sideDonatePad.style.opacity = '0';
                 }
                 
-                // Tambahkan Stok Aktual Keseluruhan
                 if(isReg) visualMachine.stockReguler++; else visualMachine.stockMaxi++;
                 
                 renderPhysicalStacks(); updatePhysicalScreen();
@@ -418,7 +394,7 @@ function checkDonationDrop(padObj) {
     }
 }
 
-// MESIN FISIKA LOKAL (ANTI JATUH KE LUAR MESIN)
+// MESIN FISIKA LOKAL (ANTI JATUH KELUAR)
 function physicsLoop() {
     activePads.forEach(pad => {
         if (pad.isDragging || pad.isResting) return; 
@@ -431,8 +407,7 @@ function physicsLoop() {
         pad.y += pad.vy;
         pad.rotation += pad.vr;
 
-        // Bounding Box Lokal (Mesin selalu berukuran 320x560)
-        // Mencegah pembalut jatuh menyamping keluar dari mesin
+        // Bounding Box Lokal (Mesin 320x560)
         if (pad.x < 10) { pad.x = 10; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
         if (pad.x + pad.w > 310) { pad.x = 310 - pad.w; pad.vx *= -physics.bounce; pad.vr *= -0.5; }
 
