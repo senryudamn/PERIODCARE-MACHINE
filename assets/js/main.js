@@ -1,6 +1,6 @@
 /**
  * PERIODCARE MACHINE - Main JavaScript
- * API disembunyikan di Vercel Backend
+ * Fitur Visual 3D Interaktif + Tracker IoT Firebase
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -8,14 +8,23 @@ import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebas
 let db; 
 let machinesData = [];
 
+// === LOGIKA MESIN VISUAL INTERAKTIF ===
+let visualMachine = {
+    stockReguler: 12,
+    stockMaxi: 12,
+    maxPerStack: 12,
+    isProcessing: false,
+    hasUnclaimedPad: false
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
+    // Hilangkan Preloader
     const loader = document.getElementById('loader');
-    if (loader) {
-        setTimeout(() => {
-            loader.classList.add('opacity-0');
-            setTimeout(() => { loader.style.display = 'none'; }, 500);
-        }, 500); 
-    }
+    if (loader) setTimeout(() => { loader.classList.add('opacity-0'); setTimeout(() => { loader.style.display = 'none'; }, 500); }, 500); 
+
+    // Render Awal Tumpukan Pembalut Fisik di Layar
+    renderPhysicalStacks();
+    updatePhysicalScreen();
 
     try {
         const response = await fetch('/api/config');
@@ -29,11 +38,177 @@ document.addEventListener('DOMContentLoaded', async () => {
         initDonationDashboard();
         initDynamicSettings(); 
         initFormValidationAndSubmission(); 
-
     } catch (error) {
-        console.error("Gagal mengambil konfigurasi API:", error);
+        console.error("Gagal Firebase:", error);
     }
 });
+
+/* --- FUNGSI INTERAKSI FISIK MESIN --- */
+
+// Fungsi untuk menggambar ulang kotak-kotak pembalut di dalam rak kaca
+function renderPhysicalStacks() {
+    const stackReg = document.getElementById('stack-regular');
+    const stackMax = document.getElementById('stack-maxi');
+    if(!stackReg || !stackMax) return;
+
+    // Bersihkan rak (kecuali label atas)
+    stackReg.innerHTML = '<div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">REGULER</div>';
+    stackMax.innerHTML = '<div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">MAXI</div>';
+
+    // Tambahkan kotak pembalut sesuai jumlah
+    for(let i = 0; i < visualMachine.stockReguler; i++) {
+        stackReg.innerHTML += `<div class="w-[80%] h-[8px] bg-pink-100 rounded-sm border border-pink-200 pad-item shadow-sm"></div>`;
+    }
+    for(let i = 0; i < visualMachine.stockMaxi; i++) {
+        stackMax.innerHTML += `<div class="w-[90%] h-[8px] bg-orange-100 rounded-sm border border-orange-200 pad-item shadow-sm"></div>`;
+    }
+}
+
+// Fungsi update Layar Digital
+function updatePhysicalScreen() {
+    const totalStock = visualMachine.stockReguler + visualMachine.stockMaxi;
+    const maxTotal = visualMachine.maxPerStack * 2;
+    const screenStock = document.getElementById('screen-stock-text');
+    const led = document.getElementById('machine-led');
+    
+    if(screenStock) {
+        screenStock.textContent = `Stok: ${totalStock}/${maxTotal}`;
+        // Ubah warna teks berdasarkan stok
+        if(totalStock > 12) screenStock.className = "text-green-400 text-[11px] font-mono mt-1 font-bold";
+        else if(totalStock > 0) screenStock.className = "text-yellow-400 text-[11px] font-mono mt-1 font-bold";
+        else screenStock.className = "text-red-500 text-[11px] font-mono mt-1 font-bold";
+    }
+
+    if(led && !visualMachine.isProcessing) {
+        led.className = "w-4 h-4 rounded-full bg-green-500 text-green-500 shadow-[0_0_12px_#22c55e] transition-colors duration-300";
+    }
+}
+
+// FUNGSI 1: TEKAN TOMBOL PENGAMBILAN
+window.triggerMachineDispense = function(type) {
+    if (visualMachine.isProcessing) return;
+    if (visualMachine.hasUnclaimedPad) {
+        alert("Silakan ambil pembalut yang sudah keluar di kotak bawah terlebih dahulu!");
+        return;
+    }
+
+    if (type === 'reguler' && visualMachine.stockReguler <= 0) return alert("Stok Reguler Kosong!");
+    if (type === 'maxi' && visualMachine.stockMaxi <= 0) return alert("Stok Maxi Kosong!");
+
+    // Set Status Mesin Sibuk (Cooldown)
+    visualMachine.isProcessing = true;
+    
+    // Ubah LED jadi Merah Kedap Kedip Cepat & Layar Kuning
+    document.getElementById('machine-led').className = "w-4 h-4 rounded-full bg-red-500 text-red-500 led-blink-fast";
+    document.getElementById('screen-status').textContent = "MEMPROSES...";
+    document.getElementById('screen-status').className = "text-yellow-400 text-[13px] font-mono font-bold text-center px-2 led-blink-fast";
+    
+    // Nonaktifkan tombol sementara
+    document.getElementById('btn-reguler').disabled = true;
+    document.getElementById('btn-maxi').disabled = true;
+
+    // Animasi Jatuh (Jeda 1.5 detik mesin "berpikir")
+    setTimeout(() => {
+        // Kurangi Stok
+        if(type === 'reguler') visualMachine.stockReguler--;
+        else visualMachine.stockMaxi--;
+        
+        renderPhysicalStacks();
+        updatePhysicalScreen();
+
+        // Munculkan pad di kotak bawah
+        const droppedPad = document.getElementById('dropped-pad-box');
+        droppedPad.classList.remove('translate-y-12', 'opacity-0');
+        droppedPad.classList.add('translate-y-0', 'opacity-100');
+        
+        // Kembalikan status mesin menjadi siap tapi menunggu diambil
+        visualMachine.hasUnclaimedPad = true;
+        visualMachine.isProcessing = false;
+
+        document.getElementById('machine-led').className = "w-4 h-4 rounded-full bg-yellow-400 text-yellow-400 led-blink-slow shadow-[0_0_12px_#facc15]";
+        document.getElementById('screen-status').textContent = "SILAKAN AMBIL BAWAH";
+        document.getElementById('screen-status').className = "text-yellow-300 text-[10px] font-mono font-bold text-center px-2 animate-pulse";
+
+        // Tombol tetap nonaktif sampai pad diambil
+    }, 1500);
+};
+
+// FUNGSI 2: AMBIL PEMBALUT DARI KOTAK
+window.takeDroppedPad = function() {
+    if(!visualMachine.hasUnclaimedPad) return;
+    
+    const droppedPad = document.getElementById('dropped-pad-box');
+    droppedPad.classList.remove('translate-y-0', 'opacity-100');
+    droppedPad.classList.add('translate-y-12', 'opacity-0');
+
+    visualMachine.hasUnclaimedPad = false;
+
+    // Reset Layar dan LED ke Hijau
+    document.getElementById('machine-led').className = "w-4 h-4 rounded-full bg-green-500 text-green-500 shadow-[0_0_12px_#22c55e]";
+    document.getElementById('screen-status').textContent = "SIAP DIGUNAKAN";
+    document.getElementById('screen-status').className = "text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse";
+    
+    document.getElementById('btn-reguler').disabled = false;
+    document.getElementById('btn-maxi').disabled = false;
+};
+
+// FUNGSI 3: SIMULASI DONASI MASUK DARI ATAS
+window.triggerMachineDonation = function() {
+    if (visualMachine.isProcessing) return;
+    const totalStock = visualMachine.stockReguler + visualMachine.stockMaxi;
+    if (totalStock >= (visualMachine.maxPerStack * 2)) return alert("Rak di dalam mesin sudah penuh! (24/24)");
+
+    visualMachine.isProcessing = true;
+    document.getElementById('btn-reguler').disabled = true;
+    document.getElementById('btn-maxi').disabled = true;
+
+    // LED Kuning Kedip
+    document.getElementById('machine-led').className = "w-4 h-4 rounded-full bg-yellow-400 text-yellow-400 led-blink-fast";
+    document.getElementById('screen-status').textContent = "MENERIMA DONASI...";
+    document.getElementById('screen-status').className = "text-pink-400 text-[11px] font-mono font-bold text-center px-2 led-blink-fast";
+
+    // Animasi kotak masuk dari atas
+    const animPad = document.getElementById('anim-donate-pad');
+    animPad.classList.remove('opacity-0', 'translate-y-0');
+    animPad.classList.add('opacity-100', 'translate-y-10'); // turun ke arah slot
+
+    setTimeout(() => {
+        // Hilangkan elemen animasi
+        animPad.classList.remove('opacity-100', 'translate-y-10');
+        animPad.classList.add('opacity-0', 'translate-y-0');
+
+        // Tambah stok ke rak yang masih muat (Prioritas Reguler, lalu Maxi)
+        if(visualMachine.stockReguler < visualMachine.maxPerStack) {
+            visualMachine.stockReguler++;
+        } else if (visualMachine.stockMaxi < visualMachine.maxPerStack) {
+            visualMachine.stockMaxi++;
+        }
+
+        renderPhysicalStacks();
+        updatePhysicalScreen();
+
+        // Tampilkan Terima Kasih sejenak
+        document.getElementById('machine-led').className = "w-4 h-4 rounded-full bg-green-500 text-green-500 shadow-[0_0_12px_#22c55e]";
+        document.getElementById('screen-status').textContent = "TERIMA KASIH! 💖";
+        document.getElementById('screen-status').className = "text-green-400 text-[13px] font-mono font-bold text-center px-2";
+
+        setTimeout(() => {
+            visualMachine.isProcessing = false;
+            document.getElementById('screen-status').textContent = "SIAP DIGUNAKAN";
+            document.getElementById('screen-status').className = "text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse";
+            if(!visualMachine.hasUnclaimedPad) {
+                document.getElementById('btn-reguler').disabled = false;
+                document.getElementById('btn-maxi').disabled = false;
+            }
+        }, 2000);
+
+    }, 800); // Durasi jatuh masuk mesin
+};
+
+
+/* ========================================================
+   KODE LAMA (TRACKER IOT ASLI, NAVIGASI, DASHBOARD, DLL) 
+   ======================================================== */
 
 const initNavigation = () => {
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -68,7 +243,6 @@ const initFirebaseLiveTracker = () => {
     const filterSelect = document.getElementById('filter-status');
     if(!container) return; 
 
-    // Konfigurasi Kapasitas Mesin
     const maxStock = 24;
 
     const renderMachines = (data) => {
@@ -77,8 +251,7 @@ const initFirebaseLiveTracker = () => {
         
         data.forEach(machine => {
             let stockVal = parseInt(machine.stock) || 0;
-            if (stockVal > maxStock) stockVal = maxStock; // Mencegah melebihi 24
-            
+            if (stockVal > maxStock) stockVal = maxStock; 
             let percent = Math.round((stockVal / maxStock) * 100);
 
             let statusColor, statusBg, statusText;
