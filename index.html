@@ -49,10 +49,11 @@
             .led-blink-slow { animation: blink-slow 1s infinite alternate; }
             @keyframes blink-fast { from { opacity: 1; box-shadow: 0 0 15px currentColor; } to { opacity: 0.2; box-shadow: 0 0 0px currentColor; } }
             @keyframes blink-slow { from { opacity: 1; box-shadow: 0 0 10px currentColor; } to { opacity: 0.4; box-shadow: 0 0 2px currentColor; } }
+            .pad-drop-anim { transition: transform 0.4s ease-in, opacity 0.4s ease-in; transform: scale(0.1) translateY(50px); opacity: 0; }
         }
     </style>
 </head>
-<body class="bg-light font-sans text-dark antialiased">
+<body class="bg-light font-sans text-dark antialiased overflow-x-hidden">
 
     <!-- Loading Screen -->
     <div id="loader" class="fixed inset-0 z-[9999] bg-light flex flex-col items-center justify-center transition-opacity duration-700">
@@ -89,19 +90,15 @@
 
     <main>
         <!-- Hero Section -->
-        <section id="home" class="container mx-auto px-6 py-12 md:py-24">
+        <section id="home" class="container mx-auto px-6 py-16 md:py-24">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
                 
-                <!-- BAGIAN TEKS KIRI -->
                 <div class="w-full lg:w-1/2 text-center lg:text-left scroll-animate opacity-0 translate-y-10">
                     <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce collider">Inovasi Sosial 2026</span>
-                    
                     <h1 class="heading-1 mb-6 collider">PERIODCARE MACHINE</h1>
+                    <p class="body-text mb-6 collider text-justify sm:text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
                     
-                    <p class="body-text mb-6 collider text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
-                    
-                    <!-- KOTAK CARA MAIN -->
-                    <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 collider shadow-sm flex flex-col items-center lg:items-start gap-3 text-center lg:text-left">
+                    <div class="text-sm text-left font-semibold text-primary bg-pink-50 p-4 rounded-xl border border-pink-100 mb-8 collider shadow-sm flex flex-col gap-3">
                         <div class="inline-block w-fit py-1 px-3 rounded-lg bg-pink-200 text-pink-700 font-bold text-xs tracking-wider uppercase animate-pulse">
                             🕹️ Prototipe Interaktif & Game
                         </div>
@@ -117,72 +114,70 @@
                 </div>
                 
                 <!-- MESIN INTERAKTIF -->
-                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative mt-4 lg:mt-0">
-                    <div class="scale-[0.80] sm:scale-100 origin-top">
-                        <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
+                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative mt-8 lg:mt-0 scale-[0.85] sm:scale-100 origin-top">
+                    <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
+                        
+                        <!-- Panel Atas: 2 Slot Donasi & LED -->
+                        <div class="w-full flex justify-between items-center mb-3 px-2">
+                            <div class="flex gap-4">
+                                <div id="slot-reguler" class="flex flex-col gap-1 items-center relative transition-transform">
+                                    <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN REG</span>
+                                    <div class="w-10 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
+                                        <div class="w-6 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
+                                    </div>
+                                    <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="reguler"></div>
+                                </div>
+                                <div id="slot-maxi" class="flex flex-col gap-1 items-center relative transition-transform">
+                                    <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN MAXI</span>
+                                    <div class="w-14 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
+                                        <div class="w-10 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
+                                    </div>
+                                    <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="maxi"></div>
+                                </div>
+                            </div>
                             
-                            <!-- Panel Atas: 2 Slot Donasi & LED -->
-                            <div class="w-full flex justify-between items-center mb-3 px-2">
-                                <div class="flex gap-4">
-                                    <div id="slot-reguler" class="flex flex-col gap-1 items-center relative transition-transform">
-                                        <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN REG</span>
-                                        <div class="w-10 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
-                                            <div class="w-6 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
-                                        </div>
-                                        <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="reguler"></div>
-                                    </div>
-                                    <div id="slot-maxi" class="flex flex-col gap-1 items-center relative transition-transform">
-                                        <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN MAXI</span>
-                                        <div class="w-14 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
-                                            <div class="w-10 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
-                                        </div>
-                                        <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="maxi"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex flex-col items-end gap-1">
-                                    <span class="text-[8px] font-bold text-gray-400">STATUS</span>
-                                    <div id="machine-led" class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e] text-green-500 transition-colors duration-300"></div>
-                                </div>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="text-[8px] font-bold text-gray-400">STATUS</span>
+                                <div id="machine-led" class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e] text-green-500 transition-colors duration-300"></div>
                             </div>
+                        </div>
 
-                            <!-- Rak Kaca Penyimpanan -->
-                            <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
-                                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
-                                <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
-                                
-                                <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-regular">
-                                    <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">REGULER</div>
-                                </div>
-                                <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-maxi">
-                                    <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">MAXI</div>
-                                </div>
+                        <!-- Rak Kaca Penyimpanan -->
+                        <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
+                            <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
+                            
+                            <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-regular">
+                                <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">REGULER</div>
                             </div>
+                            <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-maxi">
+                                <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">MAXI</div>
+                            </div>
+                        </div>
 
-                            <!-- Layar Digital -->
-                            <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden collider">
-                                <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
-                                <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
-                                <span id="screen-status" class="text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse">SIAP DIGUNAKAN</span>
-                                <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold">Stok: 24/48</span>
-                            </div>
+                        <!-- Layar Digital -->
+                        <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden collider">
+                            <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
+                            <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
+                            <span id="screen-status" class="text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse">SIAP DIGUNAKAN</span>
+                            <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold">Stok: 24/48</span>
+                        </div>
 
-                            <!-- Tombol Dispense -->
-                            <div class="flex gap-6 mb-5 w-full justify-center px-4">
-                                <button id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50">
-                                    <span class="text-xl leading-none pointer-events-none">🩸</span>
-                                    <span class="text-[8px] font-bold mt-1 pointer-events-none">REG</span>
-                                </button>
-                                <button id="btn-maxi" class="w-16 h-16 rounded-full bg-gradient-to-b from-orange-400 to-accent shadow-[0_6px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-orange-300 focus:outline-none disabled:opacity-50">
-                                    <span class="text-xl leading-none pointer-events-none">💧</span>
-                                    <span class="text-[8px] font-bold mt-1 pointer-events-none">MAXI</span>
-                                </button>
-                            </div>
+                        <!-- Tombol Dispense -->
+                        <div class="flex gap-6 mb-5 w-full justify-center px-4">
+                            <button id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50">
+                                <span class="text-xl leading-none pointer-events-none">🩸</span>
+                                <span class="text-[8px] font-bold mt-1 pointer-events-none">REG</span>
+                            </button>
+                            <button id="btn-maxi" class="w-16 h-16 rounded-full bg-gradient-to-b from-orange-400 to-accent shadow-[0_6px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-orange-300 focus:outline-none disabled:opacity-50">
+                                <span class="text-xl leading-none pointer-events-none">💧</span>
+                                <span class="text-[8px] font-bold mt-1 pointer-events-none">MAXI</span>
+                            </button>
+                        </div>
 
-                            <!-- Pick-up Box -->
-                            <div id="pickup-box" class="w-56 h-20 bg-gray-900 rounded-b-2xl rounded-t shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 flex justify-center items-end pb-3 relative overflow-hidden mt-auto">
-                                <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md z-20"></div>
-                            </div>
+                        <!-- Pick-up Box -->
+                        <div id="pickup-box" class="w-56 h-20 bg-gray-900 rounded-b-2xl rounded-t shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 flex justify-center items-end pb-3 relative overflow-hidden mt-auto">
+                            <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md z-20"></div>
                         </div>
                     </div>
                 </div>
@@ -193,8 +188,9 @@
         <section id="about" class="bg-white py-20 border-t border-gray-100">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-10 scroll-animate opacity-0 translate-y-10">
-                    <h2 class="heading-2 mb-4 collider">Mengapa PERIODCARE MACHINE Hadir?</h2>
-                    <p class="body-text max-w-3xl mx-auto collider">Fenomena Period Poverty berdampak langsung pada hilangnya hari efektif sekolah. Mesin ini hadir untuk menguji efektivitas penyediaan pembalut gratis yang terintegrasi IoT untuk distribusi transparan dan tepat sasaran.</p>
+                    <h2 class="heading-2 mb-4 collider inline-block w-fit">Mengapa PERIODCARE MACHINE Hadir?</h2>
+                    <br>
+                    <p class="body-text max-w-3xl mx-auto collider inline-block w-fit">Fenomena Period Poverty berdampak langsung pada hilangnya hari efektif sekolah. Mesin ini hadir untuk menguji efektivitas penyediaan pembalut gratis yang terintegrasi IoT untuk distribusi transparan dan tepat sasaran.</p>
                 </div>
             </div>
         </section>
@@ -203,44 +199,45 @@
         <section id="locations" class="py-20 bg-light border-t border-gray-200">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
-                    <h2 class="heading-2 mb-4 collider">Live Tracker & Lokasi Mesin</h2>
-                    <p class="body-text max-w-2xl mx-auto collider">Pantau ketersediaan stok pembalut secara real-time. Temukan lokasi mesin terdekat melalui Google Maps untuk kemudahan akses.</p>
+                    <h2 class="heading-2 mb-4 collider inline-block w-fit">Live Tracker & Lokasi Mesin</h2>
+                    <br>
+                    <p class="body-text max-w-2xl mx-auto collider inline-block w-fit">Pantau ketersediaan stok pembalut secara real-time. Temukan lokasi mesin terdekat melalui Google Maps untuk kemudahan akses.</p>
                 </div>
                 <div class="flex flex-col lg:flex-row gap-8 mb-24 scroll-animate opacity-0 translate-y-10">
-                    
-                    <!-- PERBAIKAN STRUKTUR MAPS -->
                     <div class="w-full lg:w-1/2 bg-white rounded-2xl p-2 shadow-sm border border-gray-100 collider flex h-[350px] lg:h-[450px]">
                         <iframe id="maps-iframe" src="https://www.google.com/maps/embed?..." class="w-full h-full rounded-xl flex-1" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                     </div>
-
                     <div class="w-full lg:w-1/2 flex flex-col">
-                        <div class="flex gap-4 mb-6">
-                            <input type="text" id="search-machine" placeholder="Cari lokasi mesin..." class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-primary transition-all collider">
-                            <select id="filter-status" class="px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary collider">
+                        
+                        <!-- PERBAIKAN RESPONSIVE PADA KOTAK PENCARIAN & FILTER -->
+                        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                            <input type="text" id="search-machine" placeholder="Cari lokasi mesin..." class="w-full sm:flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-primary transition-all collider">
+                            <select id="filter-status" class="w-full sm:w-auto px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary collider cursor-pointer">
                                 <option value="all">Semua Status</option>
                                 <option value="aman">Aman (> 12 Buah)</option>
                                 <option value="hampir-habis">Hampir Habis (≤ 12 Buah)</option>
                                 <option value="kosong">Kosong (0 Buah)</option>
                             </select>
                         </div>
+
                         <div id="machine-list-container" class="space-y-4 overflow-y-auto pr-2 max-h-[400px] custom-scrollbar collider"></div>
                     </div>
                 </div>
 
                 <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
-                    <h2 class="heading-2 mb-4 collider">Dashboard Transparansi Donasi</h2>
+                    <h2 class="heading-2 mb-4 collider inline-block w-fit">Dashboard Transparansi Donasi</h2>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 scroll-animate opacity-0 translate-y-10">
                     <div class="lg:col-span-1 space-y-6">
                         <div class="bg-gradient-to-br from-primary to-soft rounded-2xl p-6 text-white shadow-soft collider">
-                            <h3 class="text-sm font-semibold uppercase tracking-wider mb-2 opacity-90 collider">Total Donasi Terkumpul</h3>
-                            <div class="text-3xl font-bold mb-4 collider" id="total-donation-text">Rp 0</div>
+                            <h3 class="text-sm font-semibold uppercase tracking-wider mb-2 opacity-90 collider inline-block w-fit">Total Donasi Terkumpul</h3>
+                            <div class="text-3xl font-bold mb-4 collider inline-block w-fit" id="total-donation-text">Rp 0</div>
                             <div class="w-full bg-white/30 rounded-full h-2 mb-2 collider"><div id="progress-bar" class="bg-white h-2 rounded-full transition-all duration-1000 w-0"></div></div>
                             <div class="flex justify-between text-sm opacity-90 collider"><span id="progress-percent">0%</span><span>Target: <span id="target-donation-text">Rp 0</span></span></div>
                         </div>
                     </div>
                     <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-200 shadow-sm overflow-hidden collider">
-                        <h3 class="text-xl font-bold text-dark mb-4 collider">Laporan Pengeluaran</h3>
+                        <h3 class="text-xl font-bold text-dark mb-4 collider inline-block w-fit">Laporan Pengeluaran</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse min-w-max">
                                 <thead>
@@ -260,8 +257,9 @@
         <section id="faq" class="py-20 bg-white border-t border-pink-100">
             <div class="container mx-auto px-6 max-w-4xl">
                 <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
-                    <h2 class="heading-2 mb-4 collider">Pertanyaan yang Sering Diajukan (FAQ)</h2>
-                    <p class="body-text collider">Pelajari lebih lanjut tentang cara kerja, keamanan, dan visi di balik PeriodCare Machine.</p>
+                    <h2 class="heading-2 mb-4 collider inline-block w-fit">Pertanyaan yang Sering Diajukan (FAQ)</h2>
+                    <br>
+                    <p class="body-text collider inline-block w-fit">Pelajari lebih lanjut tentang cara kerja, keamanan, dan visi di balik PeriodCare Machine.</p>
                 </div>
                 
                 <div class="space-y-4 scroll-animate opacity-0 translate-y-10">
@@ -334,14 +332,15 @@
         <section id="donate" class="py-20 bg-light border-t border-gray-200 relative">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10">
-                    <h2 class="heading-2 mb-4 collider">Waktunya Mengambil Peran</h2>
-                    <p class="body-text max-w-2xl mx-auto collider">Pilih cara Anda berkontribusi. Menjadi donatur untuk operasional mesin, atau bergabung sebagai relawan untuk edukasi dan distribusi.</p>
+                    <h2 class="heading-2 mb-4 collider inline-block w-fit">Waktunya Mengambil Peran</h2>
+                    <br>
+                    <p class="body-text max-w-2xl mx-auto collider inline-block w-fit">Pilih cara Anda berkontribusi. Menjadi donatur untuk operasional mesin, atau bergabung sebagai relawan untuk edukasi dan distribusi.</p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 scroll-animate opacity-0 translate-y-10">
                     <div class="bg-white rounded-3xl p-8 border border-pink-100 shadow-sm collider">
-                        <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-xl collider">💖</div><h3 class="text-2xl font-bold text-dark collider">Berdonasi</h3></div>
-                        <p class="text-gray-600 mb-6 text-sm collider">Scan QRIS di bawah ini melalui aplikasi M-Banking atau e-Wallet Anda.</p>
+                        <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-xl collider">💖</div><h3 class="text-2xl font-bold text-dark collider inline-block w-fit">Berdonasi</h3></div>
+                        <p class="text-gray-600 mb-6 text-sm collider inline-block w-fit">Scan QRIS di bawah ini melalui aplikasi M-Banking atau e-Wallet Anda.</p>
                         <div class="bg-light p-2 rounded-2xl border border-gray-200 shadow-inner w-48 h-48 mx-auto flex flex-col items-center justify-center mb-6 overflow-hidden collider">
                             <img id="qris-img" src="https://via.placeholder.com/300?text=Memuat+QRIS..." alt="QRIS Code" class="w-full h-full object-cover rounded-xl">
                         </div>
@@ -356,11 +355,11 @@
                         <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm relative overflow-hidden flex-1 collider">
                             <div class="absolute -top-10 -right-10 w-32 h-32 bg-orange-50 rounded-full z-0"></div>
                             <div class="relative z-10">
-                                <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-white text-xl collider">🤝</div><h3 class="text-2xl font-bold text-dark collider">Menjadi Relawan</h3></div>
+                                <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-white text-xl collider">🤝</div><h3 class="text-2xl font-bold text-dark collider inline-block w-fit">Menjadi Relawan</h3></div>
                                 <form id="volunteer-form" class="space-y-4">
                                     <input type="text" id="vol-name" placeholder="Nama Lengkap" class="form-input collider" required>
                                     <input type="email" id="vol-email" placeholder="Email Aktif" class="form-input collider" required>
-                                    <select id="vol-role" class="form-input text-gray-500 collider" required>
+                                    <select id="vol-role" class="form-input text-gray-500 collider cursor-pointer" required>
                                         <option value="" disabled selected>Pilih Peran Relawan</option><option value="distribusi">Tim Distribusi & Maintenance IoT</option><option value="edukasi">Tim Edukasi & Sosialisasi</option><option value="media">Tim Media & Kreatif</option>
                                     </select>
                                     <button type="submit" class="btn btn-accent w-full collider">Daftar Sekarang</button>
@@ -369,11 +368,12 @@
                         </div>
 
                         <div class="bg-pink-50 rounded-3xl p-8 border border-pink-100 shadow-sm collider">
-                            <h3 class="text-xl font-bold text-dark mb-2 collider">⭐ Pengalaman Pakai Mesin?</h3>
-                            <p class="text-sm text-gray-600 mb-4 collider">Bantu kami meningkatkan kualitas mesin PeriodCare.</p>
+                            <h3 class="text-xl font-bold text-dark mb-2 collider inline-block w-fit">⭐ Pengalaman Pakai Mesin?</h3>
+                            <br>
+                            <p class="text-sm text-gray-600 mb-4 collider inline-block w-fit">Bantu kami meningkatkan kualitas mesin PeriodCare.</p>
                             <form id="feedback-form" class="space-y-3">
                                 <input type="text" id="fb-name" placeholder="Nama Anda (Boleh Anonim)" class="form-input text-sm py-2 collider">
-                                <select id="fb-rating" class="form-input text-gray-500 text-sm py-2 collider" required>
+                                <select id="fb-rating" class="form-input text-gray-500 text-sm py-2 collider cursor-pointer" required>
                                     <option value="" disabled selected>Pilih Penilaian (Bintang)</option>
                                     <option value="5">⭐⭐⭐⭐⭐ (Sangat Bagus)</option>
                                     <option value="4">⭐⭐⭐⭐ (Bagus)</option>
@@ -392,13 +392,13 @@
                 <div class="bg-dark rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl scroll-animate opacity-0 translate-y-10 collider">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div>
-                            <h3 class="text-3xl font-bold mb-4 collider">Punya Ide Kolaborasi?</h3>
-                            <p class="text-gray-400 mb-8 collider">Kami membuka pintu seluas-luasnya untuk pemerintah daerah, NGO, maupun swasta.</p>
+                            <h3 class="text-3xl font-bold mb-4 collider inline-block w-fit">Punya Ide Kolaborasi?</h3>
+                            <br>
+                            <p class="text-gray-400 mb-8 collider inline-block w-fit">Kami membuka pintu seluas-luasnya untuk pemerintah daerah, NGO, maupun swasta.</p>
                             <div class="space-y-4">
-                                <div class="flex items-center gap-4 collider"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📧</div><span class="text-gray-300">periodcare@uny.ac.id</span></div>
-                                <div class="flex items-center gap-4 collider"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📍</div><span class="text-gray-300">Fakultas Teknik, UNY</span></div>
-                                <div class="flex items-center gap-4 collider"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📱</div><span class="text-gray-300">Instagram: @periodcare.uny</span></div>
-                                <div class="flex items-center gap-4 mt-6 pt-6 border-t border-gray-700 collider">
+                                <div class="flex items-center gap-4 collider w-fit"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📧</div><span class="text-gray-300">periodcare@uny.ac.id</span></div>
+                                <div class="flex items-center gap-4 collider w-fit"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📍</div><span class="text-gray-300">Fakultas Teknik, UNY</span></div>
+                                <div class="flex items-center gap-4 mt-6 pt-6 border-t border-gray-700 collider w-fit">
                                     <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xl animate-pulse">📞</div>
                                     <div>
                                         <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Layanan Bantuan 24/7</p>
@@ -424,9 +424,9 @@
     <!-- Footer -->
     <footer class="bg-dark pt-8 pb-8 border-t border-gray-800">
         <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
-            <p class="mb-4 md:mb-0 text-center md:text-left collider">&copy; 2026 PERIODCARE MACHINE. Hak Cipta Dilindungi.</p>
+            <p class="mb-4 md:mb-0 text-center md:text-left collider inline-block w-fit">&copy; 2026 PERIODCARE MACHINE. Hak Cipta Dilindungi.</p>
             <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-                <p class="collider">Dibuat dengan ❤️ oleh Tim Peneliti UNY</p>
+                <p class="collider inline-block w-fit">Dibuat dengan ❤️ oleh Tim Peneliti UNY</p>
                 <a href="admin.html" class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-primary text-gray-400 hover:text-white rounded-lg transition-all duration-300 border border-gray-700 hover:border-primary shadow-sm collider">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     <span class="font-semibold text-xs tracking-wider uppercase">Admin</span>
