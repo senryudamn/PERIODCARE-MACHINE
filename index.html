@@ -44,7 +44,7 @@
             @keyframes blink-fast { from { opacity: 1; box-shadow: 0 0 15px currentColor; } to { opacity: 0.2; box-shadow: 0 0 0px currentColor; } }
             @keyframes blink-slow { from { opacity: 1; box-shadow: 0 0 10px currentColor; } to { opacity: 0.4; box-shadow: 0 0 2px currentColor; } }
             
-            /* KEYFRAME ANIMASI KURSOR ESTETIK (SWIPE UP) */
+            /* ANIMASI KURSOR ESTETIK */
             @keyframes swipe-up-cursor {
                 0% { transform: translate(-50%, 40px) scale(0.8); opacity: 0; }
                 15% { transform: translate(-50%, 10px) scale(1); opacity: 1; }
@@ -53,6 +53,15 @@
                 100% { transform: translate(-50%, -260px) scale(0.8); opacity: 0; }
             }
             .animate-swipe-cursor { animation: swipe-up-cursor 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
+
+            /* ANIMASI JATUH TAMPILAN SAMPING */
+            @keyframes side-drop {
+                0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+                70% { transform: translateY(140px) rotate(0deg); opacity: 1; }
+                90% { transform: translateY(180px) translateX(-10px) rotate(-15deg); opacity: 1; }
+                100% { transform: translateY(200px) translateX(-20px) rotate(-20deg); opacity: 0; }
+            }
+            .animate-side-drop { animation: side-drop 0.8s ease-in forwards; }
         }
     </style>
 </head>
@@ -104,7 +113,6 @@
                     
                     <p class="body-text mb-6 collider text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
                     
-                    <!-- KOTAK CARA MAIN (Estetik Icon) -->
                     <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 collider shadow-sm flex flex-col items-center lg:items-start gap-3 text-center lg:text-left">
                         <div class="inline-flex items-center gap-2 w-fit py-1.5 px-3 rounded-lg bg-pink-200 text-pink-700 font-bold text-xs tracking-wider uppercase animate-pulse">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -112,7 +120,7 @@
                         </div>
                         <p class="text-sm font-medium text-pink-900 leading-relaxed flex items-start gap-2">
                             <svg class="w-5 h-5 mt-0.5 shrink-0 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                            <span><b>Cara Main:</b> Tekan tombol mesin di bawah, tarik (Drag & Drop) pembalut yang jatuh, dan lemparkan ke slot donasi di atas mesin sesuai ukurannya! Coba mainkan gravitasi dengan melempar pembalutnya.</span>
+                            <span><b>Cara Main:</b> Tekan tombol mesin, lihat mekanismenya di sisi kanan, lalu tarik pembalut yang keluar ke arah slot donasi atas untuk mencoba gravitasi!</span>
                         </p>
                     </div>
 
@@ -122,18 +130,20 @@
                     </div>
                 </div>
                 
-                <!-- MESIN INTERAKTIF -->
-                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative mt-4 lg:mt-0 scale-[0.85] sm:scale-100 origin-top">
-                    <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none mx-auto">
+                <!-- CONTAINER KEDUA MESIN (DIKECILKAN AGAR MUAT DI HP) -->
+                <div class="w-full lg:w-1/2 flex justify-center items-end gap-3 sm:gap-6 scroll-animate opacity-0 translate-y-10 delay-100 relative mt-4 lg:mt-0 scale-[0.60] sm:scale-90 xl:scale-100 origin-top">
+                    
+                    <!-- 1. MESIN TAMPILAN DEPAN (FRONT VIEW) -->
+                    <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
                         
-                        <!-- ANIMASI KURSOR TUTORIAL (ESTETIK) -->
+                        <!-- Kursor Animasi -->
                         <div id="drag-hint-wrapper" class="absolute bottom-24 left-1/2 z-[100000] pointer-events-none hidden">
                             <svg id="drag-hint-icon" class="w-12 h-12 text-white drop-shadow-[0_8px_12px_rgba(255,77,133,0.8)] -translate-x-1/2" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M4.34 2.72l15.93 9.4c1.1.65.65 2.37-.58 2.37h-5.46l3.43 6.3c.3.56.09 1.25-.46 1.55l-1.78.96c-.56.3-1.25.09-1.55-.46l-3.43-6.3L6.5 21.05c-.96.7-2.5-.02-2.5-1.2V3.9c0-1.18 1.4-1.85 2.34-1.18z"/>
                             </svg>
                         </div>
 
-                        <!-- Panel Atas: 2 Slot Donasi & LED -->
+                        <!-- Panel Atas: Slot -->
                         <div class="w-full flex justify-between items-center mb-3 px-2">
                             <div class="flex gap-4">
                                 <div id="slot-reguler" class="flex flex-col gap-1 items-center relative transition-transform">
@@ -158,7 +168,7 @@
                             </div>
                         </div>
 
-                        <!-- Rak Kaca Penyimpanan -->
+                        <!-- Kaca Depan -->
                         <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
                             <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
                             <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
@@ -171,7 +181,7 @@
                             </div>
                         </div>
 
-                        <!-- Layar Digital -->
+                        <!-- Layar OS -->
                         <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden collider">
                             <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
                             <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
@@ -179,7 +189,7 @@
                             <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold">Stok: 24/48</span>
                         </div>
 
-                        <!-- Tombol Dispense (Estetik SVG) -->
+                        <!-- Tombol Dispense -->
                         <div class="flex gap-6 mb-5 w-full justify-center px-4">
                             <button id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50 group">
                                 <svg class="w-7 h-7 pointer-events-none drop-shadow-md group-active:scale-95 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
@@ -196,6 +206,30 @@
                             <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md z-20"></div>
                         </div>
                     </div>
+
+                    <!-- 2. MESIN TAMPILAN SAMPING (SIDE VIEW KACA DALAM) -->
+                    <div class="collider relative w-40 h-[530px] bg-gradient-to-r from-gray-200 to-gray-300 rounded-[2rem] shadow-[-10px_20px_30px_rgba(0,0,0,0.15)] border-[5px] border-white flex flex-col items-center py-6 z-0 shrink-0 select-none">
+                        <div class="absolute top-3 text-[9px] font-bold text-gray-500 tracking-widest bg-white/70 px-3 py-1 rounded-full shadow-sm">SIDE VIEW</div>
+                        
+                        <!-- Saluran (Chute) Kaca Dalam -->
+                        <div class="w-24 h-[370px] bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.9)] border-4 border-gray-700 relative overflow-visible flex flex-col items-center mt-8">
+                            
+                            <!-- Tumpukan Stok Samping -->
+                            <div class="w-16 bg-gray-800/80 rounded-b flex flex-col-reverse items-center pb-1 gap-[2px] absolute top-0 z-10" id="stack-side" style="height: 180px;"></div>
+
+                            <!-- Pembalut yang sedang jatuh (Animasi) -->
+                            <div id="side-drop-pad" class="w-16 h-4 rounded-sm shadow border absolute top-[180px] opacity-0 z-20"></div>
+
+                            <!-- Rel Pembatas -->
+                            <div class="absolute inset-0 border-x-2 border-white/5 mx-3 pointer-events-none"></div>
+                        </div>
+
+                        <!-- Jalur Keluar (Exit Ramp) -->
+                        <div class="w-32 h-20 bg-gray-800 mt-auto rounded-xl shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 relative overflow-hidden flex justify-start items-end p-2 -ml-8 z-10">
+                            <div class="w-[120%] h-3 bg-gray-700 absolute bottom-3 -left-2 rotate-12 origin-bottom-left shadow-md border-t border-gray-500"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -353,7 +387,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 scroll-animate opacity-0 translate-y-10">
-                    <!-- KOTAK DONASI -->
                     <div class="bg-white rounded-3xl p-8 border border-pink-100 shadow-sm collider">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-xl collider">
@@ -377,7 +410,6 @@
                     </div>
 
                     <div class="flex flex-col gap-8">
-                        <!-- KOTAK RELAWAN -->
                         <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm relative overflow-hidden flex-1 collider">
                             <div class="absolute -top-10 -right-10 w-32 h-32 bg-orange-50 rounded-full z-0"></div>
                             <div class="relative z-10">
@@ -402,7 +434,6 @@
                             </div>
                         </div>
 
-                        <!-- KOTAK FEEDBACK -->
                         <div class="bg-pink-50 rounded-3xl p-8 border border-pink-100 shadow-sm collider">
                             <h3 class="text-xl font-bold text-dark mb-2 collider inline-block w-fit flex items-center gap-2">
                                 <svg class="w-6 h-6 text-yellow-400 fill-current drop-shadow-sm" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
