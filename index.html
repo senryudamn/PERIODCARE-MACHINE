@@ -26,13 +26,7 @@
     </script>
     <style type="text/tailwindcss">
         /* Mengunci Halaman agar TIDAK BISA digeser ke kiri/kanan di HP */
-        html, body {
-            overflow-x: hidden !important;
-            max-width: 100vw;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
+        html, body { overflow-x: hidden !important; max-width: 100vw; width: 100%; margin: 0; padding: 0; }
 
         @layer components {
             .btn { @apply inline-flex items-center justify-center px-6 py-3 rounded-full font-semibold transition-all duration-300 focus:outline-none focus:ring-4; }
@@ -44,12 +38,20 @@
             .body-text { @apply text-base md:text-lg text-gray-600 leading-relaxed; }
             .form-input { @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-pink-100 transition-all; }
             
-            /* Animasi Mesin & Physics */
+            /* Animasi Mesin, Physics & Tangan Tutorial */
             .led-blink-fast { animation: blink-fast 0.2s infinite alternate; }
             .led-blink-slow { animation: blink-slow 1s infinite alternate; }
             @keyframes blink-fast { from { opacity: 1; box-shadow: 0 0 15px currentColor; } to { opacity: 0.2; box-shadow: 0 0 0px currentColor; } }
             @keyframes blink-slow { from { opacity: 1; box-shadow: 0 0 10px currentColor; } to { opacity: 0.4; box-shadow: 0 0 2px currentColor; } }
-            .pad-drop-anim { transition: transform 0.4s ease-in, opacity 0.4s ease-in; transform: scale(0.1) translateY(50px); opacity: 0; }
+            
+            /* KEYFRAME ANIMASI TANGAN (SWIPE UP) */
+            @keyframes swipe-up-hand {
+                0% { transform: translate(-50%, 20px) scale(1); opacity: 0; }
+                15% { transform: translate(-50%, 0px) scale(1.2); opacity: 1; }
+                70% { transform: translate(-50%, -240px) scale(1.2); opacity: 1; }
+                100% { transform: translate(-50%, -260px) scale(1); opacity: 0; }
+            }
+            .animate-swipe-hand { animation: swipe-up-hand 2s ease-in-out infinite; }
         }
     </style>
 </head>
@@ -90,15 +92,19 @@
 
     <main>
         <!-- Hero Section -->
-        <section id="home" class="container mx-auto px-6 py-16 md:py-24">
+        <section id="home" class="container mx-auto px-6 py-12 md:py-24">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
                 
+                <!-- BAGIAN TEKS KIRI -->
                 <div class="w-full lg:w-1/2 text-center lg:text-left scroll-animate opacity-0 translate-y-10">
                     <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce collider">Inovasi Sosial 2026</span>
-                    <h1 class="heading-1 mb-6 collider">PERIODCARE MACHINE</h1>
-                    <p class="body-text mb-6 collider text-justify sm:text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
                     
-                    <div class="text-sm text-left font-semibold text-primary bg-pink-50 p-4 rounded-xl border border-pink-100 mb-8 collider shadow-sm flex flex-col gap-3">
+                    <h1 class="heading-1 mb-6 collider">PERIODCARE MACHINE</h1>
+                    
+                    <p class="body-text mb-6 collider text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
+                    
+                    <!-- KOTAK CARA MAIN -->
+                    <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 collider shadow-sm flex flex-col items-center lg:items-start gap-3 text-center lg:text-left">
                         <div class="inline-block w-fit py-1 px-3 rounded-lg bg-pink-200 text-pink-700 font-bold text-xs tracking-wider uppercase animate-pulse">
                             🕹️ Prototipe Interaktif & Game
                         </div>
@@ -114,70 +120,77 @@
                 </div>
                 
                 <!-- MESIN INTERAKTIF -->
-                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative mt-8 lg:mt-0 scale-[0.85] sm:scale-100 origin-top">
-                    <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
-                        
-                        <!-- Panel Atas: 2 Slot Donasi & LED -->
-                        <div class="w-full flex justify-between items-center mb-3 px-2">
-                            <div class="flex gap-4">
-                                <div id="slot-reguler" class="flex flex-col gap-1 items-center relative transition-transform">
-                                    <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN REG</span>
-                                    <div class="w-10 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
-                                        <div class="w-6 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
-                                    </div>
-                                    <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="reguler"></div>
-                                </div>
-                                <div id="slot-maxi" class="flex flex-col gap-1 items-center relative transition-transform">
-                                    <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN MAXI</span>
-                                    <div class="w-14 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
-                                        <div class="w-10 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
-                                    </div>
-                                    <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="maxi"></div>
-                                </div>
-                            </div>
+                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative mt-4 lg:mt-0">
+                    <div class="scale-[0.80] sm:scale-100 origin-top">
+                        <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none mx-auto">
                             
-                            <div class="flex flex-col items-end gap-1">
-                                <span class="text-[8px] font-bold text-gray-400">STATUS</span>
-                                <div id="machine-led" class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e] text-green-500 transition-colors duration-300"></div>
+                            <!-- ANIMASI TANGAN TUTORIAL (Tersembunyi by default) -->
+                            <div id="drag-hint-wrapper" class="absolute bottom-24 left-1/2 z-[100000] pointer-events-none hidden">
+                                <div id="drag-hint-icon" class="text-5xl drop-shadow-lg -translate-x-1/2">👆</div>
                             </div>
-                        </div>
 
-                        <!-- Rak Kaca Penyimpanan -->
-                        <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
-                            <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
-                            
-                            <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-regular">
-                                <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">REGULER</div>
+                            <!-- Panel Atas: 2 Slot Donasi & LED -->
+                            <div class="w-full flex justify-between items-center mb-3 px-2">
+                                <div class="flex gap-4">
+                                    <div id="slot-reguler" class="flex flex-col gap-1 items-center relative transition-transform">
+                                        <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN REG</span>
+                                        <div class="w-10 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
+                                            <div class="w-6 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
+                                        </div>
+                                        <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="reguler"></div>
+                                    </div>
+                                    <div id="slot-maxi" class="flex flex-col gap-1 items-center relative transition-transform">
+                                        <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN MAXI</span>
+                                        <div class="w-14 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
+                                            <div class="w-10 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
+                                        </div>
+                                        <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="maxi"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="text-[8px] font-bold text-gray-400">STATUS</span>
+                                    <div id="machine-led" class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e] text-green-500 transition-colors duration-300"></div>
+                                </div>
                             </div>
-                            <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-maxi">
-                                <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">MAXI</div>
+
+                            <!-- Rak Kaca Penyimpanan -->
+                            <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
+                                <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
+                                
+                                <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-regular">
+                                    <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">REGULER</div>
+                                </div>
+                                <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-maxi">
+                                    <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">MAXI</div>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Layar Digital -->
-                        <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden collider">
-                            <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
-                            <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
-                            <span id="screen-status" class="text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse">SIAP DIGUNAKAN</span>
-                            <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold">Stok: 24/48</span>
-                        </div>
+                            <!-- Layar Digital -->
+                            <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden collider">
+                                <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
+                                <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
+                                <span id="screen-status" class="text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse">SIAP DIGUNAKAN</span>
+                                <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold">Stok: 24/48</span>
+                            </div>
 
-                        <!-- Tombol Dispense -->
-                        <div class="flex gap-6 mb-5 w-full justify-center px-4">
-                            <button id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50">
-                                <span class="text-xl leading-none pointer-events-none">🩸</span>
-                                <span class="text-[8px] font-bold mt-1 pointer-events-none">REG</span>
-                            </button>
-                            <button id="btn-maxi" class="w-16 h-16 rounded-full bg-gradient-to-b from-orange-400 to-accent shadow-[0_6px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-orange-300 focus:outline-none disabled:opacity-50">
-                                <span class="text-xl leading-none pointer-events-none">💧</span>
-                                <span class="text-[8px] font-bold mt-1 pointer-events-none">MAXI</span>
-                            </button>
-                        </div>
+                            <!-- Tombol Dispense -->
+                            <div class="flex gap-6 mb-5 w-full justify-center px-4">
+                                <button id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50">
+                                    <span class="text-xl leading-none pointer-events-none">🩸</span>
+                                    <span class="text-[8px] font-bold mt-1 pointer-events-none">REG</span>
+                                </button>
+                                <button id="btn-maxi" class="w-16 h-16 rounded-full bg-gradient-to-b from-orange-400 to-accent shadow-[0_6px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-orange-300 focus:outline-none disabled:opacity-50">
+                                    <span class="text-xl leading-none pointer-events-none">💧</span>
+                                    <span class="text-[8px] font-bold mt-1 pointer-events-none">MAXI</span>
+                                </button>
+                            </div>
 
-                        <!-- Pick-up Box -->
-                        <div id="pickup-box" class="w-56 h-20 bg-gray-900 rounded-b-2xl rounded-t shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 flex justify-center items-end pb-3 relative overflow-hidden mt-auto">
-                            <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md z-20"></div>
+                            <!-- Pick-up Box -->
+                            <div id="pickup-box" class="w-56 h-20 bg-gray-900 rounded-b-2xl rounded-t shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 flex justify-center items-end pb-3 relative overflow-hidden mt-auto">
+                                <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md z-20"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -208,8 +221,6 @@
                         <iframe id="maps-iframe" src="https://www.google.com/maps/embed?..." class="w-full h-full rounded-xl flex-1" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                     </div>
                     <div class="w-full lg:w-1/2 flex flex-col">
-                        
-                        <!-- PERBAIKAN RESPONSIVE PADA KOTAK PENCARIAN & FILTER -->
                         <div class="flex flex-col sm:flex-row gap-4 mb-6">
                             <input type="text" id="search-machine" placeholder="Cari lokasi mesin..." class="w-full sm:flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-primary transition-all collider">
                             <select id="filter-status" class="w-full sm:w-auto px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary collider cursor-pointer">
@@ -219,7 +230,6 @@
                                 <option value="kosong">Kosong (0 Buah)</option>
                             </select>
                         </div>
-
                         <div id="machine-list-container" class="space-y-4 overflow-y-auto pr-2 max-h-[400px] custom-scrollbar collider"></div>
                     </div>
                 </div>
