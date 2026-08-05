@@ -14,11 +14,10 @@ let visualMachine = {
     stockMaxi: 12, 
     maxPerStack: 24, 
     isProcessing: false,
-    isOnCooldown: false // Fitur Baru: Kunci Darurat
+    isOnCooldown: false 
 };
 
 let activePads = []; 
-// Physics yang dihaluskan: Pembalut itu ringan, jadi gravitasinya kecil dan pantulannya (bounce) rendah.
 const physics = { gravity: 0.5, friction: 0.95, bounce: 0.25 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -86,7 +85,7 @@ function dispensePad(type) {
         // FITUR BARU: COOLDOWN 5 DETIK
         visualMachine.isProcessing = false;
         visualMachine.isOnCooldown = true;
-        setMachineBusy(true, "TUNGGU 5 DETIK", "red"); // Beri tahu pengguna mesin terkunci
+        setMachineBusy(true, "TUNGGU 5 DETIK", "red"); 
 
         let countdown = 5;
         const cdInterval = setInterval(() => {
@@ -102,24 +101,29 @@ function dispensePad(type) {
             }
         }, 1000);
 
-    }, 800); // Waktu animasi mesin mengeluarkan pad
+    }, 800); 
 }
 
-// 2. FISIKA DRAG & DROP NATURAL (Menggunakan Absolute PageX/Y)
+// 2. FISIKA DRAG & DROP NATURAL (PERBAIKAN POSISI SPAWN)
 function spawnDraggablePad(type) {
     const pad = document.createElement('div');
     const isReg = type === 'reguler';
     
-    // Position Absolute agar scroll halaman tidak merusak pergerakan
     pad.className = `absolute z-[99999] cursor-grab touch-none flex items-center justify-center rounded border shadow-[0_5px_15px_rgba(0,0,0,0.4)] ${isReg ? 'w-12 h-5 bg-pink-100 border-pink-300 text-pink-600' : 'w-16 h-5 bg-orange-100 border-orange-300 text-orange-600'}`;
     pad.innerHTML = `<span class="text-[8px] font-bold pointer-events-none">${isReg ? 'REG' : 'MAXI'}</span>`;
     
-    const box = document.getElementById('pickup-box').getBoundingClientRect();
+    // PERBAIKAN: Mengambil kordinat absolut berdasarkan body web
+    const box = document.getElementById('pickup-box');
+    const boxRect = box.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     
-    // Perhitungkan Scroll Y agar posisi awal tidak meleset
-    let startX = box.left + box.width/2 - (isReg ? 24 : 32) + window.scrollX;
-    let startY = box.top - 20 + window.scrollY; 
-    let targetY = box.top + box.height - 35 + window.scrollY; 
+    let boxAbsoluteTop = boxRect.top + scrollTop;
+    let boxAbsoluteLeft = boxRect.left + scrollLeft;
+
+    let startX = boxAbsoluteLeft + (boxRect.width/2) - (isReg ? 24 : 32);
+    let startY = boxAbsoluteTop - 20; 
+    let targetY = boxAbsoluteTop + boxRect.height - 35; 
     
     document.body.appendChild(pad);
 
@@ -128,7 +132,7 @@ function spawnDraggablePad(type) {
         x: startX, y: startY, 
         w: isReg ? 48 : 64, h: 20, 
         vx: 0, vy: 0, 
-        rotation: 0, vr: 0, // Putaran (Torque)
+        rotation: 0, vr: 0, 
         isDragging: false,
         isResting: true 
     };
@@ -146,24 +150,21 @@ function spawnDraggablePad(type) {
 
     // LOGIKA DRAG
     let lastX = 0, lastY = 0;
-    let offsetX = 0, offsetY = 0; // Agar mouse memegang pad di tempat yang tepat
+    let offsetX = 0, offsetY = 0; 
     
     const onMove = (e) => {
         if(!padObj.isDragging) return;
         const pageX = e.touches ? e.touches[0].pageX : e.pageX;
         const pageY = e.touches ? e.touches[0].pageY : e.pageY;
         
-        // Kalkulasi kekuatan lemparan (Dibatasi agar tidak glitch)
         padObj.vx = (pageX - lastX) * 0.8; 
         padObj.vy = (pageY - lastY) * 0.8;
         
-        // Update Posisi berdasarkan offset klik
         padObj.x = pageX - offsetX; 
         padObj.y = pageY - offsetY;
         
         lastX = pageX; lastY = pageY;
 
-        // Efek miring saat diseret
         padObj.rotation = padObj.vx * 1.5; 
         pad.style.transform = `translate(${padObj.x}px, ${padObj.y}px) rotate(${padObj.rotation}deg) scale(1.1)`;
     };
@@ -173,7 +174,6 @@ function spawnDraggablePad(type) {
         padObj.isDragging = false;
         pad.classList.remove('cursor-grabbing', 'scale-110'); pad.classList.add('cursor-grab');
         
-        // Putaran lemparan
         padObj.vr = padObj.vx * 0.5;
 
         window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp);
@@ -198,8 +198,10 @@ function spawnDraggablePad(type) {
         offsetY = pageY - padObj.y;
         
         window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchend', onUp);
+        window.addEventListener('touchmove', onMove, {passive: false}); window.addEventListener('touchmove', preventDefaultTouch, {passive: false}); window.addEventListener('touchend', onUp);
     };
+
+    const preventDefaultTouch = (e) => { if(padObj.isDragging) e.preventDefault(); };
 
     pad.addEventListener('pointerdown', onDown);
     pad.addEventListener('touchstart', onDown, {passive: false});
@@ -254,29 +256,26 @@ function physicsLoop() {
         if (pad.isDragging || pad.isResting) return; 
 
         pad.vy += physics.gravity; 
-        pad.vx *= physics.friction; // Udara memperlambat lemparan
-        pad.vr *= 0.98; // Putaran melambat
+        pad.vx *= physics.friction; 
+        pad.vr *= 0.98; 
 
         pad.x += pad.vx;
         pad.y += pad.vy;
         pad.rotation += pad.vr;
 
-        // Batas Kiri Kanan Dokumen
         if (pad.x < 0) { pad.x = 0; pad.vx *= -physics.bounce; pad.vr *= -1; }
         let docWidth = document.documentElement.scrollWidth;
         if (pad.x + pad.w > docWidth) { pad.x = docWidth - pad.w; pad.vx *= -physics.bounce; pad.vr *= -1; }
 
-        // Batas Bawah Dokumen (Bukan sekedar layar)
         let docHeight = document.documentElement.scrollHeight;
         if (pad.y + pad.h > docHeight) {
             pad.y = docHeight - pad.h;
             pad.vy *= -physics.bounce;
-            pad.vx *= 0.8; // Gesekan lantai
+            pad.vx *= 0.8; 
             pad.vr *= 0.8;
             if(Math.abs(pad.vy) < 1) { pad.vy = 0; pad.vr = 0; }
         }
 
-        // Tumbukan Elemen (Collider) - Diselaraskan dengan Scroll
         let isRestingOnCollider = false;
         for (let el of colliders) {
             let rect = el.getBoundingClientRect();
@@ -285,7 +284,6 @@ function physicsLoop() {
             let elLeft = rect.left + window.scrollX;
             let elRight = rect.right + window.scrollX;
 
-            // Pantul Atas elemen
             if (pad.vy > 0 && pad.y + pad.h >= elTop && pad.y + pad.h - pad.vy <= elTop + 15 && pad.x + pad.w > elLeft && pad.x < elRight) {
                 pad.y = elTop - pad.h;
                 pad.vy *= -physics.bounce;
@@ -293,7 +291,6 @@ function physicsLoop() {
                 pad.vr *= 0.5;
                 isRestingOnCollider = true;
             }
-            // Pantul Samping
             else if (pad.y + pad.h > elTop && pad.y < elBottom) {
                 if (pad.vx > 0 && pad.x + pad.w >= elLeft && pad.x + pad.w - pad.vx <= elLeft) { pad.x = elLeft - pad.w; pad.vx *= -physics.bounce; pad.vr *= -1; }
                 else if (pad.vx < 0 && pad.x <= elRight && pad.x - pad.vx >= elRight) { pad.x = elRight; pad.vx *= -physics.bounce; pad.vr *= -1; }
