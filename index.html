@@ -37,13 +37,17 @@
             .body-text { @apply text-base md:text-lg text-gray-600 leading-relaxed; }
             .form-input { @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-pink-100 transition-all; }
             
-            /* Animasi Mesin & Physics */
+            /* Animasi Hardware LED */
             .led-blink-fast { animation: blink-fast 0.2s infinite alternate; }
             .led-blink-slow { animation: blink-slow 1s infinite alternate; }
             @keyframes blink-fast { from { opacity: 1; box-shadow: 0 0 15px currentColor; } to { opacity: 0.2; box-shadow: 0 0 0px currentColor; } }
             @keyframes blink-slow { from { opacity: 1; box-shadow: 0 0 10px currentColor; } to { opacity: 0.4; box-shadow: 0 0 2px currentColor; } }
             
-            /* ANIMASI KURSOR ESTETIK */
+            /* Kabel Data IoT Flow */
+            @keyframes data-flow { 0% { stroke-dashoffset: 24; } 100% { stroke-dashoffset: 0; } }
+            .animate-data-flow { animation: data-flow 1s linear infinite; stroke-dasharray: 6; }
+
+            /* Kursor Tutorial */
             @keyframes swipe-up-cursor {
                 0% { transform: translate(-50%, 40px) scale(0.8); opacity: 0; }
                 15% { transform: translate(-50%, 10px) scale(1); opacity: 1; }
@@ -53,16 +57,25 @@
             }
             .animate-swipe-cursor { animation: swipe-up-cursor 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite; }
 
-            /* ANIMASI MEKANIK PENDORONG & JATUH (SIDE VIEW) */
+            /* FISIKA JATUH (PENGAMBILAN) - SIDE VIEW */
             @keyframes side-push-drop {
                 0%   { transform: translate(0px, 0px) rotate(0deg); opacity: 1; }
-                15%  { transform: translate(-45px, 0px) rotate(0deg); opacity: 1; }  /* Didorong ke depan oleh pendorong */
-                30%  { transform: translate(-55px, 10px) rotate(-15deg); opacity: 1; } /* Mulai jatuh ke saluran */
-                60%  { transform: translate(-55px, 60px) rotate(-15deg); opacity: 1; } /* Jatuh vertikal */
-                80%  { transform: translate(-70px, 80px) rotate(-15deg); opacity: 1; } /* Meluncur di lereng keluar */
-                100% { transform: translate(-95px, 90px) rotate(-15deg); opacity: 0; } /* Keluar dari mesin */
+                15%  { transform: translate(-45px, 0px) rotate(0deg); opacity: 1; } 
+                30%  { transform: translate(-55px, 10px) rotate(-15deg); opacity: 1; } 
+                60%  { transform: translate(-55px, 80px) rotate(-15deg); opacity: 1; } 
+                80%  { transform: translate(-70px, 100px) rotate(-15deg); opacity: 1; } 
+                100% { transform: translate(-95px, 110px) rotate(-15deg); opacity: 0; } 
             }
-            .animate-side-push-drop { animation: side-push-drop 0.8s linear forwards; }
+            .animate-side-push-drop { animation: side-push-drop 0.8s cubic-bezier(0.4, 0, 1, 1) forwards; }
+
+            /* FISIKA JATUH (DONASI MASUK) - SIDE VIEW */
+            @keyframes side-donate-drop {
+                0%   { transform: translateY(-80px); opacity: 0; }
+                10%  { opacity: 1; }
+                80%  { transform: translateY(0px); opacity: 1; }
+                100% { transform: translateY(0px); opacity: 0; }
+            }
+            .animate-side-donate-drop { animation: side-donate-drop 0.5s cubic-bezier(0.4, 0, 0.8, 1) forwards; }
         }
     </style>
 </head>
@@ -104,161 +117,180 @@
     <main>
         <!-- Hero Section -->
         <section id="home" class="container mx-auto px-6 py-12 md:py-24">
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div class="flex flex-col xl:flex-row items-center justify-between gap-12">
                 
                 <!-- BAGIAN TEKS KIRI -->
-                <div class="w-full lg:w-1/2 text-center lg:text-left scroll-animate opacity-0 translate-y-10">
+                <div class="w-full xl:w-[45%] text-center xl:text-left scroll-animate opacity-0 translate-y-10">
                     <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce collider">Inovasi Sosial 2026</span>
                     
                     <h1 class="heading-1 mb-6 collider">PERIODCARE MACHINE</h1>
                     
-                    <p class="body-text mb-6 collider text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
+                    <p class="body-text mb-6 collider text-center xl:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
                     
-                    <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 collider shadow-sm flex flex-col items-center lg:items-start gap-3 text-center lg:text-left">
+                    <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 collider shadow-sm flex flex-col items-center xl:items-start gap-3 text-center xl:text-left">
                         <div class="inline-flex items-center gap-2 w-fit py-1.5 px-3 rounded-lg bg-pink-200 text-pink-700 font-bold text-xs tracking-wider uppercase animate-pulse">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             Prototipe Interaktif & Game
                         </div>
                         <p class="text-sm font-medium text-pink-900 leading-relaxed flex items-start gap-2">
                             <svg class="w-5 h-5 mt-0.5 shrink-0 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                            <span><b>Cara Main:</b> Tekan tombol mesin, lihat mekanismenya di sisi kanan, lalu tarik pembalut yang keluar ke arah slot donasi atas untuk mencoba gravitasi!</span>
+                            <span><b>Cara Main:</b> Tekan tombol mesin, lihat otak mekaniknya beroperasi di sisi kanan, lalu tarik pembalut yang keluar ke arah slot donasi untuk menyumbang balik!</span>
                         </p>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center xl:justify-start">
                         <a href="#locations" class="btn btn-primary collider">Lihat Tracker</a>
                         <a href="#donate" class="btn btn-accent collider">Donate Now</a>
                     </div>
                 </div>
                 
-                <!-- CONTAINER KEDUA MESIN -->
-                <div class="w-full lg:w-1/2 flex justify-center items-end gap-3 sm:gap-6 scroll-animate opacity-0 translate-y-10 delay-100 relative mt-4 lg:mt-0 scale-[0.60] sm:scale-90 xl:scale-100 origin-top">
-                    
-                    <!-- 1. MESIN TAMPILAN DEPAN (FRONT VIEW) -->
-                    <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
+                <!-- CONTAINER KEDUA MESIN (PANEL SKEMATIK) -->
+                <div class="w-full xl:w-[55%] flex justify-center scroll-animate opacity-0 translate-y-10 delay-100">
+                    <div class="bg-gray-50 border border-gray-200 rounded-[2.5rem] p-4 sm:p-8 shadow-inner flex flex-col sm:flex-row justify-center items-end gap-6 relative origin-top scale-[0.65] sm:scale-[0.85] lg:scale-100">
                         
-                        <!-- Kursor Animasi -->
-                        <div id="drag-hint-wrapper" class="absolute bottom-24 left-1/2 z-[100000] pointer-events-none hidden">
-                            <svg id="drag-hint-icon" class="w-12 h-12 text-white drop-shadow-[0_8px_12px_rgba(255,77,133,0.8)] -translate-x-1/2" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M4.34 2.72l15.93 9.4c1.1.65.65 2.37-.58 2.37h-5.46l3.43 6.3c.3.56.09 1.25-.46 1.55l-1.78.96c-.56.3-1.25.09-1.55-.46l-3.43-6.3L6.5 21.05c-.96.7-2.5-.02-2.5-1.2V3.9c0-1.18 1.4-1.85 2.34-1.18z"/>
-                            </svg>
-                        </div>
+                        <!-- Kabel Data IoT Penghubung antar Mesin -->
+                        <svg class="absolute top-[180px] left-[150px] w-[200px] h-[100px] pointer-events-none z-0 hidden sm:block" viewBox="0 0 200 100" fill="none">
+                            <!-- Kabel Background -->
+                            <path d="M 40,80 C 100,80 120,20 180,20" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
+                            <!-- Kabel Animasi Data Flow -->
+                            <path d="M 40,80 C 100,80 120,20 180,20" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" class="animate-data-flow"/>
+                        </svg>
 
-                        <!-- Panel Atas: Slot -->
-                        <div class="w-full flex justify-between items-center mb-3 px-2">
-                            <div class="flex gap-4">
-                                <div id="slot-reguler" class="flex flex-col gap-1 items-center relative transition-transform">
-                                    <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN REG</span>
-                                    <div class="w-10 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
-                                        <div class="w-6 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
-                                    </div>
-                                    <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="reguler"></div>
-                                </div>
-                                <div id="slot-maxi" class="flex flex-col gap-1 items-center relative transition-transform">
-                                    <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN MAXI</span>
-                                    <div class="w-14 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
-                                        <div class="w-10 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
-                                    </div>
-                                    <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="maxi"></div>
-                                </div>
-                            </div>
+                        <!-- Label Sistem -->
+                        <div class="absolute top-4 left-6 text-xs font-mono font-bold text-gray-400 tracking-widest hidden sm:block">SYSTEM_SCHEMATIC_V2</div>
+
+                        <!-- 1. MESIN TAMPILAN DEPAN (FRONT VIEW) -->
+                        <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
                             
-                            <div class="flex flex-col items-end gap-1">
-                                <span class="text-[8px] font-bold text-gray-400">STATUS</span>
-                                <div id="machine-led" class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e] text-green-500 transition-colors duration-300"></div>
+                            <!-- Kursor Animasi -->
+                            <div id="drag-hint-wrapper" class="absolute bottom-24 left-1/2 z-[100000] pointer-events-none hidden">
+                                <svg id="drag-hint-icon" class="w-12 h-12 text-white drop-shadow-[0_8px_12px_rgba(255,77,133,0.8)] -translate-x-1/2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M4.34 2.72l15.93 9.4c1.1.65.65 2.37-.58 2.37h-5.46l3.43 6.3c.3.56.09 1.25-.46 1.55l-1.78.96c-.56.3-1.25.09-1.55-.46l-3.43-6.3L6.5 21.05c-.96.7-2.5-.02-2.5-1.2V3.9c0-1.18 1.4-1.85 2.34-1.18z"/>
+                                </svg>
+                            </div>
+
+                            <!-- Panel Atas: Slot -->
+                            <div class="w-full flex justify-between items-center mb-3 px-2">
+                                <div class="flex gap-4">
+                                    <div id="slot-reguler" class="flex flex-col gap-1 items-center relative transition-transform">
+                                        <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN REG</span>
+                                        <div class="w-10 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
+                                            <div class="w-6 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
+                                        </div>
+                                        <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="reguler"></div>
+                                    </div>
+                                    <div id="slot-maxi" class="flex flex-col gap-1 items-center relative transition-transform">
+                                        <span class="text-[7px] font-bold text-gray-500 uppercase tracking-widest">IN MAXI</span>
+                                        <div class="w-14 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
+                                            <div class="w-10 h-0.5 bg-gray-700 rounded-full pointer-events-none"></div>
+                                        </div>
+                                        <div class="absolute inset-0 scale-150 drop-zone pointer-events-none" data-type="maxi"></div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="text-[8px] font-bold text-gray-400">STATUS</span>
+                                    <div id="machine-led" class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e] text-green-500 transition-colors duration-300"></div>
+                                </div>
+                            </div>
+
+                            <!-- Kaca Depan -->
+                            <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
+                                <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
+                                
+                                <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-regular">
+                                    <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">REGULER</div>
+                                </div>
+                                <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-maxi">
+                                    <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">MAXI</div>
+                                </div>
+                            </div>
+
+                            <!-- Layar OS -->
+                            <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden collider">
+                                <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
+                                <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
+                                <span id="screen-status" class="text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse">SIAP DIGUNAKAN</span>
+                                <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold">Stok: 24/48</span>
+                            </div>
+
+                            <!-- Tombol Dispense -->
+                            <div class="flex gap-6 mb-5 w-full justify-center px-4">
+                                <button id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50 group">
+                                    <svg class="w-7 h-7 pointer-events-none drop-shadow-md group-active:scale-95 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+                                    <span class="text-[8px] font-bold mt-1 pointer-events-none">REG</span>
+                                </button>
+                                <button id="btn-maxi" class="w-16 h-16 rounded-full bg-gradient-to-b from-orange-400 to-accent shadow-[0_6px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-orange-300 focus:outline-none disabled:opacity-50 group">
+                                    <svg class="w-7 h-7 pointer-events-none drop-shadow-md group-active:scale-95 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"></path></svg>
+                                    <span class="text-[8px] font-bold mt-1 pointer-events-none">MAXI</span>
+                                </button>
+                            </div>
+
+                            <!-- Pick-up Box -->
+                            <div id="pickup-box" class="w-56 h-20 bg-gray-900 rounded-b-2xl rounded-t shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 flex justify-center items-end pb-3 relative overflow-hidden mt-auto">
+                                <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md z-20"></div>
                             </div>
                         </div>
 
-                        <!-- Kaca Depan -->
-                        <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
-                            <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
+                        <!-- 2. MESIN TAMPILAN SAMPING (OTAK IoT & CAD VIEW) -->
+                        <div class="collider relative w-48 h-[530px] bg-gradient-to-r from-gray-300 to-gray-400 rounded-[2rem] shadow-[-15px_20px_30px_rgba(0,0,0,0.2)] border-[5px] border-white flex flex-col items-center z-10 shrink-0 select-none overflow-hidden pb-12 pr-6">
+                            <div class="absolute top-3 right-3 text-[7px] font-bold text-gray-600 tracking-widest bg-white/70 px-2 py-1 rounded shadow-sm z-30">INNER MEKANISME</div>
+
+                            <!-- Modul IoT (ESP32) -->
+                            <div class="absolute top-8 left-4 w-14 h-[85px] bg-green-900 rounded border-2 border-green-700 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)] z-20 flex flex-col items-center justify-between py-2 px-1">
+                                <div class="w-8 h-8 bg-gray-900 rounded-sm mb-1 flex items-center justify-center border border-gray-700 shadow-lg">
+                                    <span class="text-[4px] text-gray-400 font-mono font-bold tracking-widest leading-none text-center">ESP<br>32</span>
+                                </div>
+                                <div class="flex gap-1.5 w-full justify-center">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444] animate-pulse"></div>
+                                    <div class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6] animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+                                </div>
+                                <!-- Wiring Internal -->
+                                <div class="w-[30px] h-[1.5px] bg-yellow-400 absolute -right-[30px] top-6 shadow-sm"></div>
+                                <div class="w-[30px] h-[1.5px] bg-red-400 absolute -right-[30px] top-10 shadow-sm"></div>
+                                <div class="w-[1.5px] h-[350px] bg-yellow-500 absolute -right-[30px] top-6 shadow-sm z-0"></div>
+                            </div>
+
+                            <!-- Saluran Donasi Masuk (Top Chute) -->
+                            <div class="absolute top-0 right-[40px] w-14 h-[40px] bg-gray-800/80 border-x-4 border-gray-700 z-0"></div>
                             
-                            <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-regular">
-                                <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">REGULER</div>
+                            <!-- Animasi Donasi Jatuh (Disembunyikan default) -->
+                            <div id="side-donate-pad" class="w-12 h-[6px] bg-pink-100 rounded-[1px] shadow border border-pink-300 absolute top-[30px] right-[44px] z-30 opacity-0 pointer-events-none"></div>
+
+                            <!-- Tempat Isi Ulang (Tumpukan Pembalut) -->
+                            <div id="stack-side-container" class="absolute bottom-[140px] right-[40px] w-14 h-[240px] bg-gray-900/70 border-4 border-gray-700 border-b-0 rounded-t-xl flex flex-col-reverse items-center pb-[1px] gap-[2px] z-10 overflow-hidden shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)]">
+                                <div id="stack-side" class="w-full flex flex-col-reverse items-center gap-[2px]"></div>
                             </div>
-                            <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-maxi">
-                                <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">MAXI</div>
+
+                            <!-- Tempat Mekanisme Pendorong -->
+                            <div class="absolute bottom-[140px] right-[10px] w-24 h-12 bg-gray-800 border-4 border-gray-600 rounded-r-lg z-20 flex items-center p-1 shadow-2xl">
+                                <!-- Motor Servo -->
+                                <div class="w-5 h-8 bg-blue-800 rounded border border-blue-600 shadow-[inset_0_0_5px_rgba(0,0,0,0.8)] flex justify-center items-center z-10 relative">
+                                    <div class="w-3 h-3 bg-gray-400 rounded-full shadow-inner"></div>
+                                    <div class="w-[10px] h-[1.5px] bg-yellow-500 absolute -top-[1.5px] -left-[10px]"></div>
+                                </div>
+                                <!-- Lengan Pendorong -->
+                                <div id="pusher-arm" class="w-16 h-3 bg-gray-400 absolute right-6 rounded-l-sm transition-transform duration-200 ease-out origin-right border-y border-l border-gray-300 shadow-md"></div>
                             </div>
-                        </div>
 
-                        <!-- Layar OS -->
-                        <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden collider">
-                            <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
-                            <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
-                            <span id="screen-status" class="text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse">SIAP DIGUNAKAN</span>
-                            <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold">Stok: 24/48</span>
-                        </div>
+                            <!-- Saluran Jatuh (Vertical Chute Bawah) -->
+                            <div class="absolute bottom-[75px] right-[102px] w-12 h-[300px] bg-gray-800/40 border-l-4 border-gray-700 z-0"></div>
 
-                        <!-- Tombol Dispense -->
-                        <div class="flex gap-6 mb-5 w-full justify-center px-4">
-                            <button id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50 group">
-                                <svg class="w-7 h-7 pointer-events-none drop-shadow-md group-active:scale-95 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
-                                <span class="text-[8px] font-bold mt-1 pointer-events-none">REG</span>
-                            </button>
-                            <button id="btn-maxi" class="w-16 h-16 rounded-full bg-gradient-to-b from-orange-400 to-accent shadow-[0_6px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-orange-300 focus:outline-none disabled:opacity-50 group">
-                                <svg class="w-7 h-7 pointer-events-none drop-shadow-md group-active:scale-95 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"></path></svg>
-                                <span class="text-[8px] font-bold mt-1 pointer-events-none">MAXI</span>
-                            </button>
-                        </div>
-
-                        <!-- Pick-up Box -->
-                        <div id="pickup-box" class="w-56 h-20 bg-gray-900 rounded-b-2xl rounded-t shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 flex justify-center items-end pb-3 relative overflow-hidden mt-auto">
-                            <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md z-20"></div>
-                        </div>
-                    </div>
-
-                    <!-- 2. MESIN TAMPILAN SAMPING (OTAK IoT & CAD VIEW) -->
-                    <div class="collider relative w-48 h-[530px] bg-gradient-to-r from-gray-200 to-gray-300 rounded-[2rem] shadow-[-10px_20px_30px_rgba(0,0,0,0.15)] border-[5px] border-white flex flex-col items-center z-0 shrink-0 select-none overflow-hidden pb-12 pr-6">
-                        <div class="absolute top-3 right-3 text-[7px] font-bold text-gray-500 tracking-widest bg-white/70 px-2 py-1 rounded shadow-sm z-30">INNER MEKANISME</div>
-
-                        <!-- Modul IoT (ESP32) -->
-                        <div class="absolute top-10 left-4 w-14 h-20 bg-green-900 rounded border-2 border-green-700 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)] z-20 flex flex-col items-center justify-between py-2 px-1">
-                            <!-- ESP32 Chip -->
-                            <div class="w-8 h-8 bg-gray-900 rounded-sm mb-1 flex items-center justify-center border border-gray-700">
-                                <span class="text-[4px] text-gray-400 font-mono font-bold tracking-widest leading-none text-center">ESP<br>32</span>
+                            <!-- Tempat Pengambilan (Slanted Ramp) -->
+                            <div class="absolute bottom-[56px] right-[40px] w-[114px] h-[84px] bg-gray-900 border-4 border-gray-700 rounded-bl-[1.5rem] z-10 overflow-hidden shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)]">
+                                <div class="w-[150%] h-4 bg-gray-600 absolute bottom-1 -left-4 -rotate-12 shadow-md border-t border-gray-400"></div>
                             </div>
-                            <div class="flex gap-1.5 w-full justify-center">
-                                <div class="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444] animate-pulse"></div>
-                                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6] animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                            </div>
-                            <!-- Wiring -->
-                            <div class="w-[80px] h-0.5 bg-yellow-500 absolute -right-[4.2rem] top-8 rotate-12 shadow-sm"></div>
-                            <div class="w-[80px] h-0.5 bg-red-500 absolute -right-[4.2rem] top-12 -rotate-12 shadow-sm"></div>
+
+                            <!-- Pembalut Jatuh Keluar (Animasi) -->
+                            <div id="side-drop-pad" class="w-12 h-[6px] rounded-[1px] shadow border absolute bottom-[144px] right-[44px] opacity-0 z-30 pointer-events-none"></div>
                         </div>
-
-                        <!-- Tempat Isi Ulang (Tumpukan Pembalut) -->
-                        <div id="stack-side" class="absolute bottom-[140px] right-[40px] w-14 h-[240px] bg-gray-900/60 border-4 border-gray-700 border-b-0 rounded-t-xl flex flex-col-reverse items-center pb-[1px] gap-[2px] z-10 overflow-hidden">
-                            <!-- Diisi oleh JavaScript -->
-                        </div>
-
-                        <!-- Tempat Mekanisme Pendorong -->
-                        <div class="absolute bottom-[140px] right-[10px] w-24 h-12 bg-gray-800 border-4 border-gray-600 rounded-r-lg z-20 flex items-center p-1 shadow-lg">
-                            <div class="w-5 h-8 bg-blue-800 rounded border border-blue-600 shadow-inner flex justify-center items-center">
-                                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-                            </div>
-                            <!-- Lengan Pendorong -->
-                            <div id="pusher-arm" class="w-16 h-3 bg-gray-400 absolute right-6 rounded-l-sm transition-transform duration-200 origin-right border-y border-l border-gray-300"></div>
-                        </div>
-
-                        <!-- Saluran Jatuh (Vertical Chute) -->
-                        <div class="absolute bottom-[75px] right-[102px] w-12 h-[300px] bg-gray-800/30 border-l-4 border-gray-700 z-0"></div>
-
-                        <!-- Tempat Pengambilan (Slanted Ramp) -->
-                        <div class="absolute bottom-[56px] right-[40px] w-[114px] h-[84px] bg-gray-900 border-4 border-gray-700 rounded-bl-[1.5rem] z-10 overflow-hidden shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)]">
-                            <div class="w-[150%] h-4 bg-gray-600 absolute bottom-1 -left-4 -rotate-12 shadow-md border-t border-gray-400"></div>
-                        </div>
-
-                        <!-- Pembalut Jatuh (Tampilan Samping) -->
-                        <div id="side-drop-pad" class="w-12 h-[6px] rounded-sm absolute bottom-[144px] right-[44px] opacity-0 z-30 pointer-events-none"></div>
 
                     </div>
-
                 </div>
             </div>
         </section>
 
-        <!-- About Section -->
+        <!-- SISA KODE WEBSITE (About, Locations, FAQ, Donate, Footer) -->
         <section id="about" class="bg-white py-20 border-t border-gray-100">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-10 scroll-animate opacity-0 translate-y-10">
@@ -269,7 +301,6 @@
             </div>
         </section>
 
-        <!-- Locations & Tracker -->
         <section id="locations" class="py-20 bg-light border-t border-gray-200">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
@@ -324,7 +355,6 @@
             </div>
         </section>
 
-        <!-- FAQ Section -->
         <section id="faq" class="py-20 bg-white border-t border-pink-100">
             <div class="container mx-auto px-6 max-w-4xl">
                 <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
@@ -332,164 +362,66 @@
                     <br>
                     <p class="body-text collider inline-block w-fit">Pelajari lebih lanjut tentang cara kerja, keamanan, dan visi di balik PeriodCare Machine.</p>
                 </div>
-                
                 <div class="space-y-4 scroll-animate opacity-0 translate-y-10">
                     <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider" open>
-                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
-                            <span>1. Apakah aman dan steril jika saya menyumbangkan pembalut langsung ke dalam mesin?</span>
-                            <span class="transition group-open:rotate-180">
-                                <svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
-                            </span>
-                        </summary>
-                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
-                            <b>Sangat aman!</b> Mesin PeriodCare didesain dengan kompartemen tertutup yang menjaga kebersihan. Kami menerapkan aturan ketat bahwa pembalut yang disumbangkan secara fisik <b>wajib masih dalam kemasan plastik segel aslinya (belum terbuka)</b>. Selain itu, relawan distribusi kami secara berkala melakukan pengecekan kualitas dan kelayakan fisik pembalut di dalam mesin.
-                        </p>
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors"><span>1. Apakah aman dan steril jika saya menyumbangkan pembalut langsung ke dalam mesin?</span><span class="transition group-open:rotate-180"><svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span></summary><p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm"><b>Sangat aman!</b> Mesin PeriodCare didesain dengan kompartemen tertutup yang menjaga kebersihan. Kami menerapkan aturan ketat bahwa pembalut yang disumbangkan secara fisik <b>wajib masih dalam kemasan plastik segel aslinya (belum terbuka)</b>.</p>
                     </details>
-
                     <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider">
-                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
-                            <span>2. Bagaimana cara kerja "Donasi Silang" di PeriodCare Machine?</span>
-                            <span class="transition group-open:rotate-180">
-                                <svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
-                            </span>
-                        </summary>
-                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
-                            Sistem kami memfasilitasi dua metode donasi gotong royong: <br><br>
-                            <b>1. Donasi Tunai (QRIS):</b> Dana yang terkumpul via website akan dikelola secara transparan untuk biaya operasional dan pembelian stok massal oleh tim kami.<br>
-                            <b>2. Donasi Fisik (In-Kind):</b> Pengguna yang sedang membawa pembalut lebih di tasnya, dapat langsung memasukkannya ke dalam "Slot Donasi IN" di atas mesin untuk langsung dipakai oleh perempuan lain yang sedang membutuhkan secara darurat.
-                        </p>
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors"><span>2. Bagaimana cara kerja "Donasi Silang" di PeriodCare Machine?</span><span class="transition group-open:rotate-180"><svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span></summary><p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">Sistem kami memfasilitasi dua metode: Donasi Tunai (QRIS) dan Donasi Fisik (In-Kind) dengan memasukkannya ke dalam "Slot Donasi IN".</p>
                     </details>
-
                     <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider">
-                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
-                            <span>3. Bagaimana cara mengambil pembalut agar tidak disalahgunakan?</span>
-                            <span class="transition group-open:rotate-180">
-                                <svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
-                            </span>
-                        </summary>
-                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
-                            Pengguna cukup menekan tombol mekanik pada mesin (Reguler/Maxi). Untuk mencegah penimbunan atau vandalisme, sistem mikrokontroler mesin ini dilengkapi dengan <b>mekanisme Jeda Waktu (Cooldown)</b> selama beberapa saat setelah satu pembalut berhasil dikeluarkan. Alat ini difokuskan untuk kondisi darurat <i>(emergency)</i> di fasilitas publik/pendidikan.
-                        </p>
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors"><span>3. Bagaimana cara mengambil pembalut agar tidak disalahgunakan?</span><span class="transition group-open:rotate-180"><svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span></summary><p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">Sistem mikrokontroler mesin ini dilengkapi dengan <b>mekanisme Jeda Waktu (Cooldown)</b> selama beberapa saat setelah satu pembalut berhasil dikeluarkan.</p>
                     </details>
-
                     <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider">
-                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
-                            <span>4. Apa fungsi dari Live Tracker IoT di website ini?</span>
-                            <span class="transition group-open:rotate-180">
-                                <svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
-                            </span>
-                        </summary>
-                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
-                            Setiap Mesin PeriodCare dilengkapi dengan modul IoT (Internet of Things) seperti mikrokontroler cerdas. Data stok pembalut dari setiap lokasi mesin akan dikirim ke server secara <i>real-time</i>. Melalui Live Tracker ini, relawan tahu persis kapan dan mesin mana yang perlu diisi ulang, sementara pengguna bisa mengecek ketersediaan sebelum mendatangi lokasi mesin.
-                        </p>
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors"><span>4. Apa fungsi dari Live Tracker IoT di website ini?</span><span class="transition group-open:rotate-180"><svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span></summary><p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">Setiap Mesin PeriodCare dilengkapi dengan modul IoT. Data stok pembalut dikirim ke server secara <i>real-time</i>.</p>
                     </details>
-
                     <details class="bg-light rounded-2xl border border-pink-100 shadow-sm group collider">
-                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
-                            <span>5. Apakah mesin memiliki sistem untuk memantau kondisi pembalut di dalamnya?</span>
-                            <span class="transition group-open:rotate-180">
-                                <svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
-                            </span>
-                        </summary>
-                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
-                            Tentu saja! Selain menghitung stok, kompartemen mesin PeriodCare terintegrasi dengan <b>Sensor Kondisi Lingkungan (seperti Suhu & Kelembapan)</b>. Sensor ini terus mengumpulkan data di dalam rak penyimpanan secara <i>real-time</i>. Jika parameter lingkungan mencapai titik yang berpotensi merusak higienitas pembalut, sistem IoT akan otomatis mengirimkan peringatan dini kepada tim <i>maintenance</i> untuk segera melakukan pengecekan fisik.
-                        </p>
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors"><span>5. Apakah mesin memiliki sistem untuk memantau kondisi pembalut di dalamnya?</span><span class="transition group-open:rotate-180"><svg fill="none" class="w-6 h-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span></summary><p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">Selain menghitung stok, kompartemen mesin terintegrasi dengan <b>Sensor Kondisi Lingkungan (Suhu & Kelembapan)</b> untuk menjaga sterilisasi.</p>
                     </details>
                 </div>
             </div>
         </section>
 
-        <!-- Donasi, Relawan & Kontak -->
         <section id="donate" class="py-20 bg-light border-t border-gray-200 relative">
             <div class="container mx-auto px-6">
-                <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10">
-                    <h2 class="heading-2 mb-4 collider inline-block w-fit">Waktunya Mengambil Peran</h2>
-                    <br>
-                    <p class="body-text max-w-2xl mx-auto collider inline-block w-fit">Pilih cara Anda berkontribusi. Menjadi donatur untuk operasional mesin, atau bergabung sebagai relawan untuk edukasi dan distribusi.</p>
-                </div>
-
+                <div class="text-center mb-16 scroll-animate opacity-0 translate-y-10"><h2 class="heading-2 mb-4 collider inline-block w-fit">Waktunya Mengambil Peran</h2><br><p class="body-text max-w-2xl mx-auto collider inline-block w-fit">Pilih cara Anda berkontribusi. Menjadi donatur untuk operasional mesin, atau bergabung sebagai relawan.</p></div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 scroll-animate opacity-0 translate-y-10">
                     <div class="bg-white rounded-3xl p-8 border border-pink-100 shadow-sm collider">
                         <div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-xl collider"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div><h3 class="text-2xl font-bold text-dark collider inline-block w-fit">Berdonasi</h3></div>
                         <p class="text-gray-600 mb-6 text-sm collider inline-block w-fit">Scan QRIS di bawah ini melalui aplikasi M-Banking atau e-Wallet Anda.</p>
-                        <div class="bg-light p-2 rounded-2xl border border-gray-200 shadow-inner w-48 h-48 mx-auto flex flex-col items-center justify-center mb-6 overflow-hidden collider">
-                            <img id="qris-img" src="https://via.placeholder.com/300?text=Memuat+QRIS..." alt="QRIS Code" class="w-full h-full object-cover rounded-xl">
-                        </div>
-                        <form id="donation-form" class="space-y-4">
-                            <input type="text" id="donator-name" placeholder="Nama Donatur (Boleh Anonim)" class="form-input collider">
-                            <input type="number" id="donation-amount" placeholder="Nominal Donasi (Rp)" class="form-input collider" required>
-                            <button type="submit" class="btn btn-primary w-full shadow-soft collider">Konfirmasi Donasi Saya</button>
+                        <div class="bg-light p-2 rounded-2xl border border-gray-200 shadow-inner w-48 h-48 mx-auto flex flex-col items-center justify-center mb-6 overflow-hidden collider"><img id="qris-img" src="https://via.placeholder.com/300?text=Memuat+QRIS..." alt="QRIS Code" class="w-full h-full object-cover rounded-xl"></div>
+                        <form id="donation-form" class="space-y-4"><input type="text" id="donator-name" placeholder="Nama Donatur (Boleh Anonim)" class="form-input collider"><input type="number" id="donation-amount" placeholder="Nominal Donasi (Rp)" class="form-input collider" required><button type="submit" class="btn btn-primary w-full shadow-soft collider">Konfirmasi Donasi Saya</button>
+                            <div id="donasi-success" class="hidden flex items-center justify-center gap-2 text-green-600 text-sm font-semibold bg-green-50 p-3 rounded-lg mt-2 border border-green-200"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Terima kasih! Donasi diverifikasi.</div>
                         </form>
                     </div>
-
                     <div class="flex flex-col gap-8">
                         <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm relative overflow-hidden flex-1 collider">
                             <div class="absolute -top-10 -right-10 w-32 h-32 bg-orange-50 rounded-full z-0"></div>
-                            <div class="relative z-10">
-                                <div class="flex items-center gap-4 mb-6">
-                                    <div class="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-white text-xl collider"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
-                                    <h3 class="text-2xl font-bold text-dark collider inline-block w-fit">Menjadi Relawan</h3>
-                                </div>
-                                <form id="volunteer-form" class="space-y-4">
-                                    <input type="text" id="vol-name" placeholder="Nama Lengkap" class="form-input collider" required>
-                                    <input type="email" id="vol-email" placeholder="Email Aktif" class="form-input collider" required>
-                                    <select id="vol-role" class="form-input text-gray-500 collider cursor-pointer" required>
-                                        <option value="" disabled selected>Pilih Peran Relawan</option><option value="distribusi">Tim Distribusi & Maintenance IoT</option><option value="edukasi">Tim Edukasi & Sosialisasi</option><option value="media">Tim Media & Kreatif</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-accent w-full collider">Daftar Sekarang</button>
+                            <div class="relative z-10"><div class="flex items-center gap-4 mb-6"><div class="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-white text-xl collider"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div><h3 class="text-2xl font-bold text-dark collider inline-block w-fit">Menjadi Relawan</h3></div>
+                                <form id="volunteer-form" class="space-y-4"><input type="text" id="vol-name" placeholder="Nama Lengkap" class="form-input collider" required><input type="email" id="vol-email" placeholder="Email Aktif" class="form-input collider" required><select id="vol-role" class="form-input text-gray-500 collider cursor-pointer" required><option value="" disabled selected>Pilih Peran Relawan</option><option value="distribusi">Tim Distribusi & Maintenance IoT</option><option value="edukasi">Tim Edukasi & Sosialisasi</option><option value="media">Tim Media & Kreatif</option></select><button type="submit" class="btn btn-accent w-full collider">Daftar Sekarang</button>
+                                    <div id="volunteer-success" class="hidden flex items-center justify-center gap-2 text-orange-600 text-sm font-semibold bg-orange-50 p-3 rounded-lg mt-2 border border-orange-200"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Pendaftaran berhasil!</div>
                                 </form>
                             </div>
                         </div>
-
-                        <div class="bg-pink-50 rounded-3xl p-8 border border-pink-100 shadow-sm collider">
-                            <h3 class="text-xl font-bold text-dark mb-2 collider inline-block w-fit flex items-center gap-2">
-                                <svg class="w-6 h-6 text-yellow-400 fill-current drop-shadow-sm" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                Pengalaman Pakai Mesin?
-                            </h3>
-                            <br>
-                            <p class="text-sm text-gray-600 mb-4 collider inline-block w-fit">Bantu kami meningkatkan kualitas mesin PeriodCare.</p>
-                            <form id="feedback-form" class="space-y-3">
-                                <input type="text" id="fb-name" placeholder="Nama Anda (Boleh Anonim)" class="form-input text-sm py-2 collider">
-                                <select id="fb-rating" class="form-input text-gray-500 text-sm py-2 collider cursor-pointer" required>
-                                    <option value="" disabled selected>Pilih Penilaian Bintang</option>
-                                    <option value="5">5 Bintang (Sangat Bagus)</option>
-                                    <option value="4">4 Bintang (Bagus)</option>
-                                    <option value="3">3 Bintang (Cukup)</option>
-                                    <option value="2">2 Bintang (Kurang)</option>
-                                    <option value="1">1 Bintang (Sangat Kurang)</option>
-                                </select>
-                                <textarea id="fb-message" rows="2" placeholder="Saran atau masukan Anda..." class="form-input text-sm py-2 resize-none collider" required></textarea>
-                                <button type="submit" class="btn btn-primary w-full text-sm py-2 collider">Kirim Penilaian</button>
+                        <div class="bg-pink-50 rounded-3xl p-8 border border-pink-100 shadow-sm collider"><h3 class="text-xl font-bold text-dark mb-2 collider inline-block w-fit flex items-center gap-2"><svg class="w-6 h-6 text-yellow-400 fill-current drop-shadow-sm" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>Pengalaman Pakai Mesin?</h3><br><p class="text-sm text-gray-600 mb-4 collider inline-block w-fit">Bantu kami meningkatkan kualitas mesin PeriodCare.</p>
+                            <form id="feedback-form" class="space-y-3"><input type="text" id="fb-name" placeholder="Nama Anda (Boleh Anonim)" class="form-input text-sm py-2 collider"><select id="fb-rating" class="form-input text-gray-500 text-sm py-2 collider cursor-pointer" required><option value="" disabled selected>Pilih Penilaian Bintang</option><option value="5">5 Bintang (Sangat Bagus)</option><option value="4">4 Bintang (Bagus)</option><option value="3">3 Bintang (Cukup)</option><option value="2">2 Bintang (Kurang)</option><option value="1">1 Bintang (Sangat Kurang)</option></select><textarea id="fb-message" rows="2" placeholder="Saran atau masukan Anda..." class="form-input text-sm py-2 resize-none collider" required></textarea><button type="submit" class="btn btn-primary w-full text-sm py-2 collider">Kirim Penilaian</button>
+                                <div id="feedback-success" class="hidden flex items-center justify-center gap-2 text-green-600 text-sm font-semibold bg-green-50 p-2 rounded-lg mt-2 border border-green-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Terima kasih atas ulasan Anda!</div>
                             </form>
                         </div>
                     </div>
                 </div>
-
-                <!-- Kontak & Call Center -->
                 <div class="bg-dark rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl scroll-animate opacity-0 translate-y-10 collider">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <div>
-                            <h3 class="text-3xl font-bold mb-4 collider inline-block w-fit">Punya Ide Kolaborasi?</h3>
-                            <br>
-                            <p class="text-gray-400 mb-8 collider inline-block w-fit">Kami membuka pintu seluas-luasnya untuk pemerintah daerah, NGO, maupun swasta.</p>
+                        <div><h3 class="text-3xl font-bold mb-4 collider inline-block w-fit">Punya Ide Kolaborasi?</h3><br><p class="text-gray-400 mb-8 collider inline-block w-fit">Kami membuka pintu seluas-luasnya untuk pemerintah daerah, NGO, maupun swasta.</p>
                             <div class="space-y-4">
                                 <div class="flex items-center gap-4 collider w-fit"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div><span class="text-gray-300">periodcare@uny.ac.id</span></div>
                                 <div class="flex items-center gap-4 collider w-fit"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div><span class="text-gray-300">Fakultas Teknik, UNY</span></div>
-                                <div class="flex items-center gap-4 mt-6 pt-6 border-t border-gray-700 collider w-fit">
-                                    <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 animate-pulse"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg></div>
-                                    <div>
-                                        <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Layanan Bantuan 24/7</p>
-                                        <a href="#" id="call-center-link" class="text-xl font-bold text-green-400 hover:text-green-300 transition-colors" target="_blank"><span id="call-center-text">Memuat...</span></a>
-                                    </div>
-                                </div>
+                                <div class="flex items-center gap-4 mt-6 pt-6 border-t border-gray-700 collider w-fit"><div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 animate-pulse"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg></div><div><p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Layanan Bantuan 24/7</p><a href="#" id="call-center-link" class="text-xl font-bold text-green-400 hover:text-green-300 transition-colors" target="_blank"><span id="call-center-text">Memuat...</span></a></div></div>
                             </div>
                         </div>
                         <div>
-                            <form id="contact-form" class="space-y-4">
-                                <input type="text" id="contact-name" placeholder="Nama / Instansi" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary collider" required>
-                                <input type="email" id="contact-email" placeholder="Email" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary collider" required>
-                                <textarea id="contact-message" rows="4" placeholder="Tuliskan pesan..." class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary resize-none collider" required></textarea>
-                                <button type="submit" class="btn btn-primary w-full collider">Kirim Pesan</button>
+                            <form id="contact-form" class="space-y-4"><input type="text" id="contact-name" placeholder="Nama / Instansi" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary collider" required><input type="email" id="contact-email" placeholder="Email" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary collider" required><textarea id="contact-message" rows="4" placeholder="Tuliskan pesan..." class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-primary resize-none collider" required></textarea><button type="submit" class="btn btn-primary w-full collider">Kirim Pesan</button>
+                                <div id="contact-success" class="hidden flex items-center justify-center gap-2 text-pink-300 text-sm font-semibold bg-pink-900/30 p-3 rounded-lg mt-2 border border-pink-900"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>Pesan berhasil dikirim!</div>
                             </form>
                         </div>
                     </div>
@@ -498,17 +430,10 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-dark pt-8 pb-8 border-t border-gray-800">
         <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
             <p class="mb-4 md:mb-0 text-center md:text-left collider inline-block w-fit">&copy; 2026 PERIODCARE MACHINE. Hak Cipta Dilindungi.</p>
-            <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-                <p class="collider inline-block w-fit flex items-center gap-1">Dibuat dengan <svg class="w-4 h-4 text-primary fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg> oleh Tim Peneliti UNY</p>
-                <a href="admin.html" class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-primary text-gray-400 hover:text-white rounded-lg transition-all duration-300 border border-gray-700 hover:border-primary shadow-sm collider">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                    <span class="font-semibold text-xs tracking-wider uppercase">Admin</span>
-                </a>
-            </div>
+            <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6"><p class="collider inline-block w-fit flex items-center gap-1">Dibuat dengan <svg class="w-4 h-4 text-primary fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg> oleh Tim Peneliti UNY</p><a href="admin.html" class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-primary text-gray-400 hover:text-white rounded-lg transition-all duration-300 border border-gray-700 hover:border-primary shadow-sm collider"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><span class="font-semibold text-xs tracking-wider uppercase">Admin</span></a></div>
         </div>
     </footer>
 
