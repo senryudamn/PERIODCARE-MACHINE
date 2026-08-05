@@ -40,6 +40,7 @@
             .led-blink-slow { animation: blink-slow 1s infinite alternate; }
             @keyframes blink-fast { from { opacity: 1; box-shadow: 0 0 15px currentColor; } to { opacity: 0.2; box-shadow: 0 0 0px currentColor; } }
             @keyframes blink-slow { from { opacity: 1; box-shadow: 0 0 10px currentColor; } to { opacity: 0.4; box-shadow: 0 0 2px currentColor; } }
+            .pad-drop-anim { transition: transform 0.4s ease-in, opacity 0.4s ease-in; transform: scale(0.1) translateY(50px); opacity: 0; }
         }
     </style>
 </head>
@@ -83,14 +84,22 @@
         <section id="home" class="container mx-auto px-6 py-16 md:py-24">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
                 
+                <!-- BAGIAN TEKS KIRI (DIRAPIKAN) -->
                 <div class="w-full lg:w-1/2 text-center lg:text-left scroll-animate opacity-0 translate-y-10">
                     <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce collider">Inovasi Sosial 2026</span>
-                    <h1 class="heading-1 mb-6 collider">PERIODCARE MACHINE</h1>
-                    <p class="body-text mb-6 collider">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
                     
-                    <div class="text-sm text-left font-semibold text-primary bg-pink-50 p-4 rounded-xl border border-pink-100 mb-8 collider shadow-sm">
-                        <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce collider">Prototipe Interaktif & Game</span>
-                        🎮 <b>Cara Main:</b> Tekan tombol mesin di bawah, tarik (Drag & Drop) pembalut yang jatuh, dan lemparkan ke slot donasi di atas mesin sesuai ukurannya! Coba mainkan gravitasi dengan melempar pembalutnya.
+                    <h1 class="heading-1 mb-6 collider">PERIODCARE MACHINE</h1>
+                    
+                    <p class="body-text mb-6 collider text-justify sm:text-center lg:text-left">PeriodCare Machine merupakan inovasi dispenser pembalut pintar berbasis IoT yang dirancang untuk menanggulangi <i>period poverty</i>. Alat ini memfasilitasi distribusi pembalut gratis yang tepat sasaran, sekaligus mengintegrasikan fitur donasi silang dari masyarakat dengan sistem pemantauan stok secara <i>real-time</i>.</p>
+                    
+                    <!-- KOTAK CARA MAIN (DIRAPIKAN DENGAN FLEXBOX) -->
+                    <div class="bg-pink-50 p-5 rounded-2xl border border-pink-200 mb-8 collider shadow-sm flex flex-col gap-3 text-left">
+                        <div class="inline-block w-fit py-1 px-3 rounded-lg bg-pink-200 text-pink-700 font-bold text-xs tracking-wider uppercase animate-pulse">
+                            🕹️ Prototipe Interaktif & Game
+                        </div>
+                        <p class="text-sm font-medium text-pink-900 leading-relaxed">
+                            🎮 <b>Cara Main:</b> Tekan tombol mesin di bawah, tarik (Drag & Drop) pembalut yang jatuh, dan lemparkan ke slot donasi di atas mesin sesuai ukurannya! Coba mainkan gravitasi dengan melempar pembalutnya.
+                        </p>
                     </div>
 
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -100,7 +109,6 @@
                 </div>
                 
                 <!-- MESIN INTERAKTIF -->
-                <!-- Ditambahkan scale-[0.85] agar di HP mesinnya mengecil sedikit dan tidak memakan batas layar -->
                 <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative mt-8 lg:mt-0 scale-[0.85] sm:scale-100 origin-top">
                     <div id="machine-body" class="collider relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
                         
@@ -302,6 +310,7 @@
                             <div class="space-y-4">
                                 <div class="flex items-center gap-4 collider"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📧</div><span class="text-gray-300">periodcare@uny.ac.id</span></div>
                                 <div class="flex items-center gap-4 collider"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📍</div><span class="text-gray-300">Fakultas Teknik, UNY</span></div>
+                                <div class="flex items-center gap-4 collider"><div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-primary">📱</div><span class="text-gray-300">Instagram: @periodcare.uny</span></div>
                                 <div class="flex items-center gap-4 mt-6 pt-6 border-t border-gray-700 collider">
                                     <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xl animate-pulse">📞</div>
                                     <div>
