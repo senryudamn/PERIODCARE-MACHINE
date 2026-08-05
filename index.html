@@ -34,6 +34,13 @@
             .heading-2 { @apply text-3xl md:text-4xl font-bold text-dark leading-snug; }
             .body-text { @apply text-base md:text-lg text-gray-600 leading-relaxed; }
             .form-input { @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-pink-100 transition-all; }
+            
+            /* Animasi Khusus Mesin Interaktif */
+            .led-blink-fast { animation: blink-fast 0.3s infinite alternate; }
+            .led-blink-slow { animation: blink-slow 1s infinite alternate; }
+            @keyframes blink-fast { from { opacity: 1; box-shadow: 0 0 15px currentColor; } to { opacity: 0.2; box-shadow: 0 0 0px currentColor; } }
+            @keyframes blink-slow { from { opacity: 1; box-shadow: 0 0 10px currentColor; } to { opacity: 0.4; box-shadow: 0 0 2px currentColor; } }
+            .pad-item { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         }
     </style>
 </head>
@@ -79,26 +86,91 @@
                 <div class="w-full lg:w-1/2 text-center lg:text-left scroll-animate opacity-0 translate-y-10">
                     <span class="inline-block py-1 px-3 rounded-full bg-soft text-primary font-semibold text-sm mb-4 animate-bounce">Inovasi Sosial 2026</span>
                     <h1 class="heading-1 mb-6">PERIODCARE MACHINE</h1>
-                    <p class="body-text mb-8">"Inovasi kolaboratif dalam mewujudkan pembangunan sosial inklusif melalui penyediaan dispenser pembalut gratis berbasis teknologi pintar."</p>
+                    <p class="body-text mb-8">"Coba interaksi langsung dengan purwarupa mesin kami! Sumbangkan pembalut melalui slot atas, atau tekan tombol untuk mencoba sistem distribusi otomatis."</p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <a href="#locations" class="btn btn-primary">Lihat Tracker</a>
-                        <a href="#donate" class="btn btn-accent">Donate Now</a>
+                        <button onclick="window.triggerMachineDonation()" class="btn btn-primary flex items-center gap-2"><span>📥</span> Simulasi Donasi Fisik</button>
+                        <a href="#locations" class="btn btn-outline bg-white">Lihat Tracker Asli</a>
                     </div>
                 </div>
-                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100">
-                    <div class="relative w-72 h-[460px] bg-gradient-to-b from-orange-400 to-accent rounded-[2.5rem] shadow-2xl border-8 border-orange-200 flex flex-col items-center pt-8 z-10 overflow-hidden shrink-0 group">
-                        <div class="absolute -right-12 top-1/2 -translate-y-1/2 rotate-90 text-white/15 font-black text-4xl tracking-[0.2em] pointer-events-none whitespace-nowrap select-none">SMART DISPENSER</div>
-                        <div class="w-16 h-5 bg-gray-900 rounded-full mb-6 flex justify-center items-center shadow-inner border border-gray-700 relative z-10"><div class="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_#3b82f6]"></div></div>
-                        <div class="w-56 bg-gray-900 rounded-2xl flex flex-col p-5 shadow-inner border-b-[6px] border-gray-800 relative z-10">
-                            <div class="text-primary font-black text-lg mb-3 text-center tracking-wider uppercase">PeriodCare</div>
-                            <div class="flex items-center justify-between bg-gray-800 rounded-lg p-2 mb-3 border border-gray-700"><span class="text-gray-400 text-[11px] font-semibold">STATUS</span><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_5px_#22c55e]"></div><span class="text-green-400 text-[11px] font-bold tracking-wider">ONLINE</span></div></div>
-                            <div class="flex items-center justify-between mb-1.5 px-1"><span class="text-gray-400 text-[11px] font-semibold">STOK PEMBALUT</span><span class="text-white text-[11px] font-bold">20/24</span></div>
-                            <div class="w-full bg-gray-700 rounded-full h-2.5 shadow-inner"><div class="bg-primary h-2.5 rounded-full w-[83%] relative overflow-hidden"><div class="absolute inset-0 bg-white/20 animate-[pulse_2s_ease-in-out_infinite]"></div></div></div>
+                <div class="w-full lg:w-1/2 flex justify-center scroll-animate opacity-0 translate-y-10 delay-100 relative">
+                    
+                    <!-- Animasi Pembalut Masuk (Donasi) -->
+                    <div id="anim-donate-pad" class="absolute top-[-20px] w-20 h-6 bg-white rounded shadow-lg border-2 border-pink-200 z-0 opacity-0 transition-all duration-700 flex items-center justify-center translate-y-0">
+                        <span class="text-[8px] text-pink-500 font-bold">PAD BARU</span>
+                    </div>
+
+                    <!-- Bodi Utama Mesin -->
+                    <div class="relative w-80 h-[560px] bg-gradient-to-br from-pink-50 to-pink-200 rounded-[2rem] shadow-[15px_20px_40px_rgba(0,0,0,0.1),-10px_-10px_30px_rgba(255,255,255,0.8)] border-[6px] border-white flex flex-col items-center p-4 z-10 shrink-0 select-none">
+                        
+                        <!-- Panel Atas: Slot Donasi & Indikator LED -->
+                        <div class="w-full flex justify-between items-center mb-3 px-2">
+                            <!-- Slot Donasi Fisik -->
+                            <div class="flex flex-col gap-1 cursor-pointer group" onclick="window.triggerMachineDonation()" title="Klik untuk menyumbang pembalut">
+                                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-primary transition-colors">Slot Donasi IN</span>
+                                <div class="w-24 h-3 bg-gray-900 rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.8)] border border-gray-600 relative overflow-hidden flex justify-center items-center">
+                                    <div class="w-16 h-0.5 bg-gray-700 rounded-full"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Lampu LED Status -->
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="text-[8px] font-bold text-gray-400">STATUS</span>
+                                <div id="machine-led" class="w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e] text-green-500 transition-colors duration-300"></div>
+                            </div>
                         </div>
-                        <div class="absolute bottom-0 w-40 h-20 bg-gray-800 rounded-t-2xl border-t-4 border-x-4 border-gray-700 shadow-inner flex flex-col justify-start items-center overflow-hidden z-10">
-                            <div class="w-full h-2 bg-primary/50 shadow-[0_0_15px_#FF4D85] mb-2"></div>
-                            <div class="w-20 h-10 bg-pink-50 rounded-lg border-2 border-pink-200 -translate-y-12 group-hover:translate-y-0 transition-transform duration-700 shadow-md flex items-center justify-center"><span class="text-[10px] text-primary font-bold">PAD</span></div>
+
+                        <!-- Jendela Kaca (Kargo Stok Pembalut) -->
+                        <div class="w-full h-44 bg-gray-900 rounded-xl shadow-[inset_0_10px_20px_rgba(0,0,0,0.8)] border-4 border-gray-700 p-2 flex gap-3 relative overflow-hidden mb-4">
+                            <!-- Efek pantulan kaca -->
+                            <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
+                            <div class="absolute top-0 right-10 w-16 h-full bg-white/5 -skew-x-12 pointer-events-none z-20"></div>
+                            
+                            <!-- Rak Kiri (Reguler) -->
+                            <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-regular">
+                                <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">REGULER</div>
+                                <!-- Pembalut di-generate via JS -->
+                            </div>
+                            
+                            <!-- Rak Kanan (Maxi/Panjang) -->
+                            <div class="flex-1 bg-gray-800 rounded shadow-inner border border-gray-700 flex flex-col-reverse items-center pb-1 gap-[2px] z-10 overflow-hidden relative" id="stack-maxi">
+                                <div class="absolute top-0 w-full text-center text-[8px] text-gray-500 font-bold bg-gray-900/80 py-1">MAXI</div>
+                                <!-- Pembalut di-generate via JS -->
+                            </div>
                         </div>
+
+                        <!-- Layar Digital Interaktif -->
+                        <div class="w-full h-24 bg-black rounded-lg border-4 border-gray-800 shadow-[inset_0_0_15px_rgba(0,0,0,1)] flex flex-col items-center justify-center mb-4 relative overflow-hidden">
+                            <!-- Efek Garis Grid Layar -->
+                            <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4px_4px] opacity-30 pointer-events-none"></div>
+                            
+                            <span class="text-[9px] text-primary font-bold uppercase tracking-widest mb-1">PeriodCare OS</span>
+                            <span id="screen-status" class="text-white text-[13px] font-mono font-bold text-center px-2 animate-pulse">SIAP DIGUNAKAN</span>
+                            <span id="screen-stock-text" class="text-green-400 text-[11px] font-mono mt-1 font-bold">Stok: 24/24</span>
+                        </div>
+
+                        <!-- Tombol Fisik Pengambilan -->
+                        <div class="flex gap-6 mb-5 w-full justify-center px-4">
+                            <button onclick="window.triggerMachineDispense('reguler')" id="btn-reguler" class="w-16 h-16 rounded-full bg-gradient-to-b from-pink-400 to-primary shadow-[0_6px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#be185d,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-pink-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="text-xl leading-none">🩸</span>
+                                <span class="text-[8px] font-bold mt-1">REG</span>
+                            </button>
+                            <button onclick="window.triggerMachineDispense('maxi')" id="btn-maxi" class="w-16 h-16 rounded-full bg-gradient-to-b from-orange-400 to-accent shadow-[0_6px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:shadow-[0_0px_0_#c2410c,inset_0_4px_8px_rgba(255,255,255,0.4)] active:translate-y-[6px] transition-all flex flex-col items-center justify-center text-white border border-orange-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="text-xl leading-none">💧</span>
+                                <span class="text-[8px] font-bold mt-1">MAXI</span>
+                            </button>
+                        </div>
+
+                        <!-- Kotak Pengambilan Bawah (Pick-up Box) -->
+                        <div class="w-56 h-20 bg-gray-900 rounded-b-2xl rounded-t shadow-[inset_0_15px_20px_rgba(0,0,0,0.9)] border-t-4 border-gray-700 flex justify-center items-end pb-3 relative overflow-hidden mt-auto">
+                            <!-- Pintu Flap -->
+                            <div class="absolute top-0 w-full h-4 bg-gray-800 border-b border-gray-600 shadow-md"></div>
+                            
+                            <!-- Pembalut yang Jatuh (Sembunyi by default) -->
+                            <div id="dropped-pad-box" onclick="window.takeDroppedPad()" class="w-16 h-7 bg-white rounded border border-gray-300 shadow-[0_5px_15px_rgba(0,0,0,0.5)] translate-y-12 opacity-0 transition-all duration-300 flex items-center justify-center cursor-pointer group/take">
+                                 <span class="text-[8px] text-pink-600 font-bold group-hover/take:scale-110 transition-transform">AMBIL</span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -123,7 +195,7 @@
                 </div>
                 <div class="flex flex-col lg:flex-row gap-8 mb-24 scroll-animate opacity-0 translate-y-10">
                     <div class="w-full lg:w-1/2 bg-white rounded-2xl p-2 shadow-sm border border-gray-100 relative overflow-hidden min-h-[400px]">
-                        <iframe id="maps-iframe" src="https://www.google.com/maps/embed?..." class="absolute inset-0 w-full h-full rounded-xl" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        <iframe id="maps-iframe" src="" class="absolute inset-0 w-full h-full rounded-xl" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                     </div>
                     <div class="w-full lg:w-1/2 flex flex-col">
                         <div class="flex gap-4 mb-6">
