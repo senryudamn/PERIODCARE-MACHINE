@@ -243,6 +243,89 @@
             </div>
         </section>
 
+<!-- FAQ Section -->
+        <section id="faq" class="py-20 bg-light border-t border-pink-100">
+            <div class="container mx-auto px-6 max-w-4xl">
+                <div class="text-center mb-12 scroll-animate opacity-0 translate-y-10">
+                    <h2 class="heading-2 mb-4 inline-block w-fit collider">Pertanyaan yang Sering Diajukan (FAQ)</h2>
+                    <br>
+                    <p class="body-text inline-block w-fit collider">Pelajari lebih lanjut tentang cara kerja, keamanan, dan visi di balik PeriodCare Machine.</p>
+                </div>
+                
+                <div class="space-y-4 scroll-animate opacity-0 translate-y-10">
+                    
+                    <!-- FAQ 1 -->
+                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider" open>
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
+                            <span>1. Apakah aman dan steril jika saya menyumbangkan pembalut langsung ke dalam mesin?</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
+                            <b>Sangat aman!</b> Mesin PeriodCare didesain dengan kompartemen tertutup yang menjaga kebersihan. Kami menerapkan aturan ketat bahwa pembalut yang disumbangkan secara fisik <b>wajib masih dalam kemasan plastik segel aslinya (belum terbuka)</b>. Selain itu, relawan distribusi kami secara berkala melakukan pengecekan kualitas dan kelayakan fisik pembalut di dalam mesin.
+                        </p>
+                    </details>
+
+                    <!-- FAQ 2 -->
+                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider">
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
+                            <span>2. Bagaimana cara kerja "Donasi Silang" di PeriodCare Machine?</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
+                            Sistem kami memfasilitasi dua metode donasi gotong royong: <br><br>
+                            <b>1. Donasi Tunai (QRIS):</b> Dana yang terkumpul via website akan dikelola secara transparan untuk biaya operasional dan pembelian stok massal oleh tim kami.<br>
+                            <b>2. Donasi Fisik (In-Kind):</b> Pengguna yang sedang membawa pembalut lebih di tasnya, dapat langsung memasukkannya ke dalam "Slot Donasi IN" di atas mesin untuk langsung dipakai oleh perempuan lain yang sedang membutuhkan secara darurat.
+                        </p>
+                    </details>
+
+                    <!-- FAQ 3 -->
+                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider">
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
+                            <span>3. Bagaimana cara mengambil pembalut agar tidak disalahgunakan?</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
+                            Pengguna cukup menekan tombol mekanik pada mesin (Reguler/Maxi). Untuk mencegah penimbunan atau vandalisme (pengambilan berulang-ulang), sistem mikrokontroler mesin ini dilengkapi dengan <b>mekanisme Jeda Waktu (Cooldown)</b> selama beberapa saat setelah satu pembalut berhasil dikeluarkan. Alat ini difokuskan untuk kondisi darurat <i>(emergency)</i> di fasilitas publik/pendidikan.
+                        </p>
+                    </details>
+
+                    <!-- FAQ 4 -->
+                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider">
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
+                            <span>4. Apa fungsi dari Live Tracker IoT di website ini?</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
+                            Setiap Mesin PeriodCare dilengkapi dengan modul IoT (Internet of Things) seperti mikrokontroler cerdas. Data stok pembalut dari setiap lokasi mesin akan dikirim ke server secara <i>real-time</i>. Melalui Live Tracker ini, relawan tahu persis kapan dan mesin mana yang perlu diisi ulang, sementara pengguna bisa mengecek ketersediaan sebelum mendatangi lokasi mesin.
+                        </p>
+                    </details>
+
+                    <!-- FAQ 5 (BARU: SENSOR KONDISI PEMBALUT) -->
+                    <details class="bg-white rounded-2xl border border-pink-100 shadow-sm group collider">
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none p-6 text-dark group-open:text-primary transition-colors">
+                            <span>5. Apakah mesin memiliki sistem untuk memantau kondisi pembalut di dalamnya?</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <p class="text-gray-600 px-6 pb-6 pt-0 leading-relaxed text-sm">
+                            Tentu saja! Selain menghitung stok, kompartemen mesin PeriodCare terintegrasi dengan <b>Sensor Kondisi Lingkungan (seperti Suhu & Kelembapan)</b>. Sensor ini terus mengumpulkan data di dalam rak penyimpanan secara <i>real-time</i>. Jika parameter lingkungan mencapai titik yang berpotensi merusak higienitas pembalut (misalnya suhu terlalu panas atau terlalu lembap), sistem IoT akan otomatis mengirimkan peringatan dini kepada tim <i>maintenance</i> untuk segera melakukan pengecekan fisik.
+                        </p>
+                    </details>
+
+                </div>
+            </div>
+        </section>
+
+        
         <!-- Donasi, Relawan & Kontak -->
         <section id="donate" class="py-20 bg-white border-t border-gray-200 relative">
             <div class="container mx-auto px-6">
