@@ -135,3 +135,105 @@ function loadDashboardData() {
         snapshot.forEach(child => { const data = child.val(); tbody.innerHTML = `<tr><td class="p-4 text-gray-500">${formatDate(data.timestamp)}</td><td class="p-4 font-bold">${data.name}</td><td class="p-4 text-right font-mono">Rp ${parseInt(data.amount).toLocaleString('id-ID')}</td></tr>` + tbody.innerHTML; });
     });
 }
+
+// =======================================================
+// FITUR TAMBAHAN: MANAJEMEN TIM DOMPET KITA
+// =======================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    const teamForm = document.getElementById('teamForm');
+    if(teamForm) {
+        teamForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('teamName').value;
+            const role = document.getElementById('teamRole').value;
+            const desc = document.getElementById('teamDesc').value;
+            const photoInput = document.getElementById('teamPhoto');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            submitBtn.innerText = "Menyimpan...";
+            submitBtn.disabled = true;
+            
+            // Avatar inisial bawaan jika tidak upload foto
+            let photoData = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=fbcfe8&color=be185d&size=200`;
+            
+            if (photoInput.files && photoInput.files[0]) {
+                photoData = await convertToBase64(photoInput.files[0]);
+            }
+
+            const newMember = {
+                id: 'team_' + Date.now().toString(),
+                name: name,
+                role: role,
+                desc: desc,
+                photo: photoData
+            };
+
+            const team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
+            team.push(newMember);
+            localStorage.setItem('periodCareTeam', JSON.stringify(team));
+            
+            this.reset();
+            submitBtn.innerText = "+ Tambahkan Anggota";
+            submitBtn.disabled = false;
+            
+            loadAdminTeam();
+        });
+    }
+    
+    // Pastikan tabel otomatis dimuat
+    loadAdminTeam();
+});
+
+// Fungsi untuk mengubah gambar ke Base64 (agar bisa disimpan lokal)
+function convertToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Fungsi untuk memuat tabel anggota tim
+function loadAdminTeam() {
+    const tbody = document.getElementById('adminTeamList');
+    if(!tbody) return; 
+
+    const team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
+    
+    if (team.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500">Belum ada anggota tim terdaftar.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = team.map(member => `
+        <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+            <td class="p-3">
+                <img src="${member.photo}" class="w-12 h-12 rounded-full object-cover border border-gray-200">
+            </td>
+            <td class="p-3">
+                <div class="font-bold text-gray-800">${member.name}</div>
+                <div class="text-[11px] font-bold text-pink-700 bg-pink-100 inline-block px-2 py-0.5 rounded mt-1 uppercase tracking-wider">${member.role}</div>
+            </td>
+            <td class="p-3 text-sm text-gray-600">${member.desc}</td>
+            <td class="p-3 text-right">
+                <button onclick="deleteTeamMember('${member.id}')" class="text-red-500 hover:text-white border border-red-500 hover:bg-red-500 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                    Hapus
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Fungsi global untuk menghapus anggota (agar bisa dipanggil lewat onclick HTML)
+window.deleteTeamMember = function(id) {
+    if(!confirm('Apakah Anda yakin ingin menghapus anggota tim ini?')) return;
+    
+    let team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
+    team = team.filter(m => m.id !== id);
+    localStorage.setItem('periodCareTeam', JSON.stringify(team));
+    
+    loadAdminTeam();
+}
