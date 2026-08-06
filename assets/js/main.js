@@ -562,12 +562,24 @@ function loadTeamMembersUser() {
         return;
     }
 
-    container.innerHTML = teamData.map(member => `
-        <div class="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col items-center text-center shadow-sm hover:shadow-md hover:border-pink-200 transition-all group">
-            <img src="${member.photo}" alt="${member.name}" class="w-24 h-24 rounded-full object-cover border-4 border-pink-100 group-hover:border-pink-300 transition-colors mb-4">
-            <span class="text-[10px] font-bold text-pink-700 bg-pink-100 px-3 py-1 rounded-full mb-2 uppercase tracking-wide">${member.role}</span>
-            <h3 class="font-bold text-gray-800 text-lg">${member.name}</h3>
-            <p class="text-sm text-gray-500 mt-1">${member.desc}</p>
+    container.innerHTML = teamData.map(member => {
+        const tx = member.photoTx || 0;
+        const ty = member.photoTy || 0;
+        const scale = member.photoScale || 1;
+        
+        return `
+        <div class="bg-white border border-gray-100 rounded-3xl flex flex-col overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+            <div class="w-full h-64 bg-gray-100 relative overflow-hidden flex items-center justify-center">
+                <div class="w-full h-full relative transition-opacity duration-300 group-hover:opacity-90">
+                    <img src="${member.photo}" alt="${member.name}" class="absolute w-full h-full object-cover" style="transform: translate(${tx}%, ${ty}%) scale(${scale});">
+                </div>
+            </div>
+            <div class="p-6 flex flex-col items-center text-center bg-white relative z-10 border-t-[5px] border-pink-100 group-hover:border-pink-400 transition-colors">
+                <span class="text-[10px] font-bold text-pink-700 bg-pink-100 px-3 py-1 rounded-full mb-3 uppercase tracking-wider">${member.role}</span>
+                <h3 class="font-bold text-gray-800 text-xl">${member.name}</h3>
+                <p class="text-sm text-gray-500 mt-1 font-medium">${member.desc}</p>
+            </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
