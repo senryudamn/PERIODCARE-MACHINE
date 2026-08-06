@@ -38,6 +38,7 @@
                 <button onclick="switchTab('feedbacks')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">⭐ Penilaian Mesin</button>
                 <button onclick="switchTab('messages')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">📧 Pesan Masuk</button>
                 <button onclick="switchTab('volunteers')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">🤝 Data Relawan</button>
+                <button onclick="switchTab('team')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-700 font-medium">👥 Tim Dompet Kita</button>
             </nav>
             <a href="/" class="mt-auto px-4 py-2 text-center text-gray-400 text-sm hover:text-white mb-2">Lihat Website</a>
             <button id="logout-btn" class="px-4 py-2 bg-red-500 rounded-lg font-bold hover:bg-red-600">Logout</button>
@@ -142,6 +143,60 @@
 
             <!-- TAB: Volunteers -->
             <div id="tab-volunteers" class="tab-content hidden"><h3 class="text-2xl font-bold mb-6">Pendaftar Relawan</h3><div class="bg-white rounded-2xl shadow-sm overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 border-b"><tr><th class="p-4 text-sm">Waktu</th><th class="p-4 text-sm">Nama</th><th class="p-4 text-sm">Email</th><th class="p-4 text-sm">Peran</th></tr></thead><tbody id="table-volunteers" class="divide-y divide-gray-100 text-sm"></tbody></table></div></div>
+
+            <!-- TAB BARU: TEAM MANAGEMENT -->
+            <div id="tab-team" class="tab-content hidden">
+                <h3 class="text-2xl font-bold mb-6">Manajemen Tim Dompet Kita</h3>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                    <!-- Form Tambah Anggota -->
+                    <form id="teamForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 bg-gray-50 p-5 rounded-xl border border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
+                            <input type="text" id="teamName" class="w-full border-gray-300 rounded-lg shadow-sm p-2.5 focus:border-pink-500 focus:ring-pink-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Peran</label>
+                            <select id="teamRole" class="w-full border-gray-300 rounded-lg shadow-sm p-2.5 focus:border-pink-500 focus:ring-pink-500" required>
+                                <option value="Ketua Tim">Ketua Tim</option>
+                                <option value="Anggota">Anggota</option>
+                                <option value="Dosen Pembimbing">Dosen Pembimbing</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan (NIM / Info Singkat)</label>
+                            <input type="text" id="teamDesc" class="w-full border-gray-300 rounded-lg shadow-sm p-2.5 focus:border-pink-500 focus:ring-pink-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Upload Foto (Opsional)</label>
+                            <input type="file" id="teamPhoto" accept="image/*" class="w-full border border-gray-300 rounded-lg shadow-sm p-1.5 bg-white text-sm">
+                            <small class="text-gray-500 block mt-1">Jika dikosongkan, otomatis menggunakan inisial nama.</small>
+                        </div>
+                        <div class="md:col-span-2 mt-2">
+                            <button type="submit" class="bg-pink-500 text-white px-6 py-2.5 rounded-lg hover:bg-pink-600 font-semibold shadow-sm transition-colors">
+                                + Tambahkan Anggota
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Daftar Anggota Saat Ini -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-600 text-sm">
+                                    <th class="p-3 border-b rounded-tl-lg rounded-bl-lg w-20">Foto</th>
+                                    <th class="p-3 border-b">Identitas Lengkap</th>
+                                    <th class="p-3 border-b">Keterangan</th>
+                                    <th class="p-3 border-b rounded-tr-lg rounded-br-lg text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTeamList">
+                                <!-- Baris tabel akan dimuat lewat JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
