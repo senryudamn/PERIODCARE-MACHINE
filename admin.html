@@ -178,22 +178,21 @@
                             </div>
                         </div>
 
-                        <!-- Kolom Kanan: Preview & Posisi Foto -->
-                        <div class="bg-white p-4 rounded-xl border border-gray-200 flex flex-col items-center">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">Posisi Foto (Preview)</label>
-                            <!-- Bentuk Kotak Rounded (Bukan Bulat) -->
-                            <div class="w-32 h-44 rounded-xl overflow-hidden bg-gray-100 border border-gray-300 shadow-inner mb-4 relative">
-                                <img id="photoPreview" src="https://via.placeholder.com/150x200?text=Preview" class="w-full h-full object-cover" style="object-position: 50% 50%;">
+                        <!-- Kolom Kanan: Preview Canggih (Drag & Zoom) -->
+                        <div class="bg-white p-4 rounded-xl border border-gray-200 flex flex-col items-center select-none">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Posisi Foto (Preview)</label>
+                            <p class="text-[10px] text-pink-500 font-medium mb-3">Geser foto dengan jari/mouse</p>
+                            
+                            <!-- Wadah Foto yang Bisa Di-drag -->
+                            <div id="cropContainer" class="w-32 h-44 rounded-xl overflow-hidden bg-gray-100 border border-gray-300 shadow-inner mb-4 relative cursor-grab touch-none flex justify-center items-center">
+                                <!-- Pointer events none pada image agar event klik terdeteksi di cropContainer -->
+                                <img id="photoPreview" src="https://via.placeholder.com/150x200?text=Preview" class="absolute w-full h-full object-cover pointer-events-none" style="transform: translate(0%, 0%) scale(1);">
                             </div>
-                            <div class="w-full space-y-3">
-                                <div>
-                                    <div class="flex justify-between"><label class="text-[10px] font-bold text-gray-500 uppercase">Kiri / Kanan</label></div>
-                                    <input type="range" id="posX" min="0" max="100" value="50" class="w-full accent-pink-500">
-                                </div>
-                                <div>
-                                    <div class="flex justify-between"><label class="text-[10px] font-bold text-gray-500 uppercase">Atas / Bawah</label></div>
-                                    <input type="range" id="posY" min="0" max="100" value="50" class="w-full accent-pink-500">
-                                </div>
+                            
+                            <!-- Slider Perbesaran (Zoom) -->
+                            <div class="w-full mt-2">
+                                <div class="flex justify-between"><label class="text-[10px] font-bold text-gray-500 uppercase">Zoom In / Out</label></div>
+                                <input type="range" id="zoomSlider" min="1" max="3" step="0.05" value="1" class="w-full accent-pink-500">
                             </div>
                         </div>
 
@@ -213,7 +212,7 @@
                         <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead>
                                 <tr class="bg-gray-100 text-gray-600 text-sm">
-                                    <th class="p-3 border-b rounded-tl-lg rounded-bl-lg w-20">Foto</th>
+                                    <th class="p-3 border-b rounded-tl-lg rounded-bl-lg w-24">Foto</th>
                                     <th class="p-3 border-b">Identitas Lengkap</th>
                                     <th class="p-3 border-b">Keterangan</th>
                                     <th class="p-3 border-b rounded-tr-lg rounded-br-lg text-right">Aksi</th>
