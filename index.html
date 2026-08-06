@@ -310,8 +310,8 @@
                                 <p class="body-text mt-2">Bentuk perangkat keras final dengan sistem Dual-Chamber, J-Curve chute, dan komponen IoT. Geser untuk melihat dari berbagai sisi.</p>
                             </div>
                             
-                            <!-- BACKGROUND DIUBAH MENJADI GELAP (bg-gray-900) -->
-                            <div class="w-full h-[400px] md:h-[600px] bg-gray-900 rounded-3xl border border-gray-800 shadow-xl overflow-hidden relative">
+                            <!-- BACKGROUND DIKEMBALIKAN KE PUTIH (bg-white & bg-gray-50) -->
+                            <div class="w-full h-[400px] md:h-[600px] bg-white rounded-3xl border border-pink-100 shadow-sm overflow-hidden relative">
                                 <model-viewer 
                                     src="assets/3d/periodcare.glb" 
                                     alt="3D Model PeriodCare Machine"
@@ -319,11 +319,11 @@
                                     camera-controls
                                     shadow-intensity="1.5"
                                     shadow-softness="1"
-                                    exposure="0.9" 
-                                    class="w-full h-full outline-none bg-gray-900">
+                                    exposure="0.75" 
+                                    max-camera-orbit="auto auto auto"
+                                    class="w-full h-full outline-none bg-gray-50">
                                 </model-viewer>
                                 
-                                <!-- Tombol indikator tetap dipertahankan terang agar kontras -->
                                 <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 px-4 py-2 rounded-full text-xs font-bold text-pink-600 shadow-sm backdrop-blur-sm pointer-events-none flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
                                     Putar & Zoom dengan Jari/Mouse
