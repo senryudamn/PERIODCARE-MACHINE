@@ -15,9 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         auth = getAuth(app);
         db = getDatabase(app);
         initAdminPanel();
-    } catch (error) {
-        alert("Sistem Admin gagal terhubung ke Server.");
-    }
+    } catch (error) { console.error(error); }
 });
 
 function initAdminPanel() {
@@ -39,32 +37,25 @@ function initAdminPanel() {
     document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
     document.getElementById('callcenter-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        set(ref(db, 'settings/callCenter'), document.getElementById('callcenter-input').value).then(() => alert('Nomor Call Center diperbarui!'));
+        e.preventDefault(); set(ref(db, 'settings/callCenter'), document.getElementById('callcenter-input').value).then(() => alert('Nomor diperbarui!'));
     });
     onValue(ref(db, 'settings/callCenter'), (snapshot) => { if(snapshot.exists()) document.getElementById('callcenter-input').value = snapshot.val(); });
 
     document.getElementById('maps-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        let link = document.getElementById('maps-input').value;
+        e.preventDefault(); let link = document.getElementById('maps-input').value;
         if (link.includes('<iframe')) { const match = link.match(/src="([^"]+)"/); if (match) link = match[1]; }
-        if (!link.includes('embed')) return alert("⚠️ URL Tidak Valid! Harus berupa link Sematkan/Embed dari Google Maps.");
-        set(ref(db, 'settings/mapsLink'), link).then(() => { alert('Peta Berhasil Diperbarui!'); document.getElementById('maps-input').value = ''; });
+        if (!link.includes('embed')) return alert("⚠️ Harus link Sematkan/Embed!");
+        set(ref(db, 'settings/mapsLink'), link).then(() => { alert('Peta Diperbarui!'); document.getElementById('maps-input').value = ''; });
     });
 
     document.getElementById('qris-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const file = document.getElementById('qris-input').files[0];
-        const btn = document.getElementById('qris-btn');
-        if(!file) return alert("Pilih foto terlebih dahulu!");
-        btn.textContent = "Mengunggah..."; btn.disabled = true;
+        e.preventDefault(); const file = document.getElementById('qris-input').files[0]; const btn = document.getElementById('qris-btn');
+        if(!file) return alert("Pilih foto!"); btn.textContent = "Mengunggah..."; btn.disabled = true;
         try {
             const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', document.getElementById('upload-preset').value);
             const res = await fetch(`https://api.cloudinary.com/v1_1/${document.getElementById('cloud-name').value}/image/upload`, { method: 'POST', body: formData });
-            const data = await res.json();
-            await set(ref(db, 'settings/qrisUrl'), data.secure_url);
-            alert("QRIS Berhasil Diperbarui!");
-        } catch (error) { alert("Gagal upload QRIS!"); } finally { btn.textContent = "Upload & Perbarui QRIS"; btn.disabled = false; }
+            const data = await res.json(); await set(ref(db, 'settings/qrisUrl'), data.secure_url); alert("QRIS Diperbarui!");
+        } catch (error) { alert("Gagal!"); } finally { btn.textContent = "Upload & Perbarui QRIS"; btn.disabled = false; }
     });
 
     document.getElementById('target-form').addEventListener('submit', (e) => {
@@ -73,8 +64,7 @@ function initAdminPanel() {
     onValue(ref(db, 'settings/targetDonation'), (snapshot) => { if(snapshot.exists()) document.getElementById('target-input').value = snapshot.val(); });
 
     document.getElementById('expense-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('exp-btn'); btn.textContent = "Menyimpan..."; btn.disabled = true;
+        e.preventDefault(); const btn = document.getElementById('exp-btn'); btn.textContent = "Menyimpan..."; btn.disabled = true;
         try {
             await push(ref(db, 'expenses'), { date: document.getElementById('exp-date').value, category: document.getElementById('exp-category').value, desc: document.getElementById('exp-desc').value, amount: document.getElementById('exp-amount').value, timestamp: new Date().toISOString() });
             alert('Pengeluaran dicatat!'); document.getElementById('expense-form').reset();
@@ -82,64 +72,53 @@ function initAdminPanel() {
     });
 
     document.getElementById('machine-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('mac-btn'); btn.textContent = "Menyimpan..."; btn.disabled = true;
+        e.preventDefault(); const btn = document.getElementById('mac-btn'); btn.textContent = "Menyimpan..."; btn.disabled = true;
         const id = document.getElementById('mac-id').value.trim();
         const macData = { name: document.getElementById('mac-name').value, location: document.getElementById('mac-loc').value, stock: parseInt(document.getElementById('mac-stock').value), mapsLink: document.getElementById('mac-link').value };
         try {
-            await set(ref(db, 'machines/' + id), macData);
-            alert('Data Mesin berhasil disimpan ke IoT Tracker!'); document.getElementById('machine-form').reset();
-        } catch (error) { alert('Gagal menyimpan: ' + error.message); } finally { btn.textContent = "Simpan Data Mesin"; btn.disabled = false; }
+            await set(ref(db, 'machines/' + id), macData); alert('Data Mesin disimpan!'); document.getElementById('machine-form').reset();
+        } catch (error) { alert('Gagal!'); } finally { btn.textContent = "Simpan Data Mesin"; btn.disabled = false; }
     });
 
     document.getElementById('table-machines').addEventListener('click', async (e) => {
-        if(e.target.classList.contains('btn-delete-mac')) {
-            const id = e.target.getAttribute('data-id');
-            if(confirm('Yakin ingin menghapus mesin ' + id + '?')) await remove(ref(db, 'machines/' + id));
-        }
+        if(e.target.classList.contains('btn-delete-mac')) { const id = e.target.getAttribute('data-id'); if(confirm('Hapus mesin ' + id + '?')) await remove(ref(db, 'machines/' + id)); }
     });
 }
 
 function loadDashboardData() {
-    const formatDate = (isoString) => { if(!isoString) return '-'; const d = new Date(isoString); return d.toLocaleDateString('id-ID') + ' ' + d.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}); };
-    const createStars = (rating) => { return '⭐'.repeat(rating) + '☆'.repeat(5 - rating); }; 
+    const formatDate = (iso) => { if(!iso) return '-'; const d = new Date(iso); return d.toLocaleDateString('id-ID') + ' ' + d.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}); };
+    const createStars = (r) => '⭐'.repeat(r) + '☆'.repeat(5 - r); 
 
-    onValue(ref(db, 'machines'), (snapshot) => {
+    onValue(ref(db, 'machines'), (s) => {
         const tbody = document.getElementById('table-machines'); if(!tbody) return; tbody.innerHTML = '';
-        snapshot.forEach(child => {
-            const id = child.key; const data = child.val();
-            let stockVal = parseInt(data.stock) || 0;
-            let statusColor = stockVal > 12 ? 'text-green-500' : (stockVal > 0 ? 'text-yellow-500' : 'text-red-500');
-            tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-4 font-mono font-bold text-gray-700">${id}</td><td class="p-4"><strong>${data.name}</strong><br><span class="text-xs text-gray-500">${data.location}</span></td><td class="p-4 text-center font-black ${statusColor} text-lg">${stockVal}<span class="text-sm text-gray-500 font-medium">/24</span></td><td class="p-4 text-center"><button data-id="${id}" class="btn-delete-mac bg-red-100 text-red-500 px-3 py-1 rounded text-xs font-bold hover:bg-red-200 transition-colors">Hapus</button></td></tr>`;
-        });
+        s.forEach(c => { const d = c.val(); let sV = parseInt(d.stock) || 0; let sC = sV > 12 ? 'text-green-500' : (sV > 0 ? 'text-yellow-500' : 'text-red-500'); tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-4 font-mono font-bold text-gray-700">${c.key}</td><td class="p-4"><strong>${d.name}</strong><br><span class="text-xs text-gray-500">${d.location}</span></td><td class="p-4 text-center font-black ${sC} text-lg">${sV}<span class="text-sm text-gray-500">/24</span></td><td class="p-4 text-center"><button data-id="${c.key}" class="btn-delete-mac bg-red-100 text-red-500 px-3 py-1 rounded text-xs font-bold">Hapus</button></td></tr>`; });
     });
 
-    onValue(ref(db, 'feedbacks'), (snapshot) => {
+    onValue(ref(db, 'feedbacks'), (s) => {
         const tbody = document.getElementById('table-feedbacks'); if(!tbody) return; tbody.innerHTML = '';
-        const dataArr = []; snapshot.forEach(child => dataArr.push(child.val())); dataArr.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-        dataArr.forEach(data => { tbody.innerHTML += `<tr><td class="p-4 text-gray-500">${formatDate(data.timestamp)}</td><td class="p-4 font-bold">${data.name}</td><td class="p-4 text-yellow-500">${createStars(parseInt(data.rating))}</td><td class="p-4 text-gray-700">${data.message}</td></tr>`; });
+        const arr = []; s.forEach(c => arr.push(c.val())); arr.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        arr.forEach(d => tbody.innerHTML += `<tr><td class="p-4 text-gray-500">${formatDate(d.timestamp)}</td><td class="p-4 font-bold">${d.name}</td><td class="p-4 text-yellow-500">${createStars(parseInt(d.rating))}</td><td class="p-4 text-gray-700">${d.message}</td></tr>`);
     });
 
-    onValue(ref(db, 'messages'), (snapshot) => {
+    onValue(ref(db, 'messages'), (s) => {
         const tbody = document.getElementById('table-messages'); if(!tbody) return; tbody.innerHTML = '';
-        snapshot.forEach(child => { const data = child.val(); tbody.innerHTML = `<tr><td class="p-4 text-gray-500">${formatDate(data.timestamp)}</td><td class="p-4 font-bold">${data.name}</td><td class="p-4">${data.email}</td><td class="p-4">${data.message}</td></tr>` + tbody.innerHTML; });
+        s.forEach(c => { const d = c.val(); tbody.innerHTML = `<tr><td class="p-4 text-gray-500">${formatDate(d.timestamp)}</td><td class="p-4 font-bold">${d.name}</td><td class="p-4">${d.email}</td><td class="p-4">${d.message}</td></tr>` + tbody.innerHTML; });
     });
 
-    onValue(ref(db, 'volunteers'), (snapshot) => {
+    onValue(ref(db, 'volunteers'), (s) => {
         const tbody = document.getElementById('table-volunteers'); if(!tbody) return; tbody.innerHTML = '';
-        snapshot.forEach(child => { const data = child.val(); tbody.innerHTML = `<tr><td class="p-4 text-gray-500">${formatDate(data.timestamp)}</td><td class="p-4 font-bold">${data.name}</td><td class="p-4">${data.email}</td><td class="p-4 uppercase text-xs font-bold text-pink-500">${data.role}</td></tr>` + tbody.innerHTML; });
+        s.forEach(c => { const d = c.val(); tbody.innerHTML = `<tr><td class="p-4 text-gray-500">${formatDate(d.timestamp)}</td><td class="p-4 font-bold">${d.name}</td><td class="p-4">${d.email}</td><td class="p-4 uppercase text-xs font-bold text-pink-500">${d.role}</td></tr>` + tbody.innerHTML; });
     });
 
-    onValue(ref(db, 'donations'), (snapshot) => {
+    onValue(ref(db, 'donations'), (s) => {
         const tbody = document.getElementById('table-donations'); if(!tbody) return; tbody.innerHTML = '';
-        snapshot.forEach(child => { const data = child.val(); tbody.innerHTML = `<tr><td class="p-4 text-gray-500">${formatDate(data.timestamp)}</td><td class="p-4 font-bold">${data.name}</td><td class="p-4 text-right font-mono">Rp ${parseInt(data.amount).toLocaleString('id-ID')}</td></tr>` + tbody.innerHTML; });
+        s.forEach(c => { const d = c.val(); tbody.innerHTML = `<tr><td class="p-4 text-gray-500">${formatDate(d.timestamp)}</td><td class="p-4 font-bold">${d.name}</td><td class="p-4 text-right font-mono">Rp ${parseInt(d.amount).toLocaleString('id-ID')}</td></tr>` + tbody.innerHTML; });
     });
 }
 
 // =======================================================
-// FITUR TAMBAHAN: MANAJEMEN TIM DOMPET KITA (DENGAN DRAG & ZOOM Transform)
+// MANAJEMEN TIM DOMPET KITA DENGAN DRAG & ZOOM (1:1)
 // =======================================================
-
 document.addEventListener('DOMContentLoaded', () => {
     const teamForm = document.getElementById('teamForm');
     const photoInput = document.getElementById('teamPhoto');
@@ -149,17 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let currentPhotoBase64 = null; 
     
-    // Variabel Transformasi (Berdasarkan Persentase Container agar Responsif)
     let pScale = 1, pTx = 0, pTy = 0;
     let isDragging = false, startX, startY;
 
     if(teamForm) {
-        // Menerapkan transformasi CSS ke gambar preview
         const updateTransform = () => {
             if(preview) preview.style.transform = `translate(${pTx}%, ${pTy}%) scale(${pScale})`;
         };
 
-        // Fungsi Slider Zoom
         if(zoomSlider) {
             zoomSlider.addEventListener('input', (e) => {
                 pScale = parseFloat(e.target.value);
@@ -167,10 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // FUNGSI DRAG MOUSE / SENTUHAN
         if(cropContainer) {
             const handleDragStart = (e) => {
-                if(!currentPhotoBase64) return; // Jangan drag jika belum ada foto
+                if(!currentPhotoBase64) return;
                 isDragging = true;
                 cropContainer.classList.add('cursor-grabbing');
                 cropContainer.classList.remove('cursor-grab');
@@ -179,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 let rect = cropContainer.getBoundingClientRect();
                 
-                // Konversi Persentase saat ini ke Pixel untuk hitungan matematika
                 let currentPx = (pTx * rect.width) / 100;
                 let currentPy = (pTy * rect.height) / 100;
                 
@@ -197,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let newPx = clientX - startX;
                 let newPy = clientY - startY;
                 
-                // Kembalikan pixel ke persentase agar skala di web utama (yang lebih besar) tetap proporsional
                 pTx = (newPx / rect.width) * 100;
                 pTy = (newPy / rect.height) * 100;
                 
@@ -210,27 +183,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 cropContainer.classList.add('cursor-grab');
             };
 
-            // Mouse Events
             cropContainer.addEventListener('mousedown', handleDragStart);
             window.addEventListener('mousemove', handleDragMove);
             window.addEventListener('mouseup', handleDragEnd);
-            // Touch Events (HP)
             cropContainer.addEventListener('touchstart', handleDragStart, {passive: false});
             window.addEventListener('touchmove', handleDragMove, {passive: false});
             window.addEventListener('touchend', handleDragEnd);
         }
 
-        // Preview foto saat file dipilih
         photoInput.addEventListener('change', async function() {
             if (this.files && this.files[0]) {
                 currentPhotoBase64 = await convertToBase64(this.files[0]);
                 preview.src = currentPhotoBase64;
-                // Reset posisi saat upload foto baru
                 pTx = 0; pTy = 0; pScale = 1; zoomSlider.value = 1; updateTransform();
             }
         });
 
-        // Submit Form
         teamForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -240,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const desc = document.getElementById('teamDesc').value;
             
             const submitBtn = document.getElementById('teamSubmitBtn');
+            const originalText = submitBtn.innerText;
             submitBtn.innerText = "Menyimpan...";
             submitBtn.disabled = true;
             
@@ -256,6 +225,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             localStorage.setItem('periodCareTeam', JSON.stringify(team));
+            
+            // Tampilkan notifikasi sukses
+            const successMsg = document.getElementById('teamSuccessMsg');
+            if (successMsg) {
+                successMsg.classList.remove('hidden');
+                setTimeout(() => {
+                    successMsg.classList.add('hidden');
+                }, 3000); // Hilang otomatis setelah 3 detik
+            }
+            
             cancelEditTeam(); 
         });
     }
@@ -263,14 +242,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAdminTeam();
 });
 
-// Fungsi membatalkan mode Edit
 window.cancelEditTeam = function() {
     document.getElementById('teamForm').reset();
     document.getElementById('teamId').value = "";
     
-    // Kembalikan variabel global dan tampilan
     currentPhotoBase64 = null;
-    document.getElementById('photoPreview').src = "https://via.placeholder.com/150x200?text=Preview";
+    document.getElementById('photoPreview').src = "https://via.placeholder.com/200x200?text=Preview";
     
     const zoomSlider = document.getElementById('zoomSlider');
     if (zoomSlider) zoomSlider.value = 1;
@@ -285,7 +262,6 @@ window.cancelEditTeam = function() {
     loadAdminTeam();
 };
 
-// Fungsi memuat data ke Form saat Edit ditekan
 window.editTeamMember = function(id) {
     const team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
     const member = team.find(m => m.id === id);
@@ -299,9 +275,6 @@ window.editTeamMember = function(id) {
     currentPhotoBase64 = member.photo;
     document.getElementById('photoPreview').src = member.photo;
     
-    // Memuat ulang koordinat dan skala zoom yang tersimpan
-    // PENTING: Jangan gunakan 'let' karena variabel ini sudah dideklarasikan di scope luar jika diperlukan,
-    // atau gunakan manipulasi langsung ke elemen DOM.
     const savedTx = member.photoTx || 0;
     const savedTy = member.photoTy || 0;
     const savedScale = member.photoScale || 1;
@@ -325,7 +298,6 @@ function convertToBase64(file) {
     });
 }
 
-// Render Tabel Admin
 function loadAdminTeam() {
     const tbody = document.getElementById('adminTeamList');
     if(!tbody) return; 
@@ -337,7 +309,6 @@ function loadAdminTeam() {
     }
 
     tbody.innerHTML = team.map(member => {
-        // Ambil data penyesuaian foto untuk ditampilkan di thumbnail tabel
         const tx = member.photoTx || 0;
         const ty = member.photoTy || 0;
         const scale = member.photoScale || 1;
@@ -345,7 +316,8 @@ function loadAdminTeam() {
         return `
         <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
             <td class="p-3">
-                <div class="w-16 h-20 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 relative flex justify-center items-center">
+                <!-- Thumbnail tabel diubah menjadi aspect-square agar 1:1 -->
+                <div class="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 relative flex justify-center items-center">
                     <img src="${member.photo}" class="absolute w-full h-full object-cover" style="transform: translate(${tx}%, ${ty}%) scale(${scale});">
                 </div>
             </td>
