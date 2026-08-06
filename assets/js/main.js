@@ -521,3 +521,53 @@ const initFormValidationAndSubmission = () => {
     handle('contact-form', 'contact-success', 'messages', () => ({ name: document.getElementById('contact-name').value, email: document.getElementById('contact-email').value, message: document.getElementById('contact-message').value }));
     handle('feedback-form', 'feedback-success', 'feedbacks', () => ({ name: document.getElementById('fb-name').value || 'Pengguna Anonim', rating: document.getElementById('fb-rating').value, message: document.getElementById('fb-message').value }));
 };
+
+/* =======================================================
+   FITUR POPUP TIM DOMPET KITA
+   ======================================================= */
+window.openTeamModal = function() {
+    const modal = document.getElementById('teamModal');
+    const content = document.getElementById('teamModalContent');
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+    }, 10);
+    
+    loadTeamMembersUser();
+}
+
+window.closeTeamModal = function() {
+    const modal = document.getElementById('teamModal');
+    const content = document.getElementById('teamModalContent');
+    
+    modal.classList.add('opacity-0');
+    content.classList.add('scale-95');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+function loadTeamMembersUser() {
+    const teamData = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
+    const container = document.getElementById('teamContainer');
+    
+    if (teamData.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-8">
+                <p class="text-gray-500 italic">Data tim belum ditambahkan. Silakan atur melalui panel Admin.</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = teamData.map(member => `
+        <div class="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col items-center text-center shadow-sm hover:shadow-md hover:border-pink-200 transition-all group">
+            <img src="${member.photo}" alt="${member.name}" class="w-24 h-24 rounded-full object-cover border-4 border-pink-100 group-hover:border-pink-300 transition-colors mb-4">
+            <span class="text-[10px] font-bold text-pink-700 bg-pink-100 px-3 py-1 rounded-full mb-2 uppercase tracking-wide">${member.role}</span>
+            <h3 class="font-bold text-gray-800 text-lg">${member.name}</h3>
+            <p class="text-sm text-gray-500 mt-1">${member.desc}</p>
+        </div>
+    `).join('');
+}
