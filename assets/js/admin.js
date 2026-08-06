@@ -137,37 +137,100 @@ function loadDashboardData() {
 }
 
 // =======================================================
-// FITUR TAMBAHAN: MANAJEMEN TIM DOMPET KITA (DENGAN EDIT & POSISI FOTO)
+// FITUR TAMBAHAN: MANAJEMEN TIM DOMPET KITA (DENGAN DRAG & ZOOM Transform)
 // =======================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     const teamForm = document.getElementById('teamForm');
     const photoInput = document.getElementById('teamPhoto');
     const preview = document.getElementById('photoPreview');
-    const posX = document.getElementById('posX');
-    const posY = document.getElementById('posY');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const cropContainer = document.getElementById('cropContainer');
     
-    let currentPhotoBase64 = null; // Menyimpan foto saat sedang mode Edit
+    let currentPhotoBase64 = null; 
+    
+    // Variabel Transformasi (Berdasarkan Persentase Container agar Responsif)
+    let pScale = 1, pTx = 0, pTy = 0;
+    let isDragging = false, startX, startY;
 
     if(teamForm) {
-        // Fungsi sinkronisasi Slider dengan Preview Foto
-        const updatePos = () => {
-            preview.style.objectPosition = `${posX.value}% ${posY.value}%`;
+        // Menerapkan transformasi CSS ke gambar preview
+        const updateTransform = () => {
+            if(preview) preview.style.transform = `translate(${pTx}%, ${pTy}%) scale(${pScale})`;
         };
-        posX.addEventListener('input', updatePos);
-        posY.addEventListener('input', updatePos);
+
+        // Fungsi Slider Zoom
+        if(zoomSlider) {
+            zoomSlider.addEventListener('input', (e) => {
+                pScale = parseFloat(e.target.value);
+                updateTransform();
+            });
+        }
+
+        // FUNGSI DRAG MOUSE / SENTUHAN
+        if(cropContainer) {
+            const handleDragStart = (e) => {
+                if(!currentPhotoBase64) return; // Jangan drag jika belum ada foto
+                isDragging = true;
+                cropContainer.classList.add('cursor-grabbing');
+                cropContainer.classList.remove('cursor-grab');
+                
+                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                let rect = cropContainer.getBoundingClientRect();
+                
+                // Konversi Persentase saat ini ke Pixel untuk hitungan matematika
+                let currentPx = (pTx * rect.width) / 100;
+                let currentPy = (pTy * rect.height) / 100;
+                
+                startX = clientX - currentPx;
+                startY = clientY - currentPy;
+            };
+
+            const handleDragMove = (e) => {
+                if (!isDragging) return;
+                e.preventDefault(); 
+                let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                let rect = cropContainer.getBoundingClientRect();
+                
+                let newPx = clientX - startX;
+                let newPy = clientY - startY;
+                
+                // Kembalikan pixel ke persentase agar skala di web utama (yang lebih besar) tetap proporsional
+                pTx = (newPx / rect.width) * 100;
+                pTy = (newPy / rect.height) * 100;
+                
+                updateTransform();
+            };
+
+            const handleDragEnd = () => {
+                isDragging = false;
+                cropContainer.classList.remove('cursor-grabbing');
+                cropContainer.classList.add('cursor-grab');
+            };
+
+            // Mouse Events
+            cropContainer.addEventListener('mousedown', handleDragStart);
+            window.addEventListener('mousemove', handleDragMove);
+            window.addEventListener('mouseup', handleDragEnd);
+            // Touch Events (HP)
+            cropContainer.addEventListener('touchstart', handleDragStart, {passive: false});
+            window.addEventListener('touchmove', handleDragMove, {passive: false});
+            window.addEventListener('touchend', handleDragEnd);
+        }
 
         // Preview foto saat file dipilih
         photoInput.addEventListener('change', async function() {
             if (this.files && this.files[0]) {
                 currentPhotoBase64 = await convertToBase64(this.files[0]);
                 preview.src = currentPhotoBase64;
-                // Reset slider ke tengah tiap upload foto baru
-                posX.value = 50; posY.value = 50; updatePos();
+                // Reset posisi saat upload foto baru
+                pTx = 0; pTy = 0; pScale = 1; zoomSlider.value = 1; updateTransform();
             }
         });
 
-        // Submit Form (Tambah Baru ATAU Edit)
+        // Submit Form
         teamForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -175,43 +238,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = document.getElementById('teamName').value;
             const role = document.getElementById('teamRole').value;
             const desc = document.getElementById('teamDesc').value;
-            const pos = `${posX.value}% ${posY.value}%`; // Format posisi CSS
             
             const submitBtn = document.getElementById('teamSubmitBtn');
             submitBtn.innerText = "Menyimpan...";
             submitBtn.disabled = true;
             
             let photoData = currentPhotoBase64;
-            // Jika tidak ada foto sama sekali, pakai avatar otomatis
-            if (!photoData) {
-                photoData = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=fbcfe8&color=be185d&size=400`;
-            }
+            if (!photoData) { photoData = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=fbcfe8&color=be185d&size=400`; }
 
             let team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
 
             if (idInput) {
-                // UPDATE (Mode Edit)
-                team = team.map(m => m.id === idInput ? { ...m, name, role, desc, photo: photoData, photoPos: pos } : m);
+                team = team.map(m => m.id === idInput ? { ...m, name, role, desc, photo: photoData, photoTx: pTx, photoTy: pTy, photoScale: pScale } : m);
             } else {
-                // CREATE (Tambah Baru)
-                const newMember = {
-                    id: 'team_' + Date.now().toString(),
-                    name: name,
-                    role: role,
-                    desc: desc,
-                    photo: photoData,
-                    photoPos: pos
-                };
+                const newMember = { id: 'team_' + Date.now().toString(), name: name, role: role, desc: desc, photo: photoData, photoTx: pTx, photoTy: pTy, photoScale: pScale };
                 team.push(newMember);
             }
 
             localStorage.setItem('periodCareTeam', JSON.stringify(team));
-            
-            cancelEditTeam(); // Reset form dan muat ulang tabel
+            cancelEditTeam(); 
         });
     }
     
-    // Panggil tabel saat halaman dimuat
     loadAdminTeam();
 });
 
@@ -220,14 +268,16 @@ window.cancelEditTeam = function() {
     document.getElementById('teamForm').reset();
     document.getElementById('teamId').value = "";
     
-    // Reset Preview
+    // Kembalikan variabel global dan tampilan
     currentPhotoBase64 = null;
     document.getElementById('photoPreview').src = "https://via.placeholder.com/150x200?text=Preview";
-    document.getElementById('posX').value = 50;
-    document.getElementById('posY').value = 50;
-    document.getElementById('photoPreview').style.objectPosition = "50% 50%";
     
-    // Reset Tombol
+    const zoomSlider = document.getElementById('zoomSlider');
+    if (zoomSlider) zoomSlider.value = 1;
+    
+    const preview = document.getElementById('photoPreview');
+    if (preview) preview.style.transform = "translate(0%, 0%) scale(1)";
+    
     document.getElementById('teamSubmitBtn').innerText = "+ Tambahkan Anggota";
     document.getElementById('teamSubmitBtn').disabled = false;
     document.getElementById('teamCancelBtn').classList.add('hidden');
@@ -235,67 +285,68 @@ window.cancelEditTeam = function() {
     loadAdminTeam();
 };
 
-// Fungsi memuat data ke Form untuk di-Edit
+// Fungsi memuat data ke Form saat Edit ditekan
 window.editTeamMember = function(id) {
     const team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
     const member = team.find(m => m.id === id);
     if(!member) return;
 
-    // Isi nilai input
     document.getElementById('teamId').value = member.id;
     document.getElementById('teamName').value = member.name;
     document.getElementById('teamRole').value = member.role;
     document.getElementById('teamDesc').value = member.desc;
     
-    // Muat foto
     currentPhotoBase64 = member.photo;
     document.getElementById('photoPreview').src = member.photo;
     
-    // Muat posisi slider
-    let px = 50, py = 50;
-    if(member.photoPos) {
-        const parts = member.photoPos.replace(/%/g, '').split(' ');
-        if(parts.length === 2) { px = parts[0]; py = parts[1]; }
-    }
-    document.getElementById('posX').value = px;
-    document.getElementById('posY').value = py;
-    document.getElementById('photoPreview').style.objectPosition = `${px}% ${py}%`;
+    // Memuat ulang koordinat dan skala zoom yang tersimpan
+    // PENTING: Jangan gunakan 'let' karena variabel ini sudah dideklarasikan di scope luar jika diperlukan,
+    // atau gunakan manipulasi langsung ke elemen DOM.
+    const savedTx = member.photoTx || 0;
+    const savedTy = member.photoTy || 0;
+    const savedScale = member.photoScale || 1;
+    
+    const zoomSlider = document.getElementById('zoomSlider');
+    if (zoomSlider) zoomSlider.value = savedScale;
+    
+    const preview = document.getElementById('photoPreview');
+    if (preview) preview.style.transform = `translate(${savedTx}%, ${savedTy}%) scale(${savedScale})`;
 
-    // Ubah tampilan form
     document.getElementById('teamSubmitBtn').innerText = "Simpan Perubahan";
     document.getElementById('teamCancelBtn').classList.remove('hidden');
     
-    // Gulir ke atas otomatis menuju form
     window.scrollTo({ top: document.getElementById('teamForm').offsetTop - 50, behavior: 'smooth' });
 };
 
 function convertToBase64(file) {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+        const reader = new FileReader(); reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error);
     });
 }
 
-// Fungsi memuat tabel
+// Render Tabel Admin
 function loadAdminTeam() {
     const tbody = document.getElementById('adminTeamList');
     if(!tbody) return; 
 
     const team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
-    
     if (team.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500">Belum ada anggota tim terdaftar.</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = team.map(member => `
+    tbody.innerHTML = team.map(member => {
+        // Ambil data penyesuaian foto untuk ditampilkan di thumbnail tabel
+        const tx = member.photoTx || 0;
+        const ty = member.photoTy || 0;
+        const scale = member.photoScale || 1;
+        
+        return `
         <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
             <td class="p-3">
-                <!-- Foto diubah menjadi Rounded Rectangle (Bukan Bulat) dan posisi CSS diaplikasikan -->
-                <div class="w-14 h-16 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                    <img src="${member.photo}" class="w-full h-full object-cover" style="object-position: ${member.photoPos || '50% 50%'};">
+                <div class="w-16 h-20 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 relative flex justify-center items-center">
+                    <img src="${member.photo}" class="absolute w-full h-full object-cover" style="transform: translate(${tx}%, ${ty}%) scale(${scale});">
                 </div>
             </td>
             <td class="p-3">
@@ -305,24 +356,19 @@ function loadAdminTeam() {
             <td class="p-3 text-sm text-gray-600">${member.desc}</td>
             <td class="p-3 text-right">
                 <div class="flex justify-end gap-2">
-                    <button onclick="editTeamMember('${member.id}')" class="text-blue-500 hover:text-white border border-blue-500 hover:bg-blue-500 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
-                        Edit
-                    </button>
-                    <button onclick="deleteTeamMember('${member.id}')" class="text-red-500 hover:text-white border border-red-500 hover:bg-red-500 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
-                        Hapus
-                    </button>
+                    <button onclick="editTeamMember('${member.id}')" class="text-blue-500 hover:text-white border border-blue-500 hover:bg-blue-500 px-3 py-1 rounded-lg text-sm font-medium transition-colors">Edit</button>
+                    <button onclick="deleteTeamMember('${member.id}')" class="text-red-500 hover:text-white border border-red-500 hover:bg-red-500 px-3 py-1 rounded-lg text-sm font-medium transition-colors">Hapus</button>
                 </div>
             </td>
         </tr>
-    `).join('');
+        `;
+    }).join('');
 }
 
 window.deleteTeamMember = function(id) {
     if(!confirm('Apakah Anda yakin ingin menghapus anggota tim ini?')) return;
-    
     let team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
     team = team.filter(m => m.id !== id);
     localStorage.setItem('periodCareTeam', JSON.stringify(team));
-    
     loadAdminTeam();
 }
