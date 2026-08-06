@@ -137,56 +137,138 @@ function loadDashboardData() {
 }
 
 // =======================================================
-// FITUR TAMBAHAN: MANAJEMEN TIM DOMPET KITA
+// FITUR TAMBAHAN: MANAJEMEN TIM DOMPET KITA (DENGAN EDIT & POSISI FOTO)
 // =======================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     const teamForm = document.getElementById('teamForm');
+    const photoInput = document.getElementById('teamPhoto');
+    const preview = document.getElementById('photoPreview');
+    const posX = document.getElementById('posX');
+    const posY = document.getElementById('posY');
+    
+    let currentPhotoBase64 = null; // Menyimpan foto saat sedang mode Edit
+
     if(teamForm) {
+        // Fungsi sinkronisasi Slider dengan Preview Foto
+        const updatePos = () => {
+            preview.style.objectPosition = `${posX.value}% ${posY.value}%`;
+        };
+        posX.addEventListener('input', updatePos);
+        posY.addEventListener('input', updatePos);
+
+        // Preview foto saat file dipilih
+        photoInput.addEventListener('change', async function() {
+            if (this.files && this.files[0]) {
+                currentPhotoBase64 = await convertToBase64(this.files[0]);
+                preview.src = currentPhotoBase64;
+                // Reset slider ke tengah tiap upload foto baru
+                posX.value = 50; posY.value = 50; updatePos();
+            }
+        });
+
+        // Submit Form (Tambah Baru ATAU Edit)
         teamForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const idInput = document.getElementById('teamId').value;
             const name = document.getElementById('teamName').value;
             const role = document.getElementById('teamRole').value;
             const desc = document.getElementById('teamDesc').value;
-            const photoInput = document.getElementById('teamPhoto');
-            const submitBtn = this.querySelector('button[type="submit"]');
+            const pos = `${posX.value}% ${posY.value}%`; // Format posisi CSS
             
+            const submitBtn = document.getElementById('teamSubmitBtn');
             submitBtn.innerText = "Menyimpan...";
             submitBtn.disabled = true;
             
-            // Avatar inisial bawaan jika tidak upload foto
-            let photoData = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=fbcfe8&color=be185d&size=200`;
-            
-            if (photoInput.files && photoInput.files[0]) {
-                photoData = await convertToBase64(photoInput.files[0]);
+            let photoData = currentPhotoBase64;
+            // Jika tidak ada foto sama sekali, pakai avatar otomatis
+            if (!photoData) {
+                photoData = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=fbcfe8&color=be185d&size=400`;
             }
 
-            const newMember = {
-                id: 'team_' + Date.now().toString(),
-                name: name,
-                role: role,
-                desc: desc,
-                photo: photoData
-            };
+            let team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
 
-            const team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
-            team.push(newMember);
+            if (idInput) {
+                // UPDATE (Mode Edit)
+                team = team.map(m => m.id === idInput ? { ...m, name, role, desc, photo: photoData, photoPos: pos } : m);
+            } else {
+                // CREATE (Tambah Baru)
+                const newMember = {
+                    id: 'team_' + Date.now().toString(),
+                    name: name,
+                    role: role,
+                    desc: desc,
+                    photo: photoData,
+                    photoPos: pos
+                };
+                team.push(newMember);
+            }
+
             localStorage.setItem('periodCareTeam', JSON.stringify(team));
             
-            this.reset();
-            submitBtn.innerText = "+ Tambahkan Anggota";
-            submitBtn.disabled = false;
-            
-            loadAdminTeam();
+            cancelEditTeam(); // Reset form dan muat ulang tabel
         });
     }
     
-    // Pastikan tabel otomatis dimuat
+    // Panggil tabel saat halaman dimuat
     loadAdminTeam();
 });
 
-// Fungsi untuk mengubah gambar ke Base64 (agar bisa disimpan lokal)
+// Fungsi membatalkan mode Edit
+window.cancelEditTeam = function() {
+    document.getElementById('teamForm').reset();
+    document.getElementById('teamId').value = "";
+    
+    // Reset Preview
+    currentPhotoBase64 = null;
+    document.getElementById('photoPreview').src = "https://via.placeholder.com/150x200?text=Preview";
+    document.getElementById('posX').value = 50;
+    document.getElementById('posY').value = 50;
+    document.getElementById('photoPreview').style.objectPosition = "50% 50%";
+    
+    // Reset Tombol
+    document.getElementById('teamSubmitBtn').innerText = "+ Tambahkan Anggota";
+    document.getElementById('teamSubmitBtn').disabled = false;
+    document.getElementById('teamCancelBtn').classList.add('hidden');
+    
+    loadAdminTeam();
+};
+
+// Fungsi memuat data ke Form untuk di-Edit
+window.editTeamMember = function(id) {
+    const team = JSON.parse(localStorage.getItem('periodCareTeam')) || [];
+    const member = team.find(m => m.id === id);
+    if(!member) return;
+
+    // Isi nilai input
+    document.getElementById('teamId').value = member.id;
+    document.getElementById('teamName').value = member.name;
+    document.getElementById('teamRole').value = member.role;
+    document.getElementById('teamDesc').value = member.desc;
+    
+    // Muat foto
+    currentPhotoBase64 = member.photo;
+    document.getElementById('photoPreview').src = member.photo;
+    
+    // Muat posisi slider
+    let px = 50, py = 50;
+    if(member.photoPos) {
+        const parts = member.photoPos.replace(/%/g, '').split(' ');
+        if(parts.length === 2) { px = parts[0]; py = parts[1]; }
+    }
+    document.getElementById('posX').value = px;
+    document.getElementById('posY').value = py;
+    document.getElementById('photoPreview').style.objectPosition = `${px}% ${py}%`;
+
+    // Ubah tampilan form
+    document.getElementById('teamSubmitBtn').innerText = "Simpan Perubahan";
+    document.getElementById('teamCancelBtn').classList.remove('hidden');
+    
+    // Gulir ke atas otomatis menuju form
+    window.scrollTo({ top: document.getElementById('teamForm').offsetTop - 50, behavior: 'smooth' });
+};
+
 function convertToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -196,7 +278,7 @@ function convertToBase64(file) {
     });
 }
 
-// Fungsi untuk memuat tabel anggota tim
+// Fungsi memuat tabel
 function loadAdminTeam() {
     const tbody = document.getElementById('adminTeamList');
     if(!tbody) return; 
@@ -211,7 +293,10 @@ function loadAdminTeam() {
     tbody.innerHTML = team.map(member => `
         <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
             <td class="p-3">
-                <img src="${member.photo}" class="w-12 h-12 rounded-full object-cover border border-gray-200">
+                <!-- Foto diubah menjadi Rounded Rectangle (Bukan Bulat) dan posisi CSS diaplikasikan -->
+                <div class="w-14 h-16 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                    <img src="${member.photo}" class="w-full h-full object-cover" style="object-position: ${member.photoPos || '50% 50%'};">
+                </div>
             </td>
             <td class="p-3">
                 <div class="font-bold text-gray-800">${member.name}</div>
@@ -219,15 +304,19 @@ function loadAdminTeam() {
             </td>
             <td class="p-3 text-sm text-gray-600">${member.desc}</td>
             <td class="p-3 text-right">
-                <button onclick="deleteTeamMember('${member.id}')" class="text-red-500 hover:text-white border border-red-500 hover:bg-red-500 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
-                    Hapus
-                </button>
+                <div class="flex justify-end gap-2">
+                    <button onclick="editTeamMember('${member.id}')" class="text-blue-500 hover:text-white border border-blue-500 hover:bg-blue-500 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                        Edit
+                    </button>
+                    <button onclick="deleteTeamMember('${member.id}')" class="text-red-500 hover:text-white border border-red-500 hover:bg-red-500 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                        Hapus
+                    </button>
+                </div>
             </td>
         </tr>
     `).join('');
 }
 
-// Fungsi global untuk menghapus anggota (agar bisa dipanggil lewat onclick HTML)
 window.deleteTeamMember = function(id) {
     if(!confirm('Apakah Anda yakin ingin menghapus anggota tim ini?')) return;
     
